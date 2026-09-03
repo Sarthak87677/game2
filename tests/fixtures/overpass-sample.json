@@ -1,0 +1,17 @@
+{"version":0.6,"elements":[
+{"type":"way","id":1,"tags":{"building":"apartments","building:levels":"6","name":"Block A"},"geometry":[{"lat":48.8600,"lon":2.3500},{"lat":48.8600,"lon":2.3505},{"lat":48.8604,"lon":2.3505},{"lat":48.8604,"lon":2.3500},{"lat":48.8600,"lon":2.3500}]},
+{"type":"way","id":2,"tags":{"building":"yes","height":"25 m"},"geometry":[{"lat":48.8610,"lon":2.3510},{"lat":48.8610,"lon":2.3514},{"lat":48.8613,"lon":2.3514},{"lat":48.8613,"lon":2.3510},{"lat":48.8610,"lon":2.3510}]},
+{"type":"way","id":3,"tags":{"building":"house"},"geometry":[{"lat":48.8620,"lon":2.3520},{"lat":48.8620,"lon":2.3522},{"lat":48.8622,"lon":2.3522},{"lat":48.8622,"lon":2.3520},{"lat":48.8620,"lon":2.3520}]},
+{"type":"way","id":4,"tags":{"highway":"primary","name":"Rue de Rivoli","lanes":"3"},"geometry":[{"lat":48.8590,"lon":2.3400},{"lat":48.8592,"lon":2.3600}]},
+{"type":"way","id":5,"tags":{"highway":"footway"},"geometry":[{"lat":48.8590,"lon":2.3400},{"lat":48.8595,"lon":2.3410}]},
+{"type":"way","id":6,"tags":{"waterway":"river","name":"Seine","width":"120"},"geometry":[{"lat":48.8560,"lon":2.3400},{"lat":48.8565,"lon":2.3600}]},
+{"type":"way","id":7,"tags":{"leisure":"park","name":"Jardin"},"geometry":[{"lat":48.8630,"lon":2.3530},{"lat":48.8630,"lon":2.3540},{"lat":48.8640,"lon":2.3540},{"lat":48.8640,"lon":2.3530},{"lat":48.8630,"lon":2.3530}]},
+{"type":"way","id":8,"tags":{"natural":"water","water":"lake"},"geometry":[{"lat":48.8650,"lon":2.3550},{"lat":48.8650,"lon":2.3560},{"lat":48.8660,"lon":2.3560},{"lat":48.8660,"lon":2.3550},{"lat":48.8650,"lon":2.3550}]},
+{"type":"relation","id":9,"tags":{"type":"multipolygon","building":"church","height":"40"},"members":[
+ {"type":"way","ref":91,"role":"outer","geometry":[{"lat":48.8700,"lon":2.3600},{"lat":48.8700,"lon":2.3610}]},
+ {"type":"way","ref":92,"role":"outer","geometry":[{"lat":48.8700,"lon":2.3610},{"lat":48.8710,"lon":2.3610},{"lat":48.8710,"lon":2.3600},{"lat":48.8700,"lon":2.3600}]},
+ {"type":"way","ref":93,"role":"inner","geometry":[{"lat":48.8703,"lon":2.3603},{"lat":48.8703,"lon":2.3606},{"lat":48.8706,"lon":2.3606},{"lat":48.8706,"lon":2.3603},{"lat":48.8703,"lon":2.3603}]}]},
+{"type":"node","id":10,"lat":48.8566,"lon":2.3522,"tags":{"place":"city","name":"Paris","population":"2165423"}},
+{"type":"node","id":11,"lat":48.8606,"lon":2.3376,"tags":{"tourism":"museum","name":"Louvre"}},
+{"type":"way","id":12,"tags":{"railway":"rail"},"geometry":[{"lat":48.8400,"lon":2.3600},{"lat":48.8450,"lon":2.3650}]}
+]}
