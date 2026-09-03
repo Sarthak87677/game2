@@ -13,7 +13,7 @@ const steps = JSON.parse(stepsJson);
 const proxy = process.env.HTTPS_PROXY;
 const extraArgs = (process.env.TERRA_BROWSER_ARGS ?? '').split(' ').filter(Boolean);
 const browser = await chromium.launch({ executablePath: process.env.TERRA_CHROMIUM ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined), headless: true, proxy: proxy ? { server: proxy, bypass: 'localhost,127.0.0.1' } : undefined, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox', '--disable-dev-shm-usage', '--disable-background-networking', ...extraArgs] });
-const page = await (await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1280, height: 720 } })).newPage();
+const page = await (await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: Number(process.env.TERRA_PROBE_W ?? 960), height: Number(process.env.TERRA_PROBE_H ?? 540) } })).newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push('[pageerror] ' + e.message));
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`[${m.type()}] ` + m.text().slice(0, 400)); });
@@ -31,7 +31,7 @@ for (const step of steps) {
   if (step.key) { await page.keyboard.down(step.key); await page.waitForTimeout(step.ms ?? 1000); await page.keyboard.up(step.key); }
   if (step.waitTiles) await waitTiles(step.waitTiles);
   if (step.wait) await page.waitForTimeout(step.wait);
-  if (step.shot) { const p = `${outDir}/${step.shot}.png`; await page.screenshot({ path: p }); const s = await page.evaluate(() => { const st = window.__terra.state(); return { cam: st.camera && { lat: +st.camera.lat.toFixed(4), lon: +st.camera.lon.toFixed(4), h: Math.round(st.camera.heightM), agl: st.camera.altitudeAglM && Math.round(st.camera.altitudeAglM), ground: st.camera.groundM && Math.round(st.camera.groundM) }, loc: st.location && { place: st.location.place, biome: st.location.biome, sun: st.location.sunElevationDeg?.toFixed(1) }, fps: st.streaming?.fps.toFixed(1), terrain: st.streaming?.terrainTilesLoaded, osm: window.__terra.engine.osmStatus }; }); console.log('shot', p, JSON.stringify(s)); }
+  if (step.shot) { const p = `${outDir}/${step.shot}.png`; await page.screenshot({ path: p, timeout: 180000 }); const s = await page.evaluate(() => { const st = window.__terra.state(); return { cam: st.camera && { lat: +st.camera.lat.toFixed(4), lon: +st.camera.lon.toFixed(4), h: Math.round(st.camera.heightM), agl: st.camera.altitudeAglM && Math.round(st.camera.altitudeAglM), ground: st.camera.groundM && Math.round(st.camera.groundM) }, loc: st.location && { place: st.location.place, biome: st.location.biome, sun: st.location.sunElevationDeg?.toFixed(1) }, fps: st.streaming?.fps.toFixed(1), terrain: st.streaming?.terrainTilesLoaded, osm: window.__terra.engine.osmStatus }; }); console.log('shot', p, JSON.stringify(s)); }
 }
 console.log('errors/warnings:', errors.length); errors.slice(0, 15).forEach((e) => console.log('  ', e));
 await browser.close();

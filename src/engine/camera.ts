@@ -1,6 +1,32 @@
-import { Cartesian3, Cartographic, EasingFunction, Ellipsoid, Math as CMath, type Viewer } from 'cesium';
+import { Cartesian3, Cartographic, EasingFunction, Ellipsoid, Math as CMath, sampleTerrain, type Viewer } from 'cesium';
 
 export interface CameraTarget { lat: number; lon: number; heightM: number; headingDeg?: number; pitchDeg?: number }
+
+/**
+ * Terrain height at a point, sampled from the active terrain provider (level 12 ≈ 40 m spacing) with the loaded
+ * globe tiles as a fast path. Returns 0 when the provider cannot answer (e.g. offline ellipsoid terrain).
+ */
+export async function terrainHeightAt(viewer: Viewer, lat: number, lon: number): Promise<number> {
+  const carto = Cartographic.fromDegrees(lon, lat);
+  const loaded = viewer.scene.globe.getHeight(carto);
+  if (loaded !== undefined) return loaded;
+  try {
+    const [s] = await sampleTerrain(viewer.terrainProvider, 12, [carto]);
+    return s?.height ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Resolves a target whose heightM is ABOVE GROUND (for targets below 50 km) into an ellipsoid height by sampling the
+ * terrain, so bookmarks and search results never end up underground or clamped by collision detection.
+ */
+export async function resolveTargetHeight(viewer: Viewer, t: CameraTarget): Promise<CameraTarget> {
+  if (t.heightM >= 50_000) return t;
+  const ground = await terrainHeightAt(viewer, t.lat, t.lon);
+  return { ...t, heightM: Math.max(ground, 0) + t.heightM };
+}
 
 export interface CameraState {
   lat: number; lon: number; heightM: number; headingDeg: number; pitchDeg: number; rollDeg: number;

@@ -24,7 +24,7 @@ export async function state(page: Page): Promise<TerraState> {
 }
 
 export async function waitForReady(page: Page, timeout = 180_000): Promise<TerraState> {
-  await page.goto('/', { waitUntil: 'load' });
+  await page.goto('/?terraQuality=low', { waitUntil: 'load' });
   await page.waitForFunction(() => (window as unknown as { __terra?: { ready: boolean } }).__terra?.ready === true, null, { timeout });
   const s = await state(page);
   expect(s.boot.phase).toBe('ready');

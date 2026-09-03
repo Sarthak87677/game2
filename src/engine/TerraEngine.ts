@@ -5,7 +5,7 @@ import { EnvironmentController, simulateWeather, weatherFromPreset, type Weather
 import { installGroundMaterial, type GroundMaterialHandle } from './groundMaterial';
 import { OceanSurface } from './oceanSurface';
 import { StreamingMonitor } from './streaming';
-import { cameraState, descendTo, flyTo, groundHeight, type CameraTarget } from './camera';
+import { cameraState, descendTo, flyTo, groundHeight, resolveTargetHeight, type CameraTarget } from './camera';
 import { ModeController, type ModeId, type TourKeyframe } from '@/modes/ModeController';
 import { AdapterRegistry } from '@/data/adapters/registry';
 import { readAdapterEnv } from '@/data/adapters/types';
@@ -34,6 +34,8 @@ import { HeightFieldSource } from '@/world/nearField/heightField';
 import { buildGenerationContext } from '@/world/nearField/contextBuilder';
 import { ProcgenClient } from '@/world/nearField/procgenClient';
 import type { NearFieldTile } from '@/world/procedural/types';
+import { NearFieldWorld, type NearFieldStats } from '@/world/render';
+import { speciesById } from '@/world/procedural/species';
 import type { GeocodingAdapter } from '@/data/geocoding/types';
 
 declare global {
@@ -64,6 +66,7 @@ export class TerraEngine {
   readonly traffic: TrafficLayer | null;
   readonly heightFields = new HeightFieldSource({ cache: sharedTileCache() });
   readonly procgen = new ProcgenClient();
+  readonly nearField: NearFieldWorld | null;
   naturalEarth: NaturalEarth | null = null;
   worldMap: WorldMap | null = null;
   gazetteer: OfflineGazetteer | null = null;
@@ -75,6 +78,7 @@ export class TerraEngine {
   private lastReadout = { lat: NaN, lon: NaN, t: 0 };
   private destroyed = false;
   osmStatus: { loaded: number; loading: number; failed: number; online: boolean | null; lastError: string | null } = { loaded: 0, loading: 0, failed: 0, online: null, lastError: null };
+  nearFieldStats: NearFieldStats | null = null;
 
   private constructor(container: HTMLElement) {
     const store = useTerraStore.getState();
@@ -93,7 +97,12 @@ export class TerraEngine {
     try { ground = installGroundMaterial(this.viewer); } catch (e) { store.log('warn', `Ground material unavailable: ${String(e)}`); }
     this.ground = ground;
     this.ocean = new OceanSurface(this.viewer);
-    this.environment.onWeatherApplied = (u) => { this.ground?.setUniform('wetness', u.wetness); this.ground?.setUniform('snowCover', u.snowCover); this.ground?.setUniform('cloudCover', u.cloudCover); };
+    this.environment.onWeatherApplied = (u) => {
+      this.ground?.setUniform('wetness', u.wetness);
+      this.ground?.setUniform('snowCover', u.snowCover);
+      this.ground?.setUniform('cloudCover', u.cloudCover);
+      this.nearField?.setWind(u.windSpeedMs, (u.windDirDeg * Math.PI) / 180);
+    };
     this.quality = store.quality;
     void sharedTileCache().setBudget(store.settings.cacheMb * 1024 * 1024);
     const disabled = env.disabledAdapters ?? new Set<string>();
@@ -107,12 +116,20 @@ export class TerraEngine {
           this.osmStatus = st;
         },
       });
-      this.modes.extraHeightSampler = (lat, lon) => this.osm?.heightAt(lat, lon) ?? null;
+      this.modes.extraHeightSampler = (lat, lon) => this.osm?.heightAt(lat, lon) ?? this.nearField?.heightAt(lat, lon) ?? null;
     } else {
       this.overpass = null;
       this.osm = null;
     }
     this.traffic = this.osm ? new TrafficLayer(this.viewer, this.osm, this.environment) : null;
+    this.nearField = this.procgen.available
+      ? new NearFieldWorld(this.viewer, {
+          generate: (z, x, y) => this.generateNearFieldTile(z, x, y),
+          quality: () => QUALITY_PRESETS[this.quality],
+          species: (id) => speciesById(id),
+          onStats: (s) => { this.nearFieldStats = s; },
+        })
+      : null;
     this.clouds = new CloudSystem(this.viewer, () => this.worldMap, () => dayOfYear(this.environment.getDate()));
     if (!disabled.has('nominatim') && env.nominatimUrl) this.geocoders.push(new NominatimAdapter({ url: env.nominatimUrl }));
     this.weatherAdapter = env.enableLiveWeather && !disabled.has('open-meteo') ? new OpenMeteoAdapter() : null;
@@ -129,7 +146,9 @@ export class TerraEngine {
     store.patch({ boot: { phase: 'viewer', progress: 0.1, message: 'Creating WebGL2 globe…', error: null, details: [] } });
     const engine = new TerraEngine(container);
     const saved = (() => { try { return localStorage.getItem('terra-infinite.quality') as QualityPresetId | null; } catch { return null; } })();
-    engine.setQuality(saved && saved in QUALITY_PRESETS ? saved : detectQualityPreset());
+    // ?terraQuality=low|medium|high|ultra overrides the preset (used by tests and software-rendered CI).
+    const forced = (typeof location !== 'undefined' ? new URLSearchParams(location.search).get('terraQuality') : null) as QualityPresetId | null;
+    engine.setQuality(forced && forced in QUALITY_PRESETS ? forced : saved && saved in QUALITY_PRESETS ? saved : detectQualityPreset());
     store.patch({ boot: { phase: 'terrain', progress: 0.25, message: 'Connecting terrain and imagery…', error: null, details: [] } });
     await engine.setTerrain(engine.registry.defaultTerrainId());
     await engine.setImagery(engine.registry.defaultImageryId());
@@ -241,9 +260,11 @@ export class TerraEngine {
 
   getQuality(): QualityPresetId { return this.quality; }
 
-  async goTo(target: CameraTarget, opts: { descend?: boolean } = {}): Promise<boolean> {
+  /** Flies to a target. `heightM` is metres above ground for targets below 50 km (above the ellipsoid otherwise). */
+  async goTo(target: CameraTarget, opts: { descend?: boolean; absolute?: boolean } = {}): Promise<boolean> {
     if (this.modes.getMode() !== 'orbit') this.modes.setMode('orbit');
-    const ok = opts.descend === false ? await flyTo(this.viewer, target) : await descendTo(this.viewer, target);
+    const resolved = opts.absolute ? target : await resolveTargetHeight(this.viewer, target);
+    const ok = opts.descend === false ? await flyTo(this.viewer, resolved) : await descendTo(this.viewer, resolved);
     if (this.liveWeatherWanted) void this.useLiveWeather(true);
     else this.applySimulatedWeatherForCamera();
     return ok;
@@ -391,6 +412,7 @@ export class TerraEngine {
   setDate(date: Date): void {
     this.environment.setDate(date);
     this.clouds.refresh();
+    this.nearField?.setDate(date);
     useTerraStore.setState((s) => ({ time: { ...s.time, iso: date.toISOString() } }));
     const s = seasonFor(date, useTerraStore.getState().camera?.lat ?? 0);
     this.ground?.setUniform('seasonTint', s.season === 'autumn' ? 0.6 : 0);
@@ -472,6 +494,7 @@ export class TerraEngine {
     this.destroyed = true;
     if (this.readoutTimer !== null) window.clearInterval(this.readoutTimer);
     this.modes.destroy();
+    this.nearField?.destroy();
     this.procgen.destroy();
     this.audio.destroy();
     this.traffic?.destroy();

@@ -9,7 +9,7 @@ test.describe('City rendering (synthetic OSM fixture)', () => {
   test('renders buildings and roads, lights up at night, and blocks walking through walls', async ({ page }) => {
     test.setTimeout(600_000);
     const { pageErrors, errors } = collectErrors(page);
-    await page.goto('/?terraFixtures=1', { waitUntil: 'load' });
+    await page.goto('/?terraFixtures=1&terraQuality=low', { waitUntil: 'load' });
     await page.waitForFunction(() => (window as unknown as { __terra?: { ready: boolean } }).__terra?.ready === true, null, { timeout: 180_000 });
     await page.evaluate(() => (window as unknown as { __terra: { engine: { setDate: (d: Date) => void } } }).__terra.engine.setDate(new Date('2026-06-21T11:00:00Z')));
     await goTo(page, 48.858, 2.35, 700);

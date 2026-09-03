@@ -1,0 +1,23 @@
+/** Near-field renderer public surface (see NearFieldWorld for the integration contract). */
+export { NearFieldWorld, nearFieldTileCentre } from './NearFieldWorld';
+export type { NearFieldStats, NearFieldWorldOptions } from './NearFieldWorld';
+export { selectNearFieldTiles, unloadOrder, buildingHeightAt, tileLocalPoint, retryDelayMs, tileKey } from './tileSelection';
+export type { TileCandidate, LoadedTileInfo, NearFieldLod } from './tileSelection';
+export { buildTileMeshes, fallbackSpecies, detailFor } from './tileMesh';
+export type { SpeciesLookup, TileMeshOptions, TileMeshResult, TileMeshCounts } from './tileMesh';
+export { createVegetationAppearances, createMeshGeometry, createTilePrimitive, vegetationFragmentShader, VEGETATION_VERTEX_SHADER, BUCKET_SHADOWS } from './VegetationMaterial';
+export type { VegetationAppearances } from './VegetationMaterial';
+export { buildImpostorCollection, selectImpostorPlacements, spriteKindFor, impostorTint, ImpostorSprites } from './impostors';
+export type { SpriteKind } from './impostors';
+export { buildLeafAtlas, ATLAS_CELLS, ATLAS_SIZE, ATLAS_GRID } from './leafAtlas';
+export type { AtlasCell } from './leafAtlas';
+export { MeshBuilder, mergeGeometries, chunkGeometries, vertexCount, emptyMesh } from './geometry/mesh';
+export type { MeshData, BucketedMesh } from './geometry/mesh';
+export { buildTree, buildCactus } from './geometry/treeGeometry';
+export type { TreeLod, TreeOptions } from './geometry/treeGeometry';
+export { buildShrub } from './geometry/shrubGeometry';
+export { buildGrass } from './geometry/grassGeometry';
+export { buildRock } from './geometry/rockGeometry';
+export { buildField, addCropPlant, cropProfile, CROP_PROFILES } from './geometry/cropGeometry';
+export type { CropProfile, FieldOptions } from './geometry/cropGeometry';
+export { buildBuilding, buildingTopHeight } from './geometry/buildingGeometry';

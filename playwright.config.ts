@@ -21,6 +21,8 @@ export default defineConfig({
   use: {
     baseURL: `http://127.0.0.1:${port}/`,
     viewport: { width: 1280, height: 720 },
+    screenshot: 'off',
+    actionTimeout: 0,
     ignoreHTTPSErrors: true,
     trace: 'retain-on-failure',
     launchOptions: {
