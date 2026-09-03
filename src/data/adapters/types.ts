@@ -68,10 +68,14 @@ export function readAdapterEnv(env: Record<string, string | boolean | undefined>
     return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined;
   };
   const disabled = new Set((str('VITE_DISABLED_ADAPTERS') ?? '').split(',').map((s) => s.trim()).filter(Boolean));
+  // Runtime override for offline demos and end-to-end tests: ?terraFixtures=1 routes OSM to the synthetic responder
+  // served by the dev/preview server (TERRA_FIXTURES=1) and disables other network adapters.
+  const fixtures = typeof location !== 'undefined' && /[?&]terraFixtures=1/.test(location.search);
+  if (fixtures) { disabled.add('nominatim'); disabled.add('open-meteo'); disabled.add('photon'); }
   return {
     cesiumIonToken: str('VITE_CESIUM_ION_TOKEN'),
     maptilerKey: str('VITE_MAPTILER_KEY'),
-    overpassUrl: str('VITE_OVERPASS_URL') ?? 'https://overpass-api.de/api/interpreter',
+    overpassUrl: fixtures ? '/__fixtures/overpass' : str('VITE_OVERPASS_URL') ?? 'https://overpass-api.de/api/interpreter',
     nominatimUrl: str('VITE_NOMINATIM_URL') ?? 'https://nominatim.openstreetmap.org',
     enableLiveWeather: (str('VITE_ENABLE_LIVE_WEATHER') ?? 'true') !== 'false',
     disabledAdapters: disabled,

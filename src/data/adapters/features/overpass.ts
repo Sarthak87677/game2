@@ -19,6 +19,8 @@ export function overpassQuery(bbox: { west: number; south: number; east: number;
   return `[out:json][timeout:${timeoutS}][bbox:${b}];(
 way["building"]["building"!="no"];
 relation["building"]["type"="multipolygon"];
+way["man_made"~"^(tower|lighthouse|chimney|water_tower|silo|storage_tank)$"];
+relation["man_made"~"^(tower|lighthouse)$"]["type"="multipolygon"];
 way["highway"]["highway"!~"^(proposed|construction|abandoned|razed|corridor|elevator|bus_stop|platform)$"];
 way["railway"~"^(rail|light_rail|subway|tram|narrow_gauge)$"]["service"!~"."];
 way["waterway"~"^(river|stream|canal|riverbank)$"];

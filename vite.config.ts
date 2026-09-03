@@ -48,8 +48,26 @@ function cesiumStatic(): Plugin {
   };
 }
 
+/** Offline fixtures (synthetic OSM responder) for development and CI where the Overpass API is unreachable. */
+function fixtures(): Plugin {
+  const enabled = process.env.TERRA_FIXTURES === '1';
+  return {
+    name: 'terra-fixtures',
+    async configureServer(server) {
+      if (!enabled) return;
+      const { fixtureMiddleware } = await import('./scripts/dev/syntheticOverpass.mjs');
+      server.middlewares.use(fixtureMiddleware);
+    },
+    async configurePreviewServer(server) {
+      if (!enabled) return;
+      const { fixtureMiddleware } = await import('./scripts/dev/syntheticOverpass.mjs');
+      server.middlewares.use(fixtureMiddleware);
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), cesiumStatic()],
+  plugins: [react(), cesiumStatic(), fixtures()],
   resolve: { alias: { '@': path.join(rootDir, 'src') } },
   server: { headers: { 'Cross-Origin-Opener-Policy': 'same-origin' } },
   worker: { format: 'es' },

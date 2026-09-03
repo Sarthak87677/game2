@@ -34,7 +34,7 @@ export function SettingsPanel() {
       <label className="terra-row"><input type="checkbox" checked={settings.highContrast} onChange={(e) => setSettings({ highContrast: e.target.checked })} /> High-contrast interface</label>
       <label className="terra-row">Interface scale <input type="range" min={0.8} max={1.6} step={0.1} value={settings.uiScale} onChange={(e) => setSettings({ uiScale: Number(e.target.value) })} /> {settings.uiScale.toFixed(1)}×</label>
       <label className="terra-row"><input type="checkbox" checked={settings.showAttribution} onChange={(e) => setSettings({ showAttribution: e.target.checked })} /> Show attribution strip (required when publishing)</label>
-      <label className="terra-row"><input type="checkbox" checked={settings.audio} onChange={(e) => setSettings({ audio: e.target.checked })} /> Environmental audio</label>
+      <label className="terra-row"><input type="checkbox" checked={settings.audio} onChange={(e) => { setSettings({ audio: e.target.checked }); void engine?.audio.setEnabled(e.target.checked); }} /> Environmental audio (procedural wind, rain, surf, birds)</label>
       <h3>Streaming cache</h3>
       <label className="terra-row">Cache budget <input type="range" min={32} max={2048} step={32} value={settings.cacheMb} onChange={(e) => { const mb = Number(e.target.value); setSettings({ cacheMb: mb }); void cache.setBudget(mb * 1024 * 1024); }} /> {settings.cacheMb} MB</label>
       <div className="terra-row"><span>Used ≈ {formatBytes(cache.bytesUsed)} · hits {cache.hits} · misses {cache.misses}</span><button onClick={() => void cache.clear()}>Clear cache</button></div>

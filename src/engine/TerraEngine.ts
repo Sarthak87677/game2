@@ -26,6 +26,10 @@ import { OverpassAdapter } from '@/data/adapters/features/overpass';
 import { OsmLayer } from '@/world/osm/OsmLayer';
 import { NominatimAdapter } from '@/data/adapters/geocoding/nominatim';
 import { OpenMeteoAdapter } from '@/data/adapters/weather/openMeteo';
+import { AmbientAudio } from './audio';
+import { CloudSystem } from './clouds';
+import { TrafficLayer } from '@/world/traffic/TrafficLayer';
+import { dayOfYear } from '@/world/climate/season';
 import type { GeocodingAdapter } from '@/data/geocoding/types';
 
 declare global {
@@ -51,6 +55,9 @@ export class TerraEngine {
   readonly overpass: OverpassAdapter | null;
   readonly geocoders: GeocodingAdapter[] = [];
   readonly weatherAdapter: OpenMeteoAdapter | null;
+  readonly audio = new AmbientAudio();
+  readonly clouds: CloudSystem;
+  readonly traffic: TrafficLayer | null;
   naturalEarth: NaturalEarth | null = null;
   worldMap: WorldMap | null = null;
   gazetteer: OfflineGazetteer | null = null;
@@ -99,6 +106,8 @@ export class TerraEngine {
       this.overpass = null;
       this.osm = null;
     }
+    this.traffic = this.osm ? new TrafficLayer(this.viewer, this.osm, this.environment) : null;
+    this.clouds = new CloudSystem(this.viewer, () => this.worldMap, () => dayOfYear(this.environment.getDate()));
     if (!disabled.has('nominatim') && env.nominatimUrl) this.geocoders.push(new NominatimAdapter({ url: env.nominatimUrl }));
     this.weatherAdapter = env.enableLiveWeather && !disabled.has('open-meteo') ? new OpenMeteoAdapter() : null;
     useTerraStore.setState({ sources: this.registry.listSources() });
@@ -199,6 +208,7 @@ export class TerraEngine {
       const layers = this.viewer.imageryLayers;
       const layer = new ImageryLayer(provider);
       layers.add(layer, 0);
+      if (this.clouds) this.clouds.refresh();
       if (this.imageryLayer) layers.remove(this.imageryLayer, true);
       this.imageryLayer = layer;
       useTerraStore.setState({ imageryId: id });
@@ -216,6 +226,7 @@ export class TerraEngine {
     const q = QUALITY_PRESETS[id];
     applyQuality(this.viewer, q);
     this.environment.particleBudget = q.precipitationParticles;
+    this.clouds.nearCloudsEnabled = q.clouds;
     this.ground?.setUniform('fadeNear', q.nearFieldRadiusM * 4);
     this.ground?.setUniform('fadeFar', q.nearFieldRadiusM * 40);
     useTerraStore.setState({ quality: id });
@@ -303,6 +314,8 @@ export class TerraEngine {
     if (moved || now - this.lastReadout.t > 2000) {
       this.lastReadout = { lat: cam.lat, lon: cam.lon, t: now };
       patch.location = this.describe(cam.lat, cam.lon);
+      const sample = this.worldMap?.sample(cam.lat, cam.lon, this.naturalEarth?.isLand(cam.lat, cam.lon) ?? false);
+      this.audio.update({ biome: sample?.biome ?? 'ocean', weather: useTerraStore.getState().weather, altitudeAglM: cam.altitudeAglM ?? cam.heightM, sunElevationDeg: patch.location.sunElevationDeg ?? 0, nearWater: (sample?.distCoastKm ?? 999) < 2 || sample?.surface !== 'land', urban: this.osm ? Math.min(1, this.osmStatus.loaded / 12) : 0 });
       if (this.lastReverse.name && !moved) patch.location.place = this.lastReverse.name;
       void this.maybeReverseGeocode(cam.lat, cam.lon, cam.altitudeAglM);
     }
@@ -312,8 +325,8 @@ export class TerraEngine {
   /** Human-readable description of a point, with provenance. */
   describe(lat: number, lon: number): LocationReadout {
     const date = this.environment.getDate();
-    const sample = this.worldMap?.sample(lat, lon) ?? null;
     const surfaceInfo = this.naturalEarth?.surfaceAt(lat, lon) ?? null;
+    const sample = this.worldMap?.sample(lat, lon, surfaceInfo ? surfaceInfo.kind !== 'ocean' : false) ?? null;
     const place = this.gazetteer?.describeLocation(lat, lon) ?? `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
     const season = seasonFor(date, lat);
     const biome = sample?.biome ?? 'ocean';
@@ -348,7 +361,7 @@ export class TerraEngine {
   /** Derives plausible weather from the climate atlas for the camera position and date (labelled simulated). */
   applySimulatedWeatherForCamera(): void {
     const cam = cameraState(this.viewer);
-    const sample = this.worldMap?.sample(cam.lat, cam.lon);
+    const sample = this.worldMap?.sample(cam.lat, cam.lon, this.naturalEarth?.isLand(cam.lat, cam.lon) ?? false);
     if (!sample) return;
     const date = this.environment.getDate();
     const r = hash2(Math.round(cam.lat * 2), Math.round(cam.lon * 2), Math.floor(date.getTime() / 3_600_000 / 6));
@@ -358,6 +371,7 @@ export class TerraEngine {
 
   setWeather(w: WeatherState): void {
     this.environment.setWeather(w);
+    this.clouds.setCloudCover(w.cloudCover);
     useTerraStore.setState({ weather: w });
   }
 
@@ -370,6 +384,7 @@ export class TerraEngine {
 
   setDate(date: Date): void {
     this.environment.setDate(date);
+    this.clouds.refresh();
     useTerraStore.setState((s) => ({ time: { ...s.time, iso: date.toISOString() } }));
     const s = seasonFor(date, useTerraStore.getState().camera?.lat ?? 0);
     this.ground?.setUniform('seasonTint', s.season === 'autumn' ? 0.6 : 0);
@@ -433,6 +448,9 @@ export class TerraEngine {
     this.destroyed = true;
     if (this.readoutTimer !== null) window.clearInterval(this.readoutTimer);
     this.modes.destroy();
+    this.audio.destroy();
+    this.traffic?.destroy();
+    this.clouds.destroy();
     this.osm?.destroy();
     this.environment.destroy();
     this.ocean.destroy();

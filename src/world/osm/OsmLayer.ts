@@ -1,4 +1,6 @@
-import { Cartesian3, Cartographic, ClassificationType, Color, ColorGeometryInstanceAttribute, CornerType, CorridorGeometry, GeometryInstance, GroundPrimitive, PerInstanceColorAppearance, PolygonGeometry, PolygonHierarchy, Primitive, PrimitiveCollection, sampleTerrain, ShadowMode, type Viewer, Math as CMath } from 'cesium';
+import { Cartesian3, Cartographic, ClassificationType, Color, ColorGeometryInstanceAttribute, CornerType, CorridorGeometry, GeometryInstance, GroundPrimitive, PerInstanceColorAppearance, PolygonGeometry, Primitive, PrimitiveCollection, sampleTerrain, ShadowMode, type Viewer, Math as CMath } from 'cesium';
+import { buildBuildingMesh, type BuildingInput } from './osmBuildingGeometry';
+import { createBuildingAppearance } from './buildingAppearance';
 import type { FeatureAdapter, FeatureTile, LandUseKind, OsmBuilding, RoadKind } from '@/data/adapters/features/types';
 import { haversineM, lonLatToTile, tileBounds } from '@/util/geo';
 import { fnv1a } from '@/util/hash';
@@ -157,29 +159,35 @@ export class OsmLayer {
       }
     }
     if (!this.tiles.has(loaded.key)) return; // unloaded meanwhile
-    const buildingInstances: GeometryInstance[] = [];
+    const inputs: BuildingInput[] = [];
     tile.buildings.forEach((b: OsmBuilding, i: number) => {
       if (b.outer.length < 4) return;
-      const base = heights[i] - 0.8;
       const top = heights[i] + b.heightM;
-      const positions = b.outer.map(([lon, lat]) => Cartesian3.fromDegrees(lon, lat));
-      const holes = b.holes.filter((h) => h.length >= 4).map((h) => new PolygonHierarchy(h.map(([lon, lat]) => Cartesian3.fromDegrees(lon, lat))));
       const hash = fnv1a(b.id);
-      let colour = Color.fromCssColorString(FACADES[hash % FACADES.length]);
-      if (b.heightM > 60) colour = Color.fromCssColorString('#8fa3b8').brighten(0.1 * ((hash >> 4) % 4), new Color());
-      if (b.type === 'industrial' || b.type === 'warehouse') colour = Color.fromCssColorString('#a4a7ab');
-      if (b.type === 'church' || b.type === 'cathedral' || b.type === 'temple' || b.type === 'mosque') colour = Color.fromCssColorString('#d9d2c2');
-      try {
-        buildingInstances.push(new GeometryInstance({
-          geometry: new PolygonGeometry({ polygonHierarchy: new PolygonHierarchy(positions, holes), height: base, extrudedHeight: top, vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT }),
-          attributes: { color: ColorGeometryInstanceAttribute.fromColor(colour) },
-          id: { kind: 'building', id: b.id, name: b.name, heightM: b.heightM, heightSource: b.heightSource, type: b.type },
-        }));
-        loaded.buildings.push({ poly: b.outer, top });
-      } catch { /* degenerate footprint */ }
+      let css = FACADES[hash % FACADES.length];
+      let windows = 0.75;
+      if (b.heightM > 60) { css = ['#8fa3b8', '#9fb3c8', '#7f93a8', '#a8bccf'][(hash >> 4) % 4]; windows = 0.95; }
+      if (b.type === 'industrial' || b.type === 'warehouse' || b.type === 'garage' || b.type === 'shed' || b.type === 'barn') { css = '#a4a7ab'; windows = 0.1; }
+      if (b.type === 'church' || b.type === 'cathedral' || b.type === 'temple' || b.type === 'mosque') { css = '#d9d2c2'; windows = 0.2; }
+      const c = Color.fromCssColorString(css);
+      inputs.push({ id: b.id, outer: b.outer, holes: b.holes, baseM: heights[i] - 0.8, heightM: b.heightM + 0.8, colour: [Math.round(c.red * 255), Math.round(c.green * 255), Math.round(c.blue * 255)], windows, seed: (hash % 1000) / 1000 });
+      loaded.buildings.push({ poly: b.outer, top });
     });
-    if (buildingInstances.length) {
-      loaded.primitives.add(new Primitive({ geometryInstances: buildingInstances, appearance: new PerInstanceColorAppearance({ translucent: false, closed: true }), asynchronous: true, shadows: ShadowMode.ENABLED, allowPicking: true }));
+    if (inputs.length) {
+      const anchorLat = (tile.bbox.north + tile.bbox.south) / 2;
+      const anchorLon = (tile.bbox.east + tile.bbox.west) / 2;
+      const anchorHeight = heights.length ? heights.reduce((a, h) => a + h, 0) / heights.length : 0;
+      const mesh = buildBuildingMesh(anchorLat, anchorLon, anchorHeight, inputs);
+      if (mesh) {
+        loaded.primitives.add(new Primitive({
+          geometryInstances: new GeometryInstance({ geometry: mesh.geometry, id: { kind: 'buildings', tile: loaded.key, count: inputs.length } }),
+          modelMatrix: mesh.modelMatrix,
+          appearance: createBuildingAppearance(),
+          asynchronous: false,
+          shadows: ShadowMode.ENABLED,
+          allowPicking: true,
+        }));
+      }
     }
     const groundInstances: GeometryInstance[] = [];
     for (const l of tile.landuse) {

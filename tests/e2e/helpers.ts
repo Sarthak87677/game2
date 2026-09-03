@@ -9,7 +9,7 @@ export interface TerraState {
   diagnostics: { level: string; message: string }[];
 }
 
-export const BENIGN_CONSOLE = [/favicon/i, /ERR_CONNECTION_RESET|ERR_TUNNEL_CONNECTION_FAILED|Failed to load resource/i, /net::ERR/i, /has been blocked by CORS/i, /third-party cookie/i, /An error occurred while rendering/i];
+export const BENIGN_CONSOLE = [/favicon/i, /ERR_CONNECTION_RESET|ERR_TUNNEL_CONNECTION_FAILED|Failed to load resource/i, /net::ERR/i, /has been blocked by CORS/i, /third-party cookie/i];
 
 export function collectErrors(page: Page): { errors: string[]; pageErrors: string[] } {
   const errors: string[] = [];

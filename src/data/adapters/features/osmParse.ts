@@ -164,6 +164,11 @@ export function parseOverpass(json: OverpassResponse, tile: { z: number; x: numb
       }
     }
     const id = `${el.type[0]}${el.id}`;
+    if (tags.man_made && /^(tower|lighthouse|chimney|water_tower|silo|storage_tank)$/.test(tags.man_made) && outer && !tags.building) {
+      const h = parseHeight(tags.height) ?? (tags.man_made === 'tower' ? 60 : tags.man_made === 'lighthouse' ? 25 : 15);
+      buildings.push({ id, outer, holes, heightM: Math.min(h, 1000), levels: null, heightSource: parseHeight(tags.height) ? 'tag' : 'inferred', type: tags.man_made, name: tags.name ?? null, centroid: centroid(outer) });
+      continue;
+    }
     if (tags.building && tags.building !== 'no' && outer) {
       const h = buildingHeight(tags);
       buildings.push({ id, outer, holes, heightM: h.heightM, levels: h.levels, heightSource: h.source, type: tags.building, name: tags.name ?? null, centroid: centroid(outer) });

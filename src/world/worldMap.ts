@@ -75,9 +75,31 @@ export class WorldMap {
     return y * width + x;
   }
 
-  sample(lat: number, lon: number): WorldSample {
+  /** Index of the nearest cell whose surface is land/lake/glacier within `radius` cells, or the cell itself. */
+  nearestLandIndex(lat: number, lon: number, radius = 3): number {
     const d = this.data;
-    const i = this.index(lat, lon);
+    const i0 = this.index(lat, lon);
+    if (d.surface[i0] !== SURFACE_OCEAN) return i0;
+    const x0 = i0 % d.width, y0 = Math.floor(i0 / d.width);
+    let best = i0, bestD = Infinity;
+    for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+      const x = (x0 + dx + d.width) % d.width, y = y0 + dy;
+      if (y < 0 || y >= d.height) continue;
+      const i = y * d.width + x;
+      if (d.surface[i] === SURFACE_OCEAN) continue;
+      const dist = dx * dx + dy * dy;
+      if (dist < bestD) { bestD = dist; best = i; }
+    }
+    return best;
+  }
+
+  /**
+   * Samples the raster at a point. With `preferLand` (use when a precise vector source says the point is on land, e.g.
+   * a coastal city) the nearest land cell is used so 39 km ocean cells do not swallow coastlines.
+   */
+  sample(lat: number, lon: number, preferLand = false): WorldSample {
+    const d = this.data;
+    const i = preferLand ? this.nearestLandIndex(lat, lon) : this.index(lat, lon);
     const cx = Math.min(CLIMATE_GRID_WIDTH - 1, Math.max(0, Math.floor(((lon + 180) / 360) * CLIMATE_GRID_WIDTH)));
     const cy = Math.min(CLIMATE_GRID_HEIGHT - 1, Math.max(0, Math.floor(((90 - lat) / 180) * CLIMATE_GRID_HEIGHT)));
     const ci = (cy * CLIMATE_GRID_WIDTH + cx) * 12;

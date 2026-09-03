@@ -32,6 +32,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], channel: undefined } }],
   webServer: {
     command: process.env.TERRA_E2E_DEV ? 'npm run dev' : `npx vite preview --host 127.0.0.1 --port ${port}`,
+    env: { ...process.env, TERRA_FIXTURES: '1' },
     url: `http://127.0.0.1:${port}/`,
     reuseExistingServer: true,
     timeout: 120_000,
