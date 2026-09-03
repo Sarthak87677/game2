@@ -13,6 +13,7 @@ uniform float snowCover;
 uniform float detailStrength;
 uniform float seasonTint;
 uniform float timeSec;
+uniform float cloudCover;
 
 float terraHash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float terraNoise(vec2 p) {
@@ -76,6 +77,12 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
     wcol += spec * vec3(0.9, 0.95, 1.0) * 0.6;
     color = wcol;
   }
+  // Cloud shadows: large, slowly drifting darkening patches proportional to cloud cover.
+  if (cloudCover > 0.02) {
+    float cs = terraFbm(q * 0.0009 + vec2(timeSec * 0.004, timeSec * 0.0017));
+    float shadow = smoothstep(0.62 - cloudCover * 0.35, 0.78, cs) * cloudCover * 0.45;
+    color *= 1.0 - shadow;
+  }
   material.diffuse = color;
   material.alpha = alpha;
   return material;
@@ -84,7 +91,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
 
 export interface GroundMaterialHandle {
   material: Material;
-  setUniform(name: 'fadeNear' | 'fadeFar' | 'wetness' | 'snowCover' | 'detailStrength' | 'seasonTint' | 'timeSec', value: number): void;
+  setUniform(name: 'fadeNear' | 'fadeFar' | 'wetness' | 'snowCover' | 'detailStrength' | 'seasonTint' | 'timeSec' | 'cloudCover', value: number): void;
   setWorldMap(map: WorldMap): void;
   destroy(): void;
 }
@@ -143,6 +150,7 @@ export function installGroundMaterial(viewer: Viewer): GroundMaterialHandle {
         detailStrength: 1,
         seasonTint: 0,
         timeSec: 0,
+        cloudCover: 0,
       },
       source: GROUND_GLSL,
     },

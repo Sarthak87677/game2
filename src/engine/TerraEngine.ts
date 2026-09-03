@@ -30,6 +30,10 @@ import { AmbientAudio } from './audio';
 import { CloudSystem } from './clouds';
 import { TrafficLayer } from '@/world/traffic/TrafficLayer';
 import { dayOfYear } from '@/world/climate/season';
+import { HeightFieldSource } from '@/world/nearField/heightField';
+import { buildGenerationContext } from '@/world/nearField/contextBuilder';
+import { ProcgenClient } from '@/world/nearField/procgenClient';
+import type { NearFieldTile } from '@/world/procedural/types';
 import type { GeocodingAdapter } from '@/data/geocoding/types';
 
 declare global {
@@ -58,6 +62,8 @@ export class TerraEngine {
   readonly audio = new AmbientAudio();
   readonly clouds: CloudSystem;
   readonly traffic: TrafficLayer | null;
+  readonly heightFields = new HeightFieldSource({ cache: sharedTileCache() });
+  readonly procgen = new ProcgenClient();
   naturalEarth: NaturalEarth | null = null;
   worldMap: WorldMap | null = null;
   gazetteer: OfflineGazetteer | null = null;
@@ -87,7 +93,7 @@ export class TerraEngine {
     try { ground = installGroundMaterial(this.viewer); } catch (e) { store.log('warn', `Ground material unavailable: ${String(e)}`); }
     this.ground = ground;
     this.ocean = new OceanSurface(this.viewer);
-    this.environment.onWeatherApplied = (u) => { this.ground?.setUniform('wetness', u.wetness); this.ground?.setUniform('snowCover', u.snowCover); };
+    this.environment.onWeatherApplied = (u) => { this.ground?.setUniform('wetness', u.wetness); this.ground?.setUniform('snowCover', u.snowCover); this.ground?.setUniform('cloudCover', u.cloudCover); };
     this.quality = store.quality;
     void sharedTileCache().setBudget(store.settings.cacheMb * 1024 * 1024);
     const disabled = env.disabledAdapters ?? new Set<string>();
@@ -404,6 +410,24 @@ export class TerraEngine {
     await this.modes.startTour(keyframes);
   }
 
+  /**
+   * Generates a procedural near-field tile (vegetation, rocks, crops, settlements) for slippy tile z/x/y using the
+   * climate atlas, terrain height field, OSM features and the simulated date. Returns null until data is ready.
+   */
+  async generateNearFieldTile(z: number, x: number, y: number): Promise<NearFieldTile | null> {
+    if (!this.worldMap || !this.procgen.available) return null;
+    const ctx = await buildGenerationContext({
+      worldMap: () => this.worldMap,
+      osm: () => this.osm,
+      gazetteer: () => this.gazetteer,
+      heightFields: this.heightFields,
+      date: () => this.environment.getDate(),
+      density: () => QUALITY_PRESETS[this.quality].vegetationDensity,
+    }, z, x, y);
+    if (!ctx) return null;
+    return this.procgen.generate(ctx);
+  }
+
   /** Captures the current frame as a PNG data URL. */
   screenshot(): string {
     this.viewer.render();
@@ -448,6 +472,7 @@ export class TerraEngine {
     this.destroyed = true;
     if (this.readoutTimer !== null) window.clearInterval(this.readoutTimer);
     this.modes.destroy();
+    this.procgen.destroy();
     this.audio.destroy();
     this.traffic?.destroy();
     this.clouds.destroy();

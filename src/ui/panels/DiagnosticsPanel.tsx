@@ -33,6 +33,7 @@ export function DiagnosticsPanel() {
         <span>Natural Earth</span><span>{flags.naturalEarth ? 'loaded' : 'loading/unavailable'}</span>
         <span>Climate atlas</span><span>{flags.worldMap ? (flags.worldMapElevation ? 'built with measured elevation' : 'built without elevation (terrain host unreachable)') : 'building…'}</span>
         <span>Place index</span><span>{flags.gazetteer ? 'loaded' : 'loading/unavailable'}</span>
+        <span>Traffic / lamps</span><span>{engine?.traffic ? (() => { const t = engine.traffic.stats(); return `${t.vehicles} vehicles · ${t.lamps} lamps · ${t.roads} roads (simulated)`; })() : 'disabled'}</span>
         <span>OpenStreetMap</span><span>{engine?.osm ? `${engine.osmStatus.loaded} tiles loaded · ${engine.osmStatus.loading} loading · ${engine.osmStatus.failed} failed · ${flags.osmOnline === null ? 'not yet requested' : flags.osmOnline ? 'online' : `offline (${engine.osmStatus.lastError ?? 'unreachable'})`}` : 'disabled'}</span>
       </div>
       <h3>Log <button className="terra-mini" onClick={report}>Copy report</button></h3>

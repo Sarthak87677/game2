@@ -7,10 +7,10 @@ Resumable task ledger. Update after every completed task. Dates are UTC.
 | Milestone | Status | Notes |
 |---|---|---|
 | 1. Working Earth | **done** | Globe, Terrarium terrain (worker-decoded, cached), offline inferred imagery + optional OSM/Esri/GIBS/MapTiler/ion layers, atmosphere/sun/moon/stars, search (offline gazetteer + coordinates, optional Nominatim/Photon), camera modes, loading/error states, diagnostics. |
-| 2. Geographic Structure | **in progress** | Overpass adapter + OSM buildings (custom night-window shader), roads, rail, water, land use, POIs; bookmarks (246 highlights, 19 showcase areas); DATA_SOURCES/ATTRIBUTIONS; provenance UI. Remaining: POI labels, procedural fallback when OSM offline (part of milestone 3). |
+| 2. Geographic Structure | **done** | Overpass adapter + OSM buildings (custom night-window shader), towers, roads, rail, water, land use, POI/place labels; bookmarks (246 highlights, 19 showcase areas); DATA_SOURCES/ATTRIBUTIONS; provenance UI; synthetic fixture responder for offline testing. |
 | 3. Ground-Level World | **in progress** | Walk/drive with gravity + terrain/building collision done; tile-anchored local frames (floating origin) done for OSM buildings; procedural vegetation/rocks/crops/villages being built (`src/world/procedural`, `src/world/render`). |
 | 4. Hyperrealistic Nature | **in progress** | Species library with seasonal fruit/flowers, wind shader, weather particles, ground material (snow/wetness/season tint), ocean surface, procedural ambient audio. Remaining: wiring near-field renderer, ice/snow accumulation on vegetation, puddles. |
-| 5. Cities and Landmarks | **partial** | Night windows + night lights done; showcase presets done. Remaining: traffic, street furniture, landmark models. |
+| 5. Cities and Landmarks | **in progress** | Night windows, population night lights, simulated traffic with headlights, street lamps, OSM towers/landmarks by height tag, showcase presets. Remaining: procedural urban blocks where OSM is absent (milestone 3 renderer), street furniture. |
 | 6. Optimisation | **pending** | Perf script exists (`npm run perf`); measurements to be recorded in PERFORMANCE.md. |
 | 7. Verification & Packaging | **in progress** | Unit tests (150+), Playwright smoke suite, production build OK. Docs partially written. |
 

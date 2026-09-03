@@ -54,7 +54,7 @@ export function simulateWeather(monthlyTempC: number[], monthlyPrecipMm: number[
   return w;
 }
 
-export interface EnvironmentUniforms { wetness: number; snowCover: number; fogDensity: number; windSpeedMs: number; windDirDeg: number }
+export interface EnvironmentUniforms { wetness: number; snowCover: number; fogDensity: number; windSpeedMs: number; windDirDeg: number; cloudCover: number }
 
 function makeDropTexture(kind: 'rain' | 'snow'): HTMLCanvasElement {
   const c = document.createElement('canvas');
@@ -144,8 +144,11 @@ export class EnvironmentController {
   setWeather(w: WeatherState): void {
     this.weather = w;
     const scene = this.viewer.scene;
-    scene.fog.density = 0.0004 + w.fogDensity * 0.02 + w.precipitation * 0.002;
-    scene.fog.minimumBrightness = 0.03 + w.fogDensity * 0.3;
+    this.surfaceFog = { density: 0.0004 + w.fogDensity * 0.02 + w.precipitation * 0.002, brightness: 0.03 + w.fogDensity * 0.3 };
+    if (!this.underwater) {
+      scene.fog.density = this.surfaceFog.density;
+      scene.fog.minimumBrightness = this.surfaceFog.brightness;
+    }
     const atmosphere = scene.atmosphere;
     atmosphere.brightnessShift = -0.35 * w.cloudCover - 0.2 * w.fogDensity;
     atmosphere.saturationShift = -0.45 * w.cloudCover - 0.3 * w.fogDensity + (w.condition === 'dust' ? -0.2 : 0);
@@ -158,7 +161,7 @@ export class EnvironmentController {
     scene.shadowMap.darkness = 0.35 + 0.45 * w.cloudCover;
     const kind: 'rain' | 'snow' | null = w.precipitation > 0.05 ? (w.condition === 'snow' || w.temperatureC < 1 ? 'snow' : 'rain') : null;
     this.ensureParticles(kind, w.precipitation);
-    this.onWeatherApplied?.({ wetness: w.wetness, snowCover: w.snowCover, fogDensity: w.fogDensity, windSpeedMs: w.windSpeedMs, windDirDeg: w.windDirDeg });
+    this.onWeatherApplied?.({ wetness: w.wetness, snowCover: w.snowCover, fogDensity: w.fogDensity, windSpeedMs: w.windSpeedMs, windDirDeg: w.windDirDeg, cloudCover: w.cloudCover });
   }
 
   private ensureParticles(kind: 'rain' | 'snow' | null, intensity: number): void {
@@ -232,8 +235,34 @@ export class EnvironmentController {
     this.lastNightUpdate = 0;
   }
 
+  private underwater = false;
+  private surfaceFog = { density: 0.0004, brightness: 0.03 };
+
+  private applyUnderwater(camHeight: number): void {
+    const scene = this.viewer.scene;
+    const under = camHeight < -0.5;
+    if (under === this.underwater) return;
+    this.underwater = under;
+    if (under) {
+      scene.fog.density = 0.02;
+      scene.fog.minimumBrightness = 0.02;
+      if (scene.skyAtmosphere) scene.skyAtmosphere.show = false;
+      scene.globe.showGroundAtmosphere = false;
+      scene.backgroundColor = Color.fromCssColorString('#04213a');
+      scene.globe.baseColor = Color.fromCssColorString('#0a2e4a');
+    } else {
+      scene.fog.density = this.surfaceFog.density;
+      scene.fog.minimumBrightness = this.surfaceFog.brightness;
+      if (scene.skyAtmosphere) scene.skyAtmosphere.show = true;
+      scene.globe.showGroundAtmosphere = true;
+      scene.backgroundColor = Color.BLACK;
+      scene.globe.baseColor = Color.fromCssColorString('#20344f');
+    }
+  }
+
   private tick(): void {
     const now = performance.now();
+    this.applyUnderwater(this.viewer.camera.positionCartographic.height);
     if (this.particles) {
       const camera = this.viewer.camera;
       const agl = camera.positionCartographic.height - (this.viewer.scene.globe.getHeight(camera.positionCartographic) ?? 0);

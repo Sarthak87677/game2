@@ -1,4 +1,4 @@
-import { Cartesian3, Cartographic, ClassificationType, Color, ColorGeometryInstanceAttribute, CornerType, CorridorGeometry, GeometryInstance, GroundPrimitive, PerInstanceColorAppearance, PolygonGeometry, Primitive, PrimitiveCollection, sampleTerrain, ShadowMode, type Viewer, Math as CMath } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, ClassificationType, Color, ColorGeometryInstanceAttribute, CornerType, CorridorGeometry, DistanceDisplayCondition, GeometryInstance, GroundPrimitive, HorizontalOrigin, LabelCollection, LabelStyle, PerInstanceColorAppearance, PolygonGeometry, Primitive, PrimitiveCollection, sampleTerrain, ShadowMode, VerticalOrigin, type Viewer, Math as CMath } from 'cesium';
 import { buildBuildingMesh, type BuildingInput } from './osmBuildingGeometry';
 import { createBuildingAppearance } from './buildingAppearance';
 import type { FeatureAdapter, FeatureTile, LandUseKind, OsmBuilding, RoadKind } from '@/data/adapters/features/types';
@@ -214,6 +214,31 @@ export class OsmLayer {
     }
     if (groundInstances.length) {
       loaded.primitives.add(new GroundPrimitive({ geometryInstances: groundInstances, appearance: new PerInstanceColorAppearance({ flat: true, translucent: true }), classificationType: ClassificationType.TERRAIN, asynchronous: true, allowPicking: true }));
+    }
+    // Points of interest and place names (measured from OSM), fading with distance so the street view stays clean.
+    const pois = tile.pois.filter((p) => p.name).slice(0, 40);
+    if (pois.length) {
+      const labels = new LabelCollection();
+      for (const p of pois) {
+        const ground = scene.globe.getHeight(Cartographic.fromDegrees(p.lon, p.lat)) ?? 0;
+        const isPlace = /^(city|town|village|hamlet|suburb)$/.test(p.kind);
+        labels.add({
+          position: Cartesian3.fromDegrees(p.lon, p.lat, ground + (isPlace ? 40 : 12)),
+          text: p.name,
+          font: isPlace ? '600 15px system-ui, sans-serif' : '13px system-ui, sans-serif',
+          fillColor: Color.WHITE,
+          outlineColor: Color.BLACK.withAlpha(0.8),
+          outlineWidth: 3,
+          style: LabelStyle.FILL_AND_OUTLINE,
+          horizontalOrigin: HorizontalOrigin.CENTER,
+          verticalOrigin: VerticalOrigin.BOTTOM,
+          pixelOffset: new Cartesian2(0, -4),
+          distanceDisplayCondition: new DistanceDisplayCondition(0, isPlace ? 12_000 : 2500),
+          disableDepthTestDistance: 200,
+          id: { kind: 'poi', id: p.id, name: p.name, poiKind: p.kind, provenance: 'measured (OpenStreetMap)' },
+        });
+      }
+      loaded.primitives.add(labels);
     }
   }
 
