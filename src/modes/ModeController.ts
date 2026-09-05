@@ -1,4 +1,4 @@
-import { Cartesian3, Cartographic, Color, ConstantPositionProperty, ConstantProperty, HeadingPitchRoll, JulianDate, Math as CMath, Matrix4, Transforms, type Entity, type Viewer } from 'cesium';
+import { BoxGeometry, Cartesian3, Cartographic, Color, ColorGeometryInstanceAttribute, CylinderGeometry, EllipsoidGeometry, GeometryInstance, HeadingPitchRoll, JulianDate, Math as CMath, Matrix4, PerInstanceColorAppearance, Primitive, ShadowMode, Transforms, VertexFormat, type Viewer } from 'cesium';
 import { InputManager } from './input';
 import { flyTo, type CameraTarget } from '@/engine/camera';
 
@@ -38,8 +38,8 @@ export class ModeController {
   private verticalVel = 0;
   private driveSpeed = 0;
   private lastGround: number | null = null;
-  private avatar: Entity | null = null;
-  private vehicle: Entity | null = null;
+  private avatar: Primitive | null = null;
+  private vehicle: Primitive | null = null;
   private removePreUpdate: () => void;
   private lastTime: number | null = null;
   private tour: TourKeyframe[] | null = null;
@@ -133,21 +133,23 @@ export class ModeController {
     this.pitch = Math.max(this.pitch, CMath.toRadians(-10));
   }
 
+  /**
+   * Third-person bodies are plain primitives whose model matrix is updated every frame. (An Entity with a position
+   * that changes every frame rebuilds an asynchronous primitive each frame and never becomes visible.)
+   */
   private updateAvatars(): void {
     const showWalker = this.mode === 'walk' && this.view === 'third';
     const showCar = this.mode === 'drive' && this.view === 'third';
     if (showWalker && !this.avatar) {
-      this.avatar = this.viewer.entities.add({
-        id: 'terra-avatar',
-        cylinder: { length: 1.5, topRadius: 0.28, bottomRadius: 0.28, material: Color.fromCssColorString('#3b6ea5'), outline: false },
-      });
+      const body = new GeometryInstance({ geometry: new CylinderGeometry({ length: 1.5, topRadius: 0.26, bottomRadius: 0.3, vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT }), modelMatrix: Matrix4.fromTranslation(new Cartesian3(0, 0, 0.75)), attributes: { color: ColorGeometryInstanceAttribute.fromColor(Color.fromCssColorString('#3b6ea5')) } });
+      const head = new GeometryInstance({ geometry: new EllipsoidGeometry({ radii: new Cartesian3(0.14, 0.14, 0.16), vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT }), modelMatrix: Matrix4.fromTranslation(new Cartesian3(0, 0, 1.68)), attributes: { color: ColorGeometryInstanceAttribute.fromColor(Color.fromCssColorString('#d9b38c')) } });
+      this.avatar = this.viewer.scene.primitives.add(new Primitive({ geometryInstances: [body, head], appearance: new PerInstanceColorAppearance({ translucent: false, closed: true }), asynchronous: false, shadows: ShadowMode.ENABLED, allowPicking: false }));
     }
     if (this.avatar) this.avatar.show = showWalker;
     if (showCar && !this.vehicle) {
-      this.vehicle = this.viewer.entities.add({
-        id: 'terra-vehicle',
-        box: { dimensions: new Cartesian3(4.3, 1.85, 1.4), material: Color.fromCssColorString('#b8352a'), outline: true, outlineColor: Color.BLACK.withAlpha(0.4) },
-      });
+      const chassis = new GeometryInstance({ geometry: BoxGeometry.fromDimensions({ dimensions: new Cartesian3(4.3, 1.85, 0.7), vertexFormat: VertexFormat.POSITION_AND_NORMAL }), modelMatrix: Matrix4.fromTranslation(new Cartesian3(0, 0, 0.55)), attributes: { color: ColorGeometryInstanceAttribute.fromColor(Color.fromCssColorString('#b8352a')) } });
+      const cabin = new GeometryInstance({ geometry: BoxGeometry.fromDimensions({ dimensions: new Cartesian3(2.2, 1.7, 0.65), vertexFormat: VertexFormat.POSITION_AND_NORMAL }), modelMatrix: Matrix4.fromTranslation(new Cartesian3(-0.3, 0, 1.2)), attributes: { color: ColorGeometryInstanceAttribute.fromColor(Color.fromCssColorString('#2b2f36')) } });
+      this.vehicle = this.viewer.scene.primitives.add(new Primitive({ geometryInstances: [chassis, cabin], appearance: new PerInstanceColorAppearance({ translucent: false, closed: true }), asynchronous: false, shadows: ShadowMode.ENABLED, allowPicking: false }));
     }
     if (this.vehicle) this.vehicle.show = showCar;
   }
@@ -261,23 +263,23 @@ export class ModeController {
     if (this.view === 'first') {
       camera.setView({ destination: Cartesian3.fromRadians(bodyCarto.longitude, bodyCarto.latitude, bodyCarto.height + eye), orientation: { heading: this.heading, pitch: this.pitch, roll: 0 } });
     } else {
-      const back = isDrive ? 9 : 5;
-      const upOff = isDrive ? 3.2 : 2.2;
+      const back = isDrive ? 12 : 7.5;
+      const upOff = isDrive ? 4.2 : 3;
       const f = this.frameVectors(this.bodyPos);
       const fwd = Cartesian3.add(Cartesian3.multiplyByScalar(f.east, sinH, new Cartesian3()), Cartesian3.multiplyByScalar(f.north, cosH, new Cartesian3()), new Cartesian3());
       const camPos = Cartesian3.add(this.bodyPos, Cartesian3.multiplyByScalar(fwd, -back, new Cartesian3()), new Cartesian3());
       Cartesian3.add(camPos, Cartesian3.multiplyByScalar(f.up, upOff, new Cartesian3()), camPos);
       const camCarto = Cartographic.fromCartesian(camPos);
       const camGround = this.groundAt(camCarto);
-      if (camGround !== null && camCarto.height < camGround + 1) camPos.x = Cartesian3.fromRadians(camCarto.longitude, camCarto.latitude, camGround + 1).x;
+      if (camGround !== null && camCarto.height < camGround + 1.2) Cartesian3.fromRadians(camCarto.longitude, camCarto.latitude, camGround + 1.2, undefined, camPos);
       camera.setView({ destination: camPos, orientation: { heading: this.heading, pitch: Math.min(this.pitch, CMath.toRadians(-8)), roll: 0 } });
     }
-    const ent = isDrive ? this.vehicle : this.avatar;
-    if (ent && ent.show) {
+    const body = isDrive ? this.vehicle : this.avatar;
+    if (body && body.show) {
+      // Cesium's heading is measured from north; the box/cylinder frames point +x east, so rotate by heading − 90°.
       const hpr = new HeadingPitchRoll(this.heading - Math.PI / 2, 0, 0);
-      const pos = Cartesian3.fromRadians(bodyCarto.longitude, bodyCarto.latitude, bodyCarto.height + (isDrive ? 0.7 : 0.75));
-      ent.position = new ConstantPositionProperty(pos);
-      ent.orientation = new ConstantProperty(Transforms.headingPitchRollQuaternion(pos, hpr));
+      const pos = Cartesian3.fromRadians(bodyCarto.longitude, bodyCarto.latitude, bodyCarto.height);
+      body.modelMatrix = Transforms.headingPitchRollToFixedFrame(pos, hpr);
     }
     this.emit();
   }
@@ -291,7 +293,7 @@ export class ModeController {
   destroy(): void {
     this.removePreUpdate();
     this.input.destroy();
-    if (this.avatar) this.viewer.entities.remove(this.avatar);
-    if (this.vehicle) this.viewer.entities.remove(this.vehicle);
+    if (this.avatar) this.viewer.scene.primitives.remove(this.avatar);
+    if (this.vehicle) this.viewer.scene.primitives.remove(this.vehicle);
   }
 }

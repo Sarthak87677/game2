@@ -241,6 +241,11 @@ export class TerraEngine {
     try {
       const provider = await adapter.createProvider();
       if (this.destroyed) return;
+      // Cesium marks a tile FAILED for good unless a listener asks for a retry; let the globe re-request a tile a few
+      // times before giving up so a brief network outage does not leave a permanent hole.
+      provider.errorEvent.addEventListener((err: { timesRetried?: number; retry?: boolean }) => {
+        if ((err.timesRetried ?? 0) < 4) err.retry = true;
+      });
       this.viewer.terrainProvider = provider;
       useTerraStore.setState({ terrainId: id });
     } catch (e) {

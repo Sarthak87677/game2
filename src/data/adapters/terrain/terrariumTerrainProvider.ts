@@ -104,9 +104,22 @@ export class TerrariumTerrainProvider implements TerrainProvider {
       const hit = await this.cache.get(cacheKey);
       if (hit instanceof ArrayBuffer) return hit.slice(0);
     }
-    const fetched = await new Resource({ url }).fetchArrayBuffer();
-    if (!fetched) throw new Error('fetch returned no data');
-    if (this.cache) void this.cache.put(cacheKey, fetched.slice(0));
-    return fetched;
+    // Transient network failures (connection resets, proxy hiccups, 5xx) are retried with a short back-off; a tile that
+    // permanently fails would otherwise leave a hole in the terrain for the rest of the session.
+    let lastError: unknown = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise((r) => setTimeout(r, 400 * 2 ** (attempt - 1)));
+      try {
+        const fetched = await new Resource({ url }).fetchArrayBuffer();
+        if (!fetched) throw new Error('fetch returned no data');
+        if (this.cache) void this.cache.put(cacheKey, fetched.slice(0));
+        return fetched;
+      } catch (err) {
+        lastError = err;
+        const status = (err as { statusCode?: number }).statusCode;
+        if (status !== undefined && status >= 400 && status < 500) break;
+      }
+    }
+    throw lastError instanceof Error ? lastError : new Error(String(lastError));
   }
 }
