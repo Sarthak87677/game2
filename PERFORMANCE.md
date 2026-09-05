@@ -21,8 +21,22 @@ Recorded by `npm run perf` on 2026-09-05 (`docs/performance-2026-09-05T05-15-25-
 Observations from this run:
 
 * JavaScript heap stays between 68 MB (orbit) and 237 MB (city) across the journey — no unbounded growth.
-* The run surfaced a real bug: hundreds of terrain-tile "errors" were throttled requests that the Terrarium provider turned into failures (Cesium then fell back to parent tiles). The provider now goes through Cesium's request scheduler so throttled tiles are retried; see the follow-up measurement below when available.
+* The run surfaced a real bug: hundreds of terrain-tile "errors" were throttled requests that the Terrarium provider turned into failures (Cesium then fell back to parent tiles). The provider now goes through Cesium's request scheduler so throttled tiles are retried.
 * Frame time is dominated by fragment work in SwiftShader (globe material + atmosphere); on a GPU these passes are negligible.
+
+### Follow-up run after the terrain scheduler fix
+
+`docs/performance-2026-09-05T05-31-21-429Z.json`, same environment and preset.
+
+| Location | FPS | Frame ms | Terrain tiles loaded | Terrain tile errors | Heap MB |
+|---|---:|---:|---:|---:|---:|
+| Orbit (24 000 km) | 3.1 | 509 | 5 | 0 (was 0) | 89 |
+| Himalaya, Everest (12 km AGL) | 1.0 | 2206 | 81 | 0 (was 45) | 189 |
+| Manhattan (1.8 km AGL) | 0.6 | 676 | 182 | 0 (was 93) | 347 |
+| Zermatt ground (300 m AGL) | 0.2 | 4284 | 284 | 0 (was 110) | 240 |
+| Antarctica (60 km AGL) | 0.2 | 4303 | 394 | 0 (was 214) | 220 |
+
+Every location now streams more detail tiles with zero failures; the heap rises accordingly (up to 347 MB in the city, still bounded by the tile cache budget).
 
 **No GPU measurement exists yet.** Run `npm run build && npm run perf` on a machine with a GPU and paste the printed table here with the renderer string.
 
