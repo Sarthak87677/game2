@@ -27,7 +27,9 @@ test.describe('Terra Infinite — visual smoke', () => {
     const s = await state(page);
     expect(s.camera).not.toBeNull();
     expect(Math.abs(s.camera!.lat - 27.9881)).toBeLessThan(0.05);
-    expect(s.camera!.heightM).toBeLessThan(20_000);
+    // Flight heights are above ground: 12 km over the ~5–8 km Khumbu terrain.
+    expect(s.camera!.heightM).toBeLessThan(22_000);
+    expect(s.camera!.heightM).toBeGreaterThan(11_000);
     await page.screenshot(SHOT('02-everest'));
     // Terrain is streamed from the Terrarium adapter when the network permits; otherwise the flat fallback is used honestly.
     const terrainWorks = (s.streaming?.terrainTilesLoaded ?? 0) > 0;

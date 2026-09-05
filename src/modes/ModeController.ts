@@ -129,7 +129,8 @@ export class ModeController {
     const h = ground !== undefined ? ground + eye : Math.min(cam.height, (ground ?? 0) + eye + 50);
     this.bodyPos = Cartesian3.fromRadians(cam.longitude, cam.latitude, h);
     this.bodyHeightAgl = h - (ground ?? h);
-    this.pitch = Math.max(this.pitch, CMath.toRadians(-20));
+    // Keep a generous slice of sky in view when dropping to the ground from a steep flight.
+    this.pitch = Math.max(this.pitch, CMath.toRadians(-10));
   }
 
   private updateAvatars(): void {

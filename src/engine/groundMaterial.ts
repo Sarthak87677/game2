@@ -59,7 +59,9 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
   float snowAmount = smoothstep(snowline - 450.0, snowline + 300.0, height) * (1.0 - smoothstep(0.85, 1.25, slope));
   snowAmount = max(snowAmount, snowCover * (0.6 + 0.4 * n1) * (1.0 - smoothstep(0.6, 1.2, slope)));
   if (surf > 2.5) snowAmount = 1.0;
-  color = mix(color, snow, clamp(snowAmount, 0.0, 1.0));
+  // Wind-sculpted snow: keep faint sastrugi/drift variation so snowfields never read as a flat sheet.
+  vec3 snowShaded = snow * (0.88 + 0.12 * n2) * (0.95 + 0.05 * n1);
+  color = mix(color, snowShaded, clamp(snowAmount, 0.0, 1.0));
   color = mix(color, color * vec3(1.05, 0.9, 0.7), clamp(seasonTint, 0.0, 1.0) * (1.0 - snowAmount));
   color *= 1.0 - 0.35 * wetness * (1.0 - snowAmount);
   bool water = surf < 0.5 || (surf > 1.5 && surf < 2.5);

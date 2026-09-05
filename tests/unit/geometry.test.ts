@@ -32,6 +32,8 @@ describe('Natural Earth index (real processed data)', () => {
     expect(ne.surfaceAt(0, -150).kind).toBe('ocean');
     expect(ne.surfaceAt(47.5, -87.5).kind).toBe('lake'); // Lake Superior
     expect(ne.surfaceAt(72, -40).kind).toBe('glacier'); // Greenland ice sheet
+    expect(ne.surfaceAt(40.7484, -73.9857).kind).toBe('land'); // Manhattan: absent from 1:50m land, present in 1:110m
+    expect(ne.surfaceAt(40.7484, -73.9857).country?.name).toMatch(/United States/);
   });
   it('resolves countries, regions and oceans', () => {
     expect(ne.surfaceAt(48.8566, 2.3522).country?.name).toBe('France');

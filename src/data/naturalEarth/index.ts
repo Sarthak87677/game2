@@ -158,11 +158,15 @@ export class NaturalEarth {
     return new NaturalEarth(files as NaturalEarthFiles);
   }
 
-  /** What is at the surface at this point according to Natural Earth 1:50m vectors. */
+  /**
+   * What is at the surface at this point according to Natural Earth vectors. Land is the union of the 1:50m and
+   * 1:110m polygons: the 50m set drops some small but important islands (Manhattan), the 110m set generalises them
+   * into the mainland.
+   */
   surfaceAt(lat: number, lon: number): SurfaceInfo {
     const glacier = this.glaciers.at(lat, lon);
     const lake = glacier ? null : this.lakes.at(lat, lon);
-    const isLand = glacier !== null || lake !== null || this.land.contains(lat, lon);
+    const isLand = glacier !== null || lake !== null || this.land.contains(lat, lon) || this.landCoarse.contains(lat, lon);
     const kind: SurfaceKind = glacier ? 'glacier' : lake ? 'lake' : isLand ? 'land' : 'ocean';
     const country = isLand ? this.countries.at(lat, lon)?.props ?? null : null;
     const region = this.regions.at(lat, lon, true)?.props ?? null;
@@ -171,7 +175,7 @@ export class NaturalEarth {
   }
 
   isLand(lat: number, lon: number): boolean {
-    return this.land.contains(lat, lon) || this.lakes.contains(lat, lon) || this.glaciers.contains(lat, lon);
+    return this.land.contains(lat, lon) || this.landCoarse.contains(lat, lon) || this.lakes.contains(lat, lon) || this.glaciers.contains(lat, lon);
   }
 
   /** Serialisable geometry bundle for workers (land + lakes + glaciers rings). */

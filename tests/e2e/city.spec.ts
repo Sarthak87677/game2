@@ -16,12 +16,10 @@ test.describe('City rendering (synthetic OSM fixture)', () => {
     await waitForTiles(page, 120_000);
     await page.waitForFunction(() => (window as unknown as { __terra: { engine: { osmStatus: { loaded: number } } } }).__terra.engine.osmStatus.loaded > 0, null, { timeout: 120_000 });
     await page.waitForTimeout(8000);
-    const day = await page.evaluate(() => (window as unknown as { __terra: { engine: { osmStatus: { loaded: number; failed: number }; traffic: { stats: () => { vehicles: number; lamps: number } } | null } } }).__terra.engine);
     await page.screenshot({ path: 'test-results/06-city-day.png' });
     const stats = await page.evaluate(() => { const e = (window as unknown as { __terra: { engine: { osmStatus: { loaded: number; failed: number }; traffic: { stats: () => { vehicles: number; lamps: number } } | null } } }).__terra.engine; return { osm: e.osmStatus, traffic: e.traffic?.stats() ?? null }; });
     expect(stats.osm.loaded).toBeGreaterThan(0);
     expect(stats.traffic?.vehicles ?? 0).toBeGreaterThan(0);
-    void day;
     await page.evaluate(() => (window as unknown as { __terra: { engine: { setDate: (d: Date) => void } } }).__terra.engine.setDate(new Date('2026-06-21T22:30:00Z')));
     await page.waitForTimeout(6000);
     await page.screenshot({ path: 'test-results/07-city-night.png' });
