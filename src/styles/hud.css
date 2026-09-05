@@ -109,3 +109,35 @@
 .terra-mode-hint-title { font-weight: 700; color: var(--terra-accent); margin-bottom: 4px; letter-spacing: 0.06em; }
 @keyframes terra-fade { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .terra-reduce-motion .terra-mode-hint { animation: none; }
+
+/* Gameplay: prompts, overlays, vehicle HUD, play panel */
+.terra-gameplay-bar { position: absolute; left: 50%; bottom: 92px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 26; pointer-events: none; }
+.terra-gameplay-bar > * { pointer-events: auto; }
+.terra-prompt { background: var(--terra-bg-strong); border: 1px solid var(--terra-accent); color: var(--terra-fg); border-radius: 999px; padding: 8px 18px; font: inherit; font-size: 1.02em; cursor: pointer; backdrop-filter: blur(10px); animation: terra-fade 0.25s ease; }
+.terra-prompt kbd, .terra-overlay-card kbd, .terra-panel-body kbd { display: inline-block; min-width: 1.4em; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--terra-border); background: rgba(255,255,255,0.08); font-family: ui-monospace, monospace; font-size: 0.85em; margin-right: 4px; text-align: center; }
+.terra-gameplay-status { background: var(--terra-bg-strong); border: 1px solid var(--terra-border); border-radius: 10px; padding: 6px 14px; font-size: 0.92em; backdrop-filter: blur(10px); }
+.terra-vehicle-hud { display: flex; align-items: baseline; gap: 10px; background: var(--terra-bg-strong); border: 1px solid var(--terra-border); border-radius: 12px; padding: 6px 16px; backdrop-filter: blur(10px); }
+.terra-vehicle-speed { font-size: 1.9em; font-weight: 700; color: var(--terra-accent); }
+.terra-vehicle-unit { font-size: 0.8em; opacity: 0.8; }
+.terra-vehicle-gear { font-weight: 700; padding: 0 6px; border: 1px solid var(--terra-border); border-radius: 6px; }
+.terra-vehicle-lamp { opacity: 0.3; }
+.terra-vehicle-lamp.on { opacity: 1; color: #ffe27a; }
+.terra-vehicle-lamp.blink { opacity: 1; color: #ffb347; animation: terra-blink 0.8s steps(2) infinite; }
+.terra-vehicle-name { font-size: 0.85em; opacity: 0.85; }
+@keyframes terra-blink { to { opacity: 0.2; } }
+.terra-overlay-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100vw - 32px)); background: var(--terra-bg-strong); border: 1px solid var(--terra-border); border-radius: 14px; padding: 16px 20px; backdrop-filter: blur(14px); z-index: 40; animation: terra-fade 0.25s ease; }
+.terra-overlay-card h3 { margin: 0 0 8px; color: var(--terra-accent); }
+.terra-overlay-card p { margin: 4px 0; }
+.terra-overlay-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.terra-overlay-actions button { text-align: left; background: rgba(255,255,255,0.06); border: 1px solid var(--terra-border); color: var(--terra-fg); border-radius: 8px; padding: 8px 12px; font: inherit; cursor: pointer; }
+.terra-overlay-actions button:hover:not(:disabled) { border-color: var(--terra-accent); }
+.terra-overlay-actions button:disabled { opacity: 0.4; cursor: default; }
+.terra-overlay-close { opacity: 0.8; }
+.terra-overlay-note { margin-top: 10px; font-size: 0.78em; opacity: 0.7; font-style: italic; }
+.terra-play-btn { font-weight: 700; color: var(--terra-accent); }
+.terra-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.terra-list-btn { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 2px; background: rgba(255,255,255,0.05); border: 1px solid var(--terra-border); color: var(--terra-fg); border-radius: 10px; padding: 8px 12px; font: inherit; cursor: pointer; }
+.terra-list-btn:hover { border-color: var(--terra-accent); }
+.terra-muted { opacity: 0.8; font-size: 0.92em; }
+.terra-tiny { font-size: 0.75em; opacity: 0.65; }
+.terra-warn { color: #ffb347; font-size: 0.9em; }

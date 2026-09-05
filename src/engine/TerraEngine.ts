@@ -5,7 +5,7 @@ import { EnvironmentController, simulateWeather, weatherFromPreset, type Weather
 import { installGroundMaterial, type GroundMaterialHandle } from './groundMaterial';
 import { OceanSurface } from './oceanSurface';
 import { StreamingMonitor } from './streaming';
-import { cameraState, descendTo, flyTo, groundHeight, resolveTargetHeight, type CameraTarget } from './camera';
+import { cameraState, descendTo, flyTo, groundHeight, resolveTargetHeight, terrainHeightAt, type CameraTarget } from './camera';
 import { ModeController, type ModeId, type TourKeyframe } from '@/modes/ModeController';
 import { AdapterRegistry } from '@/data/adapters/registry';
 import { readAdapterEnv } from '@/data/adapters/types';
@@ -37,10 +37,12 @@ import type { NearFieldTile } from '@/world/procedural/types';
 import { NearFieldWorld, type NearFieldStats } from '@/world/render';
 import { speciesById } from '@/world/procedural/species';
 import { LandmarkLayer } from '@/world/landmarks/LandmarkLayer';
+import { GameplayHost } from '@/gameplay/GameplayHost';
+import type { SpawnPoint } from '@/gameplay/types';
 import type { GeocodingAdapter } from '@/data/geocoding/types';
 
 declare global {
-  interface Window { __terra?: { ready: boolean; engine?: TerraEngine; state: () => unknown; goTo: (lat: number, lon: number, h: number, headingDeg?: number, pitchDeg?: number) => Promise<boolean>; setMode: (m: ModeId) => void } }
+  interface Window { __terra?: { ready: boolean; engine?: TerraEngine; state: () => unknown; goTo: (lat: number, lon: number, h: number, headingDeg?: number, pitchDeg?: number) => Promise<boolean>; setMode: (m: ModeId) => void; spawn: (s: SpawnPoint) => Promise<void>; interact: () => void; gameplay: () => unknown } }
 }
 
 const fetchJson = async (url: string): Promise<unknown> => {
@@ -69,6 +71,7 @@ export class TerraEngine {
   readonly procgen = new ProcgenClient();
   readonly nearField: NearFieldWorld | null;
   readonly landmarks: LandmarkLayer;
+  readonly gameplay: GameplayHost;
   naturalEarth: NaturalEarth | null = null;
   worldMap: WorldMap | null = null;
   gazetteer: OfflineGazetteer | null = null;
@@ -144,6 +147,7 @@ export class TerraEngine {
     if (!disabled.has('nominatim') && env.nominatimUrl) this.geocoders.push(new NominatimAdapter({ url: env.nominatimUrl }));
     this.weatherAdapter = env.enableLiveWeather && !disabled.has('open-meteo') ? new OpenMeteoAdapter() : null;
     useTerraStore.setState({ sources: this.registry.listSources() });
+    this.gameplay = new GameplayHost(this);
     // Cesium stops its render loop on any exception thrown during a frame. Most such errors are transient (one bad
     // primitive update), so restart the loop a bounded number of times and surface the stack in Diagnostics; only
     // a persistent failure is reported as fatal.
@@ -180,6 +184,9 @@ export class TerraEngine {
       state: () => ({ boot: useTerraStore.getState().boot, camera: cameraState(engine.viewer), streaming: useTerraStore.getState().streaming, location: useTerraStore.getState().location, dataFlags: useTerraStore.getState().dataFlags, diagnostics: useTerraStore.getState().diagnostics }),
       goTo: (lat, lon, h, headingDeg, pitchDeg) => engine.goTo({ lat, lon, heightM: h, headingDeg, pitchDeg }),
       setMode: (m) => engine.modes.setMode(m),
+      spawn: (s) => engine.gameplay.spawn(s),
+      interact: () => engine.gameplay.interact(),
+      gameplay: () => useTerraStore.getState().gameplay,
     };
     void engine.loadDataInBackground();
     return engine;
@@ -493,6 +500,11 @@ export class TerraEngine {
     return this.viewer.canvas.toDataURL('image/png');
   }
 
+  /** Terrain height above the ellipsoid, sampling the provider (level 12) with atlas/loaded-tile fallbacks. */
+  terrainHeight(lat: number, lon: number): Promise<number> {
+    return terrainHeightAt(this.viewer, lat, lon, (la, lo) => this.worldMap?.sample(la, lo).elevationM ?? null);
+  }
+
   groundHeightAt(lat: number, lon: number): number | null {
     return groundHeight(this.viewer, lat, lon);
   }
@@ -513,6 +525,7 @@ export class TerraEngine {
       case 'Digit4': this.modes.setMode('drive'); break;
       case 'Digit5': void this.startTour(null); break;
       case 'KeyV': this.modes.setView(this.modes.getState().view === 'first' ? 'third' : 'first'); break;
+      case 'KeyE': if (this.modes.getMode() !== 'fly') this.gameplay.interact(); break;
       case 'KeyH': ui.setUi({ hidden: !ui.ui.hidden }); break;
       case 'BracketRight': this.modes.setSpeed(this.modes.getSpeed() * 1.5); break;
       case 'BracketLeft': this.modes.setSpeed(this.modes.getSpeed() / 1.5); break;
@@ -529,6 +542,7 @@ export class TerraEngine {
 
   destroy(): void {
     this.destroyed = true;
+    this.gameplay.destroy();
     if (this.readoutTimer !== null) window.clearInterval(this.readoutTimer);
     this.modes.destroy();
     this.nearField?.destroy();

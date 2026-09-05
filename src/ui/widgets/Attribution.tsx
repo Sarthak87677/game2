@@ -12,6 +12,7 @@ export function Attribution() {
       {active.map((s) => <span key={s.id}>{s.attributionShort}</span>)}
       <span>Places: Natural Earth</span>
       <span>Engine: CesiumJS</span>
+      <span className="mono" title={`Built ${__TERRA_BUILD__.time}`}>build {__TERRA_BUILD__.commit}{__TERRA_BUILD__.dirty ? '+' : ''}</span>
       <span className="terra-attr-note">Vegetation, buildings without data, and weather are procedural/inferred — not surveyed.</span>
     </div>
   );

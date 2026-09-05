@@ -6,9 +6,10 @@ import type { WeatherState } from '@/engine/environment';
 import type { ModeState } from '@/modes/ModeController';
 import type { DataSourceInfo } from '@/data/adapters/types';
 import type { GeocodeResult } from '@/data/geocoding/types';
+import type { GameplayOverlay } from '@/gameplay/types';
 
 export type BootPhase = 'init' | 'viewer' | 'terrain' | 'data' | 'ready' | 'error';
-export type PanelId = 'none' | 'highlights' | 'settings' | 'sources' | 'diagnostics' | 'help' | 'timeweather';
+export type PanelId = 'none' | 'highlights' | 'settings' | 'sources' | 'diagnostics' | 'help' | 'timeweather' | 'play';
 
 export interface BootState { phase: BootPhase; progress: number; message: string; error: string | null; details: string[] }
 
@@ -31,6 +32,18 @@ export interface LocationReadout {
 }
 
 export interface DiagnosticEntry { time: string; level: 'error' | 'warn' | 'info'; message: string; stack?: string }
+
+export interface GameplayState {
+  /** Interaction highlighted near the player ("E — Enter Library"). */
+  prompt: { id: string; label: string } | null;
+  /** Modal choice card (tickets, seats, inspection cameras…). */
+  overlay: GameplayOverlay | null;
+  player: { spawned: boolean; spawnName: string | null; spawnId: string | null };
+  /** Free-form status line from the active journey/activity (e.g. "Aboard 12123 to Pune · next stop Lonavala"). */
+  status: string | null;
+  /** Vehicle instrument readout when driving a gameplay vehicle. */
+  vehicle: { name: string; speedKmh: number; headlights: boolean; indicator: 'off' | 'left' | 'right' | 'hazard'; gear: string } | null;
+}
 
 export interface Settings {
   locationAccess: boolean;
@@ -63,7 +76,9 @@ export interface TerraState {
   searchResults: GeocodeResult[];
   searchBusy: boolean;
   dataFlags: { naturalEarth: boolean; worldMap: boolean; worldMapElevation: boolean; gazetteer: boolean; osmOnline: boolean | null; weatherOnline: boolean | null };
+  gameplay: GameplayState;
   patch: (p: Partial<TerraState>) => void;
+  setGameplay: (p: Partial<GameplayState>) => void;
   setUi: (p: Partial<TerraState['ui']>) => void;
   setSettings: (p: Partial<Settings>) => void;
   log: (level: DiagnosticEntry['level'], message: string, error?: unknown) => void;
@@ -95,10 +110,12 @@ export const useTerraStore = create<TerraState>()((set) => ({
   diagnostics: [],
   settings: typeof localStorage !== 'undefined' ? loadSettings() : DEFAULT_SETTINGS,
   searchResults: [],
+  gameplay: { prompt: null, overlay: null, player: { spawned: false, spawnName: null, spawnId: null }, status: null, vehicle: null },
   searchBusy: false,
   dataFlags: { naturalEarth: false, worldMap: false, worldMapElevation: false, gazetteer: false, osmOnline: null, weatherOnline: null },
   patch: (p) => set(p),
   setUi: (p) => set((s) => ({ ui: { ...s.ui, ...p } })),
+  setGameplay: (p) => set((s) => ({ gameplay: { ...s.gameplay, ...p } })),
   setSettings: (p) => set((s) => {
     const settings = { ...s.settings, ...p };
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ }

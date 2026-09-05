@@ -18,8 +18,11 @@ import { HelpPanel } from './panels/HelpPanel';
 import { scaleBarMetres, formatMetres } from './format';
 import { ErrorToasts } from './widgets/ErrorToasts';
 import { ModeHint } from './widgets/ModeHint';
+import { InteractionPrompt } from './widgets/InteractionPrompt';
+import { GameplayOverlayCard } from './widgets/GameplayOverlayCard';
+import { PlayPanel } from './panels/PlayPanel';
 
-const PANEL_TITLES = { highlights: 'World Highlights', timeweather: 'Time & Weather', sources: 'Data sources & accuracy', settings: 'Settings & accessibility', diagnostics: 'Diagnostics', help: 'Controls & help', none: '' } as const;
+const PANEL_TITLES = { play: 'Play — Maharashtra', highlights: 'World Highlights', timeweather: 'Time & Weather', sources: 'Data sources & accuracy', settings: 'Settings & accessibility', diagnostics: 'Diagnostics', help: 'Controls & help', none: '' } as const;
 
 export function Hud() {
   const engine = useEngine();
@@ -71,6 +74,7 @@ export function Hud() {
       {ui.panel !== 'none' && (
         <aside className="terra-panel" role="dialog" aria-modal="false" aria-label={PANEL_TITLES[ui.panel]} ref={panelRef} onKeyDown={(e) => { if (e.key === 'Escape') setUi({ panel: 'none' }); }}>
           <header><h2>{PANEL_TITLES[ui.panel]}</h2><button onClick={() => setUi({ panel: 'none' })} aria-label="Close panel">×</button></header>
+          {ui.panel === 'play' && <PlayPanel />}
           {ui.panel === 'highlights' && <HighlightsPanel />}
           {ui.panel === 'timeweather' && <TimeWeatherPanel />}
           {ui.panel === 'sources' && <SourcesPanel />}
@@ -87,6 +91,8 @@ export function Hud() {
       </div>
       <TouchControls />
       <ModeHint />
+      <InteractionPrompt />
+      <GameplayOverlayCard />
       <ErrorToasts />
       <Attribution />
       <LoadingOverlay />

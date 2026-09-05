@@ -2,7 +2,24 @@ import { BoxGeometry, Cartesian3, Cartographic, Color, ColorGeometryInstanceAttr
 import { InputManager } from './input';
 import { flyTo, type CameraTarget } from '@/engine/camera';
 
-export type ModeId = 'orbit' | 'fly' | 'walk' | 'drive' | 'cinematic';
+export type ModeId = 'orbit' | 'fly' | 'walk' | 'drive' | 'cinematic' | 'passenger';
+
+/** Tunables of the ground vehicle currently being driven (set by the vehicle system when the player boards one). */
+export interface DriveParams {
+  /** Acceleration in m/s² at full throttle. */
+  accelMs2: number;
+  /** Top speed in m/s. */
+  maxSpeedMs: number;
+  /** Steering rate in rad/s at speed. */
+  turnRate: number;
+  /** Driver eye height above the ground in metres. */
+  eyeHeightM: number;
+  /** Third-person camera distance/height in metres. */
+  followBackM: number;
+  followUpM: number;
+}
+
+export const DEFAULT_DRIVE_PARAMS: DriveParams = { accelMs2: 5, maxSpeedMs: 45, turnRate: 1.4, eyeHeightM: 1.35, followBackM: 12, followUpM: 4.2 };
 export type CameraView = 'first' | 'third';
 
 export interface ModeState {
@@ -18,7 +35,6 @@ export interface ModeState {
 export interface TourKeyframe extends CameraTarget { durationS?: number }
 
 const EYE_HEIGHT_WALK = 1.7;
-const EYE_HEIGHT_DRIVE = 1.35;
 const GRAVITY = 9.81;
 
 /**
@@ -49,6 +65,24 @@ export class ModeController {
   onChange?: (s: ModeState) => void;
   /** Optional extra collision height sampler (e.g. buildings) returning height above ellipsoid or null. */
   extraHeightSampler: ((lat: number, lon: number) => number | null) | null = null;
+  /** Additional height samplers (vehicle decks, campus geometry…); the highest non-null answer wins. */
+  private readonly heightSamplers = new Set<(lat: number, lon: number) => number | null>();
+  /**
+   * When set (e.g. inside a building), this sampler REPLACES terrain and all other samplers wherever it answers, so floors,
+   * stairs and elevators define the walking surface. Return null to fall back to the normal world.
+   */
+  groundOverride: ((lat: number, lon: number) => number | null) | null = null;
+  /** Optional movement filter (wall collision): returns the allowed destination, or null to block the step entirely. */
+  moveFilter: ((from: { lat: number; lon: number }, to: { lat: number; lon: number }) => { lat: number; lon: number } | null) | null = null;
+  /** Called when the walker lands after a fall of more than a few metres (fall protection / respawn hooks). */
+  onFall?: (fallM: number) => void;
+  private fallStartHeight: number | null = null;
+  /** Ground vehicle tunables (defaults describe the built-in car). */
+  driveParams: DriveParams = { ...DEFAULT_DRIVE_PARAMS };
+  private customVehicle: Primitive | null = null;
+  /** Passenger pose (train, aircraft, ferry…): set every frame by a journey system while mode === 'passenger'. */
+  private passengerPose: { position: Cartesian3; headingRad: number } | null = null;
+  private lookOffset = 0;
 
   constructor(private viewer: Viewer, onCommand?: (code: string) => void) {
     this.input = new InputManager({ element: viewer.canvas, onCommand: (code) => { if (this.mode === 'cinematic' && code !== 'Escape') { /* handled by tour loop */ } onCommand?.(code); } });
@@ -77,18 +111,72 @@ export class ModeController {
     this.tour = null;
     this.mode = mode;
     ssc.enableInputs = mode === 'orbit';
-    this.input.pointerLockWanted = mode === 'fly' || mode === 'walk' || mode === 'drive';
+    this.input.pointerLockWanted = mode === 'fly' || mode === 'walk' || mode === 'drive' || mode === 'passenger';
     if (!this.input.pointerLockWanted) this.input.releasePointerLock();
     this.heading = this.viewer.camera.heading;
     this.pitch = this.viewer.camera.pitch;
     this.verticalVel = 0;
     this.driveSpeed = 0;
     if (mode === 'walk' || mode === 'drive') this.enterGround();
+    if (mode === 'passenger') { this.lookOffset = 0; this.pitch = Math.max(CMath.toRadians(-20), Math.min(CMath.toRadians(15), this.pitch)); }
     this.updateAvatars();
     this.emit();
   }
 
   getMode(): ModeId { return this.mode; }
+  getHeading(): number { return this.heading; }
+  setHeading(rad: number): void { this.heading = rad; }
+  getPitch(): number { return this.pitch; }
+
+  /** Registers an additional height sampler; returns a disposer. */
+  addHeightSampler(fn: (lat: number, lon: number) => number | null): () => void {
+    this.heightSamplers.add(fn);
+    return () => { this.heightSamplers.delete(fn); };
+  }
+
+  /** ECEF position of the walker/vehicle body (copy). */
+  bodyPosition(): Cartesian3 { return Cartesian3.clone(this.bodyPos); }
+
+  /** Moves the body by an ECEF delta (used to ride moving platforms such as ship decks). */
+  translateBody(delta: Cartesian3): void {
+    Cartesian3.add(this.bodyPos, delta, this.bodyPos);
+    const c = Cartographic.fromCartesian(this.bodyPos);
+    this.lastGround = c.height - this.bodyHeightAgl;
+  }
+
+  /**
+   * Places the body at a lat/lon on the ground (spawn, teleport, leaving a vehicle or a building). Uses the loaded
+   * terrain plus samplers; when nothing has streamed yet the optional heightM is used, else the previous height.
+   */
+  setBody(lat: number, lon: number, headingDeg?: number, heightM?: number): void {
+    const carto = Cartographic.fromDegrees(lon, lat);
+    const g = this.groundAt(carto) ?? heightM ?? this.lastGround ?? Cartographic.fromCartesian(this.bodyPos).height;
+    this.lastGround = g;
+    this.bodyHeightAgl = 0;
+    this.verticalVel = 0;
+    this.fallStartHeight = null;
+    this.bodyPos = Cartesian3.fromDegrees(lon, lat, g);
+    if (headingDeg !== undefined) this.heading = CMath.toRadians(headingDeg);
+    if (this.mode === 'walk' || this.mode === 'drive') this.updateGround({ moveX: 0, moveY: 0, moveZ: 0, lookDx: 0, lookDy: 0, sprint: false, jump: false, brake: false, keys: new Set() }, 0);
+  }
+
+  /** Replaces the built-in car body with a vehicle primitive (null restores the default). Ownership stays with the caller. */
+  setVehicleBody(primitive: Primitive | null): void {
+    if (this.customVehicle && this.customVehicle !== primitive) this.customVehicle.show = false;
+    this.customVehicle = primitive;
+    this.updateAvatars();
+  }
+
+  /** Sets the camera pose for passenger mode (called each frame by train/aircraft/boat journeys). */
+  setPassengerPose(position: Cartesian3, headingRad: number): void {
+    this.passengerPose = { position: Cartesian3.clone(position, this.passengerPose?.position), headingRad };
+    if (this.mode === 'passenger') this.applyPassengerCamera();
+  }
+
+  private applyPassengerCamera(): void {
+    if (!this.passengerPose) return;
+    this.viewer.camera.setView({ destination: this.passengerPose.position, orientation: { heading: this.passengerPose.headingRad + this.lookOffset, pitch: this.pitch, roll: 0 } });
+  }
 
   /** Start a cinematic tour; null → auto orbit around the current view target. */
   async startTour(keyframes: TourKeyframe[] | null): Promise<void> {
@@ -125,7 +213,7 @@ export class ModeController {
     const cam = this.viewer.camera.positionCartographic;
     const ground = this.viewer.scene.globe.getHeight(cam);
     this.lastGround = ground ?? null;
-    const eye = this.mode === 'drive' ? EYE_HEIGHT_DRIVE : EYE_HEIGHT_WALK;
+    const eye = this.mode === 'drive' ? this.driveParams.eyeHeightM : EYE_HEIGHT_WALK;
     const h = ground !== undefined ? ground + eye : Math.min(cam.height, (ground ?? 0) + eye + 50);
     this.bodyPos = Cartesian3.fromRadians(cam.longitude, cam.latitude, h);
     this.bodyHeightAgl = h - (ground ?? h);
@@ -151,7 +239,8 @@ export class ModeController {
       const cabin = new GeometryInstance({ geometry: BoxGeometry.fromDimensions({ dimensions: new Cartesian3(2.2, 1.7, 0.65), vertexFormat: VertexFormat.POSITION_AND_NORMAL }), modelMatrix: Matrix4.fromTranslation(new Cartesian3(-0.3, 0, 1.2)), attributes: { color: ColorGeometryInstanceAttribute.fromColor(Color.fromCssColorString('#2b2f36')) } });
       this.vehicle = this.viewer.scene.primitives.add(new Primitive({ geometryInstances: [chassis, cabin], appearance: new PerInstanceColorAppearance({ translucent: false, closed: true }), asynchronous: false, shadows: ShadowMode.ENABLED, allowPicking: false }));
     }
-    if (this.vehicle) this.vehicle.show = showCar;
+    if (this.vehicle) this.vehicle.show = showCar && !this.customVehicle;
+    if (this.customVehicle) this.customVehicle.show = this.mode === 'drive';
   }
 
   private update(time: JulianDate): void {
@@ -162,6 +251,14 @@ export class ModeController {
     if (this.mode === 'orbit' || this.mode === 'cinematic') return;
     const frame = this.input.poll();
     const lookSens = 0.0025;
+    if (this.mode === 'passenger') {
+      // Free look from a seat/window: the journey owns the position and base heading.
+      this.lookOffset = Math.max(-2.6, Math.min(2.6, this.lookOffset + frame.lookDx * lookSens));
+      this.pitch = Math.max(CMath.toRadians(-60), Math.min(CMath.toRadians(60), this.pitch - frame.lookDy * lookSens));
+      this.applyPassengerCamera();
+      this.emit();
+      return;
+    }
     this.heading = (this.heading + frame.lookDx * lookSens) % (Math.PI * 2);
     this.pitch = Math.max(CMath.toRadians(-89), Math.min(CMath.toRadians(89), this.pitch - frame.lookDy * lookSens));
     if (this.mode === 'fly') this.updateFly(frame, dt);
@@ -201,10 +298,19 @@ export class ModeController {
   }
 
   private groundAt(carto: Cartographic): number | null {
+    const lat = CMath.toDegrees(carto.latitude), lon = CMath.toDegrees(carto.longitude);
+    if (this.groundOverride) {
+      const o = this.groundOverride(lat, lon);
+      if (o !== null) return o;
+    }
     const g = this.viewer.scene.globe.getHeight(carto);
     let h = g === undefined ? null : g;
     if (this.extraHeightSampler) {
-      const extra = this.extraHeightSampler(CMath.toDegrees(carto.latitude), CMath.toDegrees(carto.longitude));
+      const extra = this.extraHeightSampler(lat, lon);
+      if (extra !== null && (h === null || extra > h)) h = extra;
+    }
+    for (const fn of this.heightSamplers) {
+      const extra = fn(lat, lon);
       if (extra !== null && (h === null || extra > h)) h = extra;
     }
     return h;
@@ -213,7 +319,7 @@ export class ModeController {
   private updateGround(frame: ReturnType<InputManager['poll']>, dt: number): void {
     const camera = this.viewer.camera;
     const isDrive = this.mode === 'drive';
-    const eye = isDrive ? EYE_HEIGHT_DRIVE : EYE_HEIGHT_WALK;
+    const eye = isDrive ? this.driveParams.eyeHeightM : EYE_HEIGHT_WALK;
     const carto = Cartographic.fromCartesian(this.bodyPos);
     const ground = this.groundAt(carto);
     if (ground !== null) this.lastGround = ground;
@@ -224,15 +330,15 @@ export class ModeController {
     const right = Cartesian3.add(Cartesian3.multiplyByScalar(east, cosH, new Cartesian3()), Cartesian3.multiplyByScalar(north, -sinH, new Cartesian3()), new Cartesian3());
     const move = new Cartesian3();
     if (isDrive) {
-      const accel = 5 * this.speed;
-      const maxSpeed = 45 * this.speed;
+      const accel = this.driveParams.accelMs2 * this.speed;
+      const maxSpeed = this.driveParams.maxSpeedMs * this.speed;
       if (frame.moveY > 0) this.driveSpeed += accel * dt * frame.moveY;
       else if (frame.moveY < 0) this.driveSpeed -= (this.driveSpeed > 0 ? accel * 2 : accel * 0.6) * dt;
       else this.driveSpeed *= Math.max(0, 1 - 0.45 * dt);
       if (frame.brake) this.driveSpeed *= Math.max(0, 1 - 4 * dt);
       this.driveSpeed = Math.max(-maxSpeed * 0.3, Math.min(maxSpeed, this.driveSpeed));
       // Steering: turn rate scales with speed; heading also follows mouse look for camera aiming.
-      const steer = frame.moveX * Math.min(1, Math.abs(this.driveSpeed) / 6) * 1.4 * (this.driveSpeed < 0 ? -1 : 1);
+      const steer = frame.moveX * Math.min(1, Math.abs(this.driveSpeed) / 6) * this.driveParams.turnRate * (this.driveSpeed < 0 ? -1 : 1);
       this.heading = (this.heading + steer * dt) % (Math.PI * 2);
       Cartesian3.add(move, Cartesian3.multiplyByScalar(forward, this.driveSpeed * dt, new Cartesian3()), move);
     } else {
@@ -244,9 +350,18 @@ export class ModeController {
     // Gravity and terrain collision.
     this.verticalVel -= GRAVITY * dt;
     this.bodyHeightAgl += this.verticalVel * dt;
-    if (this.bodyHeightAgl <= 0) { this.bodyHeightAgl = 0; this.verticalVel = 0; this.onGround = true; } else this.onGround = false;
-    const next = Cartesian3.add(this.bodyPos, move, new Cartesian3());
-    const nextCarto = Cartographic.fromCartesian(next);
+    if (this.verticalVel < -1 && this.fallStartHeight === null) this.fallStartHeight = g + this.bodyHeightAgl;
+    if (this.bodyHeightAgl <= 0) {
+      this.bodyHeightAgl = 0; this.verticalVel = 0; this.onGround = true;
+      if (this.fallStartHeight !== null) { const fall = this.fallStartHeight - g; this.fallStartHeight = null; if (fall > 4) this.onFall?.(fall); }
+    } else this.onGround = false;
+    let next = Cartesian3.add(this.bodyPos, move, new Cartesian3());
+    let nextCarto = Cartographic.fromCartesian(next);
+    if (this.moveFilter && Cartesian3.magnitude(move) > 0) {
+      const filtered = this.moveFilter({ lat: CMath.toDegrees(carto.latitude), lon: CMath.toDegrees(carto.longitude) }, { lat: CMath.toDegrees(nextCarto.latitude), lon: CMath.toDegrees(nextCarto.longitude) });
+      if (!filtered) { next = Cartesian3.clone(this.bodyPos); nextCarto = Cartographic.fromCartesian(next); if (isDrive) this.driveSpeed *= 0.2; }
+      else { nextCarto = Cartographic.fromDegrees(filtered.lon, filtered.lat, nextCarto.height); next = Cartesian3.fromRadians(nextCarto.longitude, nextCarto.latitude, nextCarto.height); }
+    }
     const nextGround = this.groundAt(nextCarto) ?? g;
     // Block walking up walls steeper than ~60° (buildings) — keep the previous position.
     const rise = nextGround - g;
@@ -263,8 +378,8 @@ export class ModeController {
     if (this.view === 'first') {
       camera.setView({ destination: Cartesian3.fromRadians(bodyCarto.longitude, bodyCarto.latitude, bodyCarto.height + eye), orientation: { heading: this.heading, pitch: this.pitch, roll: 0 } });
     } else {
-      const back = isDrive ? 12 : 7.5;
-      const upOff = isDrive ? 4.2 : 3;
+      const back = isDrive ? this.driveParams.followBackM : 7.5;
+      const upOff = isDrive ? this.driveParams.followUpM : 3;
       const f = this.frameVectors(this.bodyPos);
       const fwd = Cartesian3.add(Cartesian3.multiplyByScalar(f.east, sinH, new Cartesian3()), Cartesian3.multiplyByScalar(f.north, cosH, new Cartesian3()), new Cartesian3());
       const camPos = Cartesian3.add(this.bodyPos, Cartesian3.multiplyByScalar(fwd, -back, new Cartesian3()), new Cartesian3());
@@ -274,7 +389,7 @@ export class ModeController {
       if (camGround !== null && camCarto.height < camGround + 1.2) Cartesian3.fromRadians(camCarto.longitude, camCarto.latitude, camGround + 1.2, undefined, camPos);
       camera.setView({ destination: camPos, orientation: { heading: this.heading, pitch: Math.min(this.pitch, CMath.toRadians(-8)), roll: 0 } });
     }
-    const body = isDrive ? this.vehicle : this.avatar;
+    const body = isDrive ? (this.customVehicle ?? this.vehicle) : this.avatar;
     if (body && body.show) {
       // Cesium's heading is measured from north; the box/cylinder frames point +x east, so rotate by heading − 90°.
       const hpr = new HeadingPitchRoll(this.heading - Math.PI / 2, 0, 0);

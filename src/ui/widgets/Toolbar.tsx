@@ -44,6 +44,7 @@ export function Toolbar() {
         </div>
       )}
       <div className="terra-toolgroup">
+        <button className={`terra-play-btn ${ui.panel === 'play' ? 'active' : ''}`} onClick={() => toggle('play')} title="Spawn as a player in Maharashtra">Play</button>
         <button className={ui.panel === 'highlights' ? 'active' : ''} onClick={() => toggle('highlights')}>World Highlights</button>
         <button className={ui.panel === 'timeweather' ? 'active' : ''} onClick={() => toggle('timeweather')}>Time & Weather</button>
         <button className={ui.panel === 'sources' ? 'active' : ''} onClick={() => toggle('sources')}>Data</button>

@@ -1,4 +1,5 @@
 import { defineConfig, type Plugin } from 'vite';
+import { execSync } from 'node:child_process';
 import react from '@vitejs/plugin-react';
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -66,7 +67,13 @@ function fixtures(): Plugin {
   };
 }
 
+function buildStamp(): { commit: string; time: string; dirty: boolean } {
+  const run = (cmd: string) => { try { return execSync(cmd, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return ''; } };
+  return { commit: run('git rev-parse --short HEAD') || 'unknown', time: new Date().toISOString(), dirty: run('git status --porcelain --untracked-files=no').length > 0 };
+}
+
 export default defineConfig({
+  define: { __TERRA_BUILD__: JSON.stringify(buildStamp()) },
   plugins: [react(), cesiumStatic(), fixtures()],
   resolve: { alias: { '@': path.join(rootDir, 'src') } },
   server: { headers: { 'Cross-Origin-Opener-Policy': 'same-origin' } },
