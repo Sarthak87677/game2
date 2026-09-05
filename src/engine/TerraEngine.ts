@@ -13,7 +13,7 @@ import { NaturalEarth } from '@/data/naturalEarth';
 import { sharedTileCache } from '@/data/cache/tileCache';
 import { buildWorldMap } from '@/world/worldMapBuilder';
 import type { WorldMap } from '@/world/worldMap';
-import { BIOME_INFO } from '@/world/climate/biome';
+import { BIOME_INFO, type Biome } from '@/world/climate/biome';
 import { seasonFor } from '@/world/climate/season';
 import { OfflineGazetteer } from '@/data/geocoding/offlineIndex';
 import { parseCoordinates } from '@/data/geocoding/parseCoordinates';
@@ -40,7 +40,7 @@ import { LandmarkLayer } from '@/world/landmarks/LandmarkLayer';
 import type { GeocodingAdapter } from '@/data/geocoding/types';
 
 declare global {
-  interface Window { __terra?: { ready: boolean; engine?: TerraEngine; state: () => unknown; goTo: (lat: number, lon: number, h: number) => Promise<boolean>; setMode: (m: ModeId) => void } }
+  interface Window { __terra?: { ready: boolean; engine?: TerraEngine; state: () => unknown; goTo: (lat: number, lon: number, h: number, headingDeg?: number, pitchDeg?: number) => Promise<boolean>; setMode: (m: ModeId) => void } }
 }
 
 const fetchJson = async (url: string): Promise<unknown> => {
@@ -96,7 +96,13 @@ export class TerraEngine {
     this.modes = new ModeController(this.viewer, (code) => this.onCommand(code));
     this.modes.onChange = (s) => useTerraStore.setState({ mode: s });
     let ground: GroundMaterialHandle | null = null;
-    try { ground = installGroundMaterial(this.viewer); } catch (e) { store.log('warn', `Ground material unavailable: ${String(e)}`); }
+    try { ground = installGroundMaterial(this.viewer); } catch (e) {
+      store.log('warn', `Ground material unavailable: ${String(e)}`);
+      // Fall back to Cesium's built-in day/night shading at every distance.
+      this.viewer.scene.globe.enableLighting = true;
+      this.viewer.scene.globe.lightingFadeOutDistance = 1;
+      this.viewer.scene.globe.lightingFadeInDistance = 2;
+    }
     this.ground = ground;
     this.ocean = new OceanSurface(this.viewer);
     this.environment.onWeatherApplied = (u) => {
@@ -161,7 +167,7 @@ export class TerraEngine {
       ready: false,
       engine,
       state: () => ({ boot: useTerraStore.getState().boot, camera: cameraState(engine.viewer), streaming: useTerraStore.getState().streaming, location: useTerraStore.getState().location, dataFlags: useTerraStore.getState().dataFlags, diagnostics: useTerraStore.getState().diagnostics }),
-      goTo: (lat, lon, h) => engine.goTo({ lat, lon, heightM: h }),
+      goTo: (lat, lon, h, headingDeg, pitchDeg) => engine.goTo({ lat, lon, heightM: h, headingDeg, pitchDeg }),
       setMode: (m) => engine.modes.setMode(m),
     };
     void engine.loadDataInBackground();
@@ -359,7 +365,9 @@ export class TerraEngine {
     const sample = this.worldMap?.sample(lat, lon, surfaceInfo ? surfaceInfo.kind !== 'ocean' : false) ?? null;
     const place = this.gazetteer?.describeLocation(lat, lon) ?? `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
     const season = seasonFor(date, lat);
-    const biome = sample?.biome ?? 'ocean';
+    const vectorKind = surfaceInfo?.kind;
+    // Natural Earth's glaciated areas include valley glaciers around inhabited alpine valleys; only polar ice is an ice sheet.
+    const biome: Biome = vectorKind === 'ocean' ? 'ocean' : vectorKind === 'lake' ? 'lake' : vectorKind === 'glacier' ? (Math.abs(lat) >= 60 ? 'ice_sheet' : 'alpine') : sample?.biome ?? 'ocean';
     const month = date.getUTCMonth();
     const sunEl = this.environment.sunElevationDeg(lat, lon);
     const localHours = ((date.getUTCHours() + date.getUTCMinutes() / 60 + lon / 15) % 24 + 24) % 24;
@@ -443,6 +451,7 @@ export class TerraEngine {
     if (!this.worldMap || !this.procgen.available) return null;
     const ctx = await buildGenerationContext({
       worldMap: () => this.worldMap,
+      naturalEarth: () => this.naturalEarth,
       osm: () => this.osm,
       gazetteer: () => this.gazetteer,
       heightFields: this.heightFields,

@@ -39,7 +39,9 @@ export function createViewer(opts: CreateViewerOptions): Viewer {
   const scene = viewer.scene;
   scene.globe.baseColor = Color.fromCssColorString('#20344f');
   scene.globe.showGroundAtmosphere = true;
-  scene.globe.enableLighting = true;
+  // Day/night and slope shading are done by the ground material (see groundMaterial.ts); Cesium's own globe lighting
+  // only acts beyond 10 000 km and needs vertex normals, so it stays off to avoid double darkening.
+  scene.globe.enableLighting = false;
   scene.globe.depthTestAgainstTerrain = true;
   scene.globe.preloadSiblings = true;
   scene.globe.preloadAncestors = true;

@@ -23,12 +23,33 @@ float terraNoise(vec2 p) {
 }
 float terraFbm(vec2 p) { float s = 0.0; float a = 0.5; for (int k = 0; k < 4; k++) { s += a * terraNoise(p); p = p * 2.03 + 11.7; a *= 0.5; } return s; }
 
+/*
+ * Lighting lives here rather than in Cesium's globe pass: Cesium only applies day/night shading to the globe when
+ * the camera is more than lightingFadeOutDistance (10 000 km) away, and heightmap terrain carries no vertex normals,
+ * so slopes would never shade. Screen-space derivatives give a per-triangle geometric normal at every distance.
+ */
 czm_material czm_getMaterial(czm_materialInput materialInput) {
   czm_material material = czm_getDefaultMaterial(materialInput);
   vec3 positionEC = -materialInput.positionToEyeEC;
   float dist = length(positionEC);
-  float alpha = (1.0 - smoothstep(fadeNear, fadeFar, dist)) * detailStrength;
-  if (alpha <= 0.002) { material.alpha = 0.0; return material; }
+  float detail = (1.0 - smoothstep(fadeNear, fadeFar, dist)) * detailStrength;
+  vec3 toEye = normalize(materialInput.positionToEyeEC);
+  vec3 nFace = normalize(cross(dFdx(positionEC), dFdy(positionEC)));
+  if (dot(nFace, toEye) < 0.0) nFace = -nFace;
+  vec3 nEll = normalize(materialInput.normalEC);
+  // Far away the facets of a coarse mesh flicker; blend toward the ellipsoid normal beyond ~300 km.
+  nFace = normalize(mix(nFace, nEll, smoothstep(150000.0, 600000.0, dist)));
+  float sunUp = dot(nEll, czm_lightDirectionEC);
+  float daylight = smoothstep(-0.10, 0.12, sunUp);
+  float lambert = max(dot(nFace, czm_lightDirectionEC), 0.0);
+  float shading = mix(0.045, 1.0, daylight) * mix(1.0, 0.32 + 0.68 * lambert, daylight);
+  if (detail <= 0.002) {
+    // Detail faded out: darken whatever imagery is underneath by the shading factor (black overlay).
+    material.diffuse = vec3(0.0);
+    material.alpha = 1.0 - shading;
+    return material;
+  }
+  float slopeFace = acos(clamp(dot(nFace, nEll), 0.0, 1.0));
   vec3 p = (czm_inverseView * vec4(positionEC, 1.0)).xyz;
   vec3 n = normalize(p);
   float lat = asin(clamp(n.z, -1.0, 1.0));
@@ -51,7 +72,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
   float mixv = clamp(n1 * 0.55 + n2 * 0.35 + n3 * 0.1, 0.0, 1.0);
   vec3 color = mix(base, second, mixv);
   color *= 0.9 + 0.2 * n2;
-  float slope = materialInput.slope;
+  float slope = max(materialInput.slope, slopeFace);
   float height = materialInput.height;
   float rockAmount = smoothstep(0.5, 0.95, slope) + smoothstep(2300.0, 3900.0, height) * 0.55;
   color = mix(color, rock * (0.8 + 0.35 * n2), clamp(rockAmount, 0.0, 1.0));
@@ -64,18 +85,18 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
   color = mix(color, snowShaded, clamp(snowAmount, 0.0, 1.0));
   color = mix(color, color * vec3(1.05, 0.9, 0.7), clamp(seasonTint, 0.0, 1.0) * (1.0 - snowAmount));
   color *= 1.0 - 0.35 * wetness * (1.0 - snowAmount);
-  bool water = surf < 0.5 || (surf > 1.5 && surf < 2.5);
-  if (water && height < 0.5) {
+  // Ocean cells count as water only where the terrain is at or below sea level (coastal land inside a coarse
+  // ocean cell keeps the land palette); lakes are water at any elevation.
+  bool water = (surf < 0.5 && height < 0.5) || (surf > 1.5 && surf < 2.5);
+  if (water) {
     float depth = max(0.0, -height);
     vec3 shallow = vec3(0.13, 0.42, 0.47);
     vec3 deep = vec3(0.015, 0.07, 0.17);
     vec3 wcol = mix(shallow, deep, clamp(depth / 70.0, 0.0, 1.0));
     float w = terraNoise(q * 0.45 + vec2(timeSec * 0.35, timeSec * 0.2)) * 0.5 + terraNoise(q * 1.6 - vec2(timeSec * 0.55, timeSec * 0.1)) * 0.5;
     wcol += (w - 0.5) * 0.06;
-    vec3 nEC = normalize(materialInput.normalEC);
-    vec3 toEye = normalize(materialInput.positionToEyeEC);
     vec3 h = normalize(toEye + czm_lightDirectionEC);
-    float spec = pow(max(dot(nEC, h), 0.0), 80.0) * (0.5 + w);
+    float spec = pow(max(dot(nEll, h), 0.0), 80.0) * (0.5 + w) * daylight;
     wcol += spec * vec3(0.9, 0.95, 1.0) * 0.6;
     color = wcol;
   }
@@ -85,7 +106,10 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
     float shadow = smoothstep(0.62 - cloudCover * 0.35, 0.78, cs) * cloudCover * 0.45;
     color *= 1.0 - shadow;
   }
-  material.diffuse = color;
+  // Blend so that the result equals shading * mix(imagery, color, detail) without knowing the imagery colour:
+  // alpha = detail + (1 - detail) * (1 - shading); diffuse = color * detail * shading / alpha.
+  float alpha = detail + (1.0 - detail) * (1.0 - shading);
+  material.diffuse = alpha > 0.0001 ? color * detail * shading / alpha : vec3(0.0);
   material.alpha = alpha;
   return material;
 }

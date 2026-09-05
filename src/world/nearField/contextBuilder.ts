@@ -1,4 +1,5 @@
 import type { WorldMap } from '@/world/worldMap';
+import type { NaturalEarth } from '@/data/naturalEarth';
 import type { OsmLayer } from '@/world/osm/OsmLayer';
 import type { OfflineGazetteer } from '@/data/geocoding/offlineIndex';
 import { tileBounds, haversineM } from '@/util/geo';
@@ -7,6 +8,8 @@ import type { HeightFieldSource } from './heightField';
 
 export interface ContextBuilderDeps {
   worldMap: () => WorldMap | null;
+  /** Vector coastline/lake/glacier lookup (more precise than the 39 km raster) — optional. */
+  naturalEarth?: () => NaturalEarth | null;
   osm: () => OsmLayer | null;
   gazetteer: () => OfflineGazetteer | null;
   heightFields: HeightFieldSource;
@@ -40,7 +43,9 @@ export async function buildGenerationContext(deps: ContextBuilderDeps, z: number
   const b = tileBounds(x, y, z);
   const lat = (b.north + b.south) / 2;
   const lon = (b.east + b.west) / 2;
-  const sample = wm.sample(lat, lon);
+  const sample = wm.sample(lat, lon, true);
+  const vector = deps.naturalEarth?.()?.surfaceAt(lat, lon) ?? null;
+  const surface = vector ? vector.kind : sample.surface;
   const heightField = await deps.heightFields.forTile(z, x, y);
   const osmLayer = deps.osm();
   const osm = osmLayer?.tileFor(lat, lon) ?? null;
@@ -57,7 +62,7 @@ export async function buildGenerationContext(deps: ContextBuilderDeps, z: number
     monthlyTempC: sample.monthlyTempC,
     monthlyPrecipMm: sample.monthlyPrecipMm,
     distCoastKm: sample.distCoastKm,
-    surface: sample.surface,
+    surface,
     heightField,
     osm,
     urbanDensity,

@@ -195,8 +195,31 @@ self.onmessage = async (ev: MessageEvent<WorldMapBuildRequest>) => {
         annualPrecip[i] = Math.max(0, Math.min(65535, Math.round(pSum)));
       }
     }
-    const data: WorldMapData = { width, height, surface, elevation, biome, koppen, annualTemp, annualPrecip, distCoast, monthlyTemp, monthlyPrecip, hasElevation: elevationFetched !== null, buildMs: performance.now() - t0 };
-    post({ data }, [surface.buffer, elevation.buffer, biome.buffer, koppen.buffer, annualTemp.buffer, annualPrecip.buffer, distCoast.buffer, monthlyTemp.buffer, monthlyPrecip.buffer]);
+    // Coastal fill: ocean cells touching land inherit the neighbouring land biome/climate so that coastal cities,
+    // beaches and islands smaller than a cell (39 km) are not painted as open sea at ground level. The surface class
+    // stays 'ocean' so the base map and HUD still know where the vector coastline says water is.
+    post({ progress: 'filling coastal cells' });
+    const filledBiome = new Uint8Array(biome);
+    const filledKoppen = new Uint8Array(koppen);
+    const filledTemp = new Int8Array(annualTemp);
+    const filledPrecip = new Uint16Array(annualPrecip);
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+      const i = y * width + x;
+      if (surface[i] !== SURFACE_OCEAN) continue;
+      let src = -1;
+      for (let dy = -1; dy <= 1 && src < 0; dy++) {
+        const yy = y + dy;
+        if (yy < 0 || yy >= height) continue;
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          const j = yy * width + ((x + dx + width) % width);
+          if (surface[j] !== SURFACE_OCEAN && surface[j] !== SURFACE_LAKE) { src = j; break; }
+        }
+      }
+      if (src >= 0) { filledBiome[i] = biome[src]; filledKoppen[i] = koppen[src]; filledTemp[i] = annualTemp[src]; filledPrecip[i] = annualPrecip[src]; }
+    }
+    const data: WorldMapData = { width, height, surface, elevation, biome: filledBiome, koppen: filledKoppen, annualTemp: filledTemp, annualPrecip: filledPrecip, distCoast, monthlyTemp, monthlyPrecip, hasElevation: elevationFetched !== null, buildMs: performance.now() - t0 };
+    post({ data }, [surface.buffer, elevation.buffer, filledBiome.buffer, filledKoppen.buffer, filledTemp.buffer, filledPrecip.buffer, distCoast.buffer, monthlyTemp.buffer, monthlyPrecip.buffer]);
   } catch (e) {
     post({ error: e instanceof Error ? e.message : String(e) });
   }

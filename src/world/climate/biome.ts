@@ -60,6 +60,9 @@ export function classifyBiome(i: BiomeInput): Biome {
     return 'steppe';
   }
   if (g === 'C') {
+    // Hot winter-dry subtropics (Indo-Gangetic plain, Sahel margins, southern China lowlands) carry tropical dry
+    // deciduous forest or savanna, not temperate broadleaf forest, whatever the latitude.
+    if (k[1] === 'w' && i.annualMeanTempC > 18) return i.annualPrecipMm > 1000 ? 'tropical_seasonal_forest' : 'savanna';
     // Tropical highlands (East African plateau, Deccan, Andean valleys) classify as C* but carry tropical vegetation.
     if (Math.abs(i.lat) < 23.5 && i.annualMeanTempC > 12) {
       if (k[1] === 's') return 'mediterranean';

@@ -54,7 +54,9 @@ export class LandmarkLayer {
       const d = haversineM(lat, lon, m.lat, m.lon);
       const key = m.name;
       if (d <= radius) {
-        if (!this.placed.has(key)) this.place(m);
+        // Placement waits for a terrain height: Cesium bakes an instance's model matrix into world coordinates, so
+        // a primitive cannot be moved afterwards — it is rebuilt instead when detailed terrain changes the base.
+        if (!this.placed.has(key)) { if (this.groundAt(m) !== null) this.place(m); }
         else this.reanchor(this.placed.get(key)!);
       } else if (this.placed.has(key)) {
         this.unload(key);
@@ -76,7 +78,7 @@ export class LandmarkLayer {
   }
 
   private place(m: LandmarkModel): void {
-    if (!this.appearances) this.appearances = createVegetationAppearances(null);
+    if (!this.appearances) { this.appearances = createVegetationAppearances(null); this.appearances.setWind(0, 0, 1, 0); }
     const ground = this.groundAt(m);
     const mesh = buildLandmark(m.archetype, m.heightM, m.footprintM, m.colour, fnv1a(m.name));
     const collection = new PrimitiveCollection();
@@ -101,14 +103,12 @@ export class LandmarkLayer {
     }));
   }
 
-  /** Once detailed terrain arrives the base height can differ by tens of metres; rebuild the model matrix. */
+  /** Once detailed terrain arrives the base height can differ by tens of metres; rebuild the primitive there. */
   private reanchor(p: Placed): void {
     const ground = this.groundAt(p.model);
     if (ground === null || (p.anchoredHeight !== null && Math.abs(ground - p.anchoredHeight) < 0.5)) return;
-    p.primitive.modelMatrix = this.modelMatrix(p.model, ground);
-    p.anchoredHeight = ground;
-    const label = this.labelIds.get(p.model.name);
-    if (label) label.position = Cartesian3.fromDegrees(p.model.lon, p.model.lat, ground + p.model.heightM + 12);
+    this.unload(p.model.name);
+    this.place(p.model);
   }
 
   private unload(key: string): void {

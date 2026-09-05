@@ -19,6 +19,8 @@ describe('biome classification', () => {
     expect(['steppe', 'cold_desert', 'temperate_grassland']).toContain(biomeAt(46, 105, 1300, 1500)); // Mongolia
     expect(['savanna', 'tropical_seasonal_forest']).toContain(biomeAt(-2.3, 34.8, 1500, 700)); // Serengeti
     expect(['hot_desert', 'steppe', 'savanna']).toContain(biomeAt(25.2, 55.27, 5, 3)); // Dubai
+    expect(['savanna', 'steppe', 'tropical_seasonal_forest']).toContain(biomeAt(30.75, 75.6, 250, 900)); // Punjab plains
+    expect(['savanna', 'steppe', 'tropical_seasonal_forest', 'hot_desert']).toContain(biomeAt(28.6, 77.2, 220, 900)); // Delhi
   });
   it('water and glacier hints override climate', () => {
     expect(classifyBiome({ koppen: 'Af', elevationM: 0, annualPrecipMm: 2000, annualMeanTempC: 27, lat: 0, isWater: true })).toBe('ocean');
