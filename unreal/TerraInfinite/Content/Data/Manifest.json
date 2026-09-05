@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/export-unreal-data.mjs",
+  "sourceEntry": "src/data/maharashtra/index.ts",
+  "dataNote": "Exported from src/data/maharashtra by scripts/export-unreal-data.mjs. Coordinates are approximate public reference values (not surveyed); campuses, interiors, landmark bodies, timetables and tickets are procedural / fictional and must be labelled as such in the UI.",
+  "tables": [
+    {
+      "file": "Spawns.json",
+      "rowStruct": "FTerraSpawnRow",
+      "sourceType": "SpawnPoint[]",
+      "sourceExports": [
+        "MAHARASHTRA_SPAWNS"
+      ],
+      "rows": 10,
+      "status": "exported"
+    },
+    {
+      "file": "Destinations.json",
+      "rowStruct": "FTerraDestinationRow",
+      "sourceType": "Destination[]",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    },
+    {
+      "file": "Stations.json",
+      "rowStruct": "FTerraStationRow",
+      "sourceType": "Station[]",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    },
+    {
+      "file": "RailCorridors.json",
+      "rowStruct": "FTerraRailCorridorRow",
+      "sourceType": "RailCorridor[]",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    },
+    {
+      "file": "Airports.json",
+      "rowStruct": "FTerraAirportRow",
+      "sourceType": "Airport[]",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    },
+    {
+      "file": "Ports.json",
+      "rowStruct": "FTerraPortRow",
+      "sourceType": "Port[]",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    },
+    {
+      "file": "WaterRoutes.json",
+      "rowStruct": "FTerraWaterRouteRow",
+      "sourceType": "WaterRoute[]",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    },
+    {
+      "file": "Campuses.json",
+      "rowStruct": "FTerraCampusRow",
+      "sourceType": "campus spec (export name /campus/i)",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    },
+    {
+      "file": "CampusBuildings.json",
+      "rowStruct": "FTerraCampusBuildingRow",
+      "sourceType": "campus spec buildings[]",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    },
+    {
+      "file": "InteriorGrammar.json",
+      "rowStruct": "FTerraInteriorGrammarRow",
+      "sourceType": "interior grammar (export name /grammar/i)",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    }
+  ]
+}
