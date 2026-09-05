@@ -74,6 +74,10 @@ Copy `.env.example` to `.env`. All keys are optional:
 
 Secrets never go into source control; `.env` is git-ignored.
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs typecheck, lint, unit tests, the production build and the Playwright suite (with the synthetic OSM fixture and software WebGL) on every push and pull request, and uploads the screenshots and `dist/` as artifacts.
+
 ## Deployment
 
 `npm run build` produces a static site in `dist/` (about 17 MB including Cesium engine assets and derived Natural Earth data). Serve it from any static host (Netlify, Vercel, GitHub Pages, S3+CloudFront, nginx):

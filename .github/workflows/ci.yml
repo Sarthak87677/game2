@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end visual smoke (synthetic OSM fixture, software WebGL)
+        env:
+          TERRA_FIXTURES: '1'
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: terra-e2e-screenshots
+          path: |
+            test-results/**/*.png
+            playwright-report
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: terra-dist
+          path: dist
+          retention-days: 7
