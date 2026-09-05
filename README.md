@@ -6,6 +6,18 @@ An explorable, streamed 3D Earth in the browser: from orbit to continents, citie
 * **Plausible where it does not** — an inferred climate atlas (400+ station normals → Köppen → biome), biome-specific vegetation with phenology, procedural ground materials, villages and urban blocks, simulated weather. Every readout says whether it is *measured*, *inferred*, *procedural* or *live*.
 * **No keys required** — the demonstration mode runs on open, key-less sources; keyed providers are opt-in through `.env`.
 
+## What it looks like
+
+| Orbit | Close to a procedural tree (Black Forest, September) | Antarctic plateau |
+|---|---|---|
+| ![Orbit](docs/screenshots/orbit.png) | ![Forest](docs/screenshots/forest-close.png) | ![Antarctica](docs/screenshots/antarctica.png) |
+
+| Synthetic city fixture by day | …and at night (window emission, street lamps) | Alpine snow with the same fixture |
+|---|---|---|
+| ![City day](docs/screenshots/city-day-synthetic.png) | ![City night](docs/screenshots/city-night-synthetic.png) | ![Alps](docs/screenshots/alpine-snow-synthetic.png) |
+
+The city frames use the built-in **synthetic OpenStreetMap fixture** (`?terraFixtures=1`) because the build sandbox cannot reach the Overpass API; with network access the same code streams real OSM buildings, roads and land use. All frames were rendered with software WebGL (SwiftShader) at the *Low* preset, which is why they look flat-shaded; on a GPU the High/Ultra presets add MSAA, shadows, ambient occlusion and HDR.
+
 ## Quick start
 
 ```bash
