@@ -1,0 +1,63 @@
+{
+  "measuredAt": "2026-09-05T05:15:25.320Z",
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "userAgent": "headless chromium",
+  "viewport": "1920x1080",
+  "results": [
+    {
+      "name": "Orbit",
+      "lat": 20,
+      "lon": 20,
+      "h": 24000000,
+      "fps": 2.4,
+      "frameMs": 1364,
+      "terrainTiles": 5,
+      "terrainErrors": 0,
+      "heapMb": 68
+    },
+    {
+      "name": "Himalaya (Everest)",
+      "lat": 27.9881,
+      "lon": 86.925,
+      "h": 12000,
+      "fps": 0.4,
+      "frameMs": 2547.6,
+      "terrainTiles": 62,
+      "terrainErrors": 45,
+      "heapMb": 169
+    },
+    {
+      "name": "Manhattan",
+      "lat": 40.7484,
+      "lon": -73.9857,
+      "h": 1800,
+      "fps": 0.5,
+      "frameMs": 2180.7,
+      "terrainTiles": 123,
+      "terrainErrors": 93,
+      "heapMb": 237
+    },
+    {
+      "name": "Zermatt ground",
+      "lat": 46.0207,
+      "lon": 7.7491,
+      "h": 300,
+      "fps": 0.5,
+      "frameMs": 4846.3,
+      "terrainTiles": 200,
+      "terrainErrors": 110,
+      "heapMb": 220
+    },
+    {
+      "name": "Antarctica",
+      "lat": -85,
+      "lon": 0,
+      "h": 60000,
+      "fps": 0.2,
+      "frameMs": 4490.3,
+      "terrainTiles": 271,
+      "terrainErrors": 214,
+      "heapMb": 221
+    }
+  ]
+}

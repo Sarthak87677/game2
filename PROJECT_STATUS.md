@@ -12,7 +12,7 @@ Resumable task ledger. Update after every completed task. Dates are UTC.
 | 4. Hyperrealistic Nature | **done (first pass)** | 100-species library with hemisphere-aware fruit/flower windows and leaf phenology, leaf cards/needles/palm fronds/fruit at close range, wind-sway vertex shader, weather particles, ground material (snow line, wetness, season tint, cloud shadows, water), ocean surface, orbital + cumulus clouds, underwater fog, procedural ambient audio. Not done: snow accumulation on vegetation geometry, puddles, subsurface leaf translucency. |
 | 5. Cities and Landmarks | **done (first pass)** | OSM building meshes with day glass / night window emission, towers, roads, rail, water, land use, POI labels, population night lights, simulated traffic with headlights/tail-lights, street lamps, procedural villages and urban blocks where OSM is absent, 36 landmark stand-ins at measured positions (labelled procedural), 19 showcase areas with tours. Not done: street furniture (benches, signs), road markings, real 3D landmark models (none legally available offline). |
 | 6. Optimisation | **in progress** | Budgets in place (tile caches, OSM/near-field radii and LRU unloading, in-flight limits, impostor LOD, vertex caps, request throttling, adaptive presets, ?terraQuality override). `npm run perf` records real numbers; the sandbox only has software WebGL, so the recorded frame rates are SwiftShader numbers, not GPU numbers. |
-| 7. Verification & Packaging | **in progress** | 217 unit tests, Playwright suites (smoke, synthetic city, nature), production build OK, all docs written; final e2e run and perf measurement in progress. |
+| 7. Verification & Packaging | **in progress** | 217 unit tests, Playwright suites (smoke, synthetic city, nature, landmarks), production build OK, CI workflow, all docs written. Visually verified frames in `docs/screenshots/`. Last steps: final biome e2e run and `npm run perf` numbers. |
 
 ## Verified commands
 
@@ -39,7 +39,9 @@ TERRA_FIXTURES=1 npm run dev   # synthetic OSM responder for offline development
 * The development sandbox has no GPU and blocks OSM/Overpass/Nominatim/Esri/GIBS hosts, so real-OSM rendering was validated only through unit tests and the synthetic fixture; frame-rate targets (60/30 fps) could not be measured on real hardware here.
 * Terrarium tiles have coarse/odd data in parts of Antarctica and the open ocean; the climate atlas is 39 km resolution.
 * The Köppen/biome model is an inference from ~400 approximate station normals; microclimates are not represented.
-* Landmarks are abstract procedural interpretations, not models. Vegetation species are archetypes.
+* Landmarks are abstract procedural interpretations, not models (see `docs/screenshots/eiffel-standin.png`). Vegetation species are archetypes.
+* Day/night and slope shading of the terrain come from the ground material (derivative normals); Cesium's own globe lighting is disabled because it only acts beyond 10 000 km and heightmap terrain has no vertex normals.
+* Coastal cells of the 39 km climate raster inherit the neighbouring land biome; the vector coastline decides land vs water for readouts and generation.
 * Reverse geocoding and live weather need network access and are rate-limited by policy.
 
 ## Next task

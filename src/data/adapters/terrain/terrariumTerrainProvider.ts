@@ -1,4 +1,4 @@
-import { Credit, Ellipsoid, Event as CesiumEvent, HeightmapTerrainData, Request, Resource, TerrainProvider, WebMercatorTilingScheme, type TerrainData, type TilingScheme } from 'cesium';
+import { Credit, Ellipsoid, Event as CesiumEvent, HeightmapTerrainData, Request, RequestScheduler, RequestState, Resource, TerrainProvider, WebMercatorTilingScheme, type TerrainData, type TilingScheme } from 'cesium';
 import { sharedTerrariumDecoder, type TerrariumDecoderPool } from './terrariumDecoder';
 import type { TileCache } from '@/data/cache/tileCache';
 
@@ -64,27 +64,19 @@ export class TerrariumTerrainProvider implements TerrainProvider {
 
   requestTileGeometry(x: number, y: number, level: number, request?: Request): Promise<TerrainData> | undefined {
     if (level > this.maximumLevel) return undefined;
-    const resource = this.resource.getDerivedResource({ templateValues: { z: String(level), x: String(x), y: String(y) }, request });
-    const started = performance.now();
+    const url = this.resource.getDerivedResource({ templateValues: { z: String(level), x: String(x), y: String(y) } }).url;
     const cacheKey = `terrarium/${level}/${x}/${y}`;
-    const cache = this.cache;
-    const fetchTile = (): Promise<ArrayBuffer> | undefined => {
-      const p = resource.fetchArrayBuffer();
-      if (!p) return undefined;
-      return p.then((buf) => { if (cache) void cache.put(cacheKey, buf.slice(0)); return buf; });
-    };
-    let promise: Promise<ArrayBuffer> | undefined;
-    if (cache) {
-      promise = cache.get(cacheKey).then((hit) => {
-        if (hit instanceof ArrayBuffer) return hit.slice(0);
-        const p = fetchTile();
-        if (!p) throw new Error('throttled');
-        return p;
-      });
-    } else {
-      promise = fetchTile();
-      if (!promise) return undefined; // throttled by Cesium's request scheduler
-    }
+    const started = performance.now();
+    // Go through Cesium's request scheduler so throttling returns `undefined` (Cesium retries next frame) instead of a
+    // rejected promise (Cesium would mark the tile failed and fall back to its parent). The scheduled function checks
+    // the persistent cache first and only then downloads.
+    const req = request ?? new Request();
+    req.url = url;
+    // The public typings declare requestFunction as returning Promise<void> and keep RequestScheduler.request
+    // private; Resource.fetchArrayBuffer({ request }) uses exactly this path internally.
+    (req as unknown as { requestFunction: () => Promise<ArrayBuffer> }).requestFunction = () => this.loadBuffer(url, cacheKey);
+    const promise = (RequestScheduler as unknown as { request: (r: Request) => Promise<ArrayBuffer> | undefined }).request(req);
+    if (!promise) return undefined;
     return promise
       .then((buffer) => {
         const bytes = buffer.byteLength;
@@ -100,8 +92,21 @@ export class TerrariumTerrainProvider implements TerrainProvider {
         });
       })
       .catch((err: unknown) => {
-        this.onTile?.({ level, x, y, bytes: 0, ms: performance.now() - started, error: err instanceof Error ? err.message : String(err) });
+        // Cancelled requests (tile no longer needed) are not failures.
+        if (req.state !== RequestState.CANCELLED) this.onTile?.({ level, x, y, bytes: 0, ms: performance.now() - started, error: err instanceof Error ? err.message : String(err) });
         throw err;
       });
+  }
+
+  /** Persistent cache first, then an unthrottled download (the scheduler already granted the slot). */
+  private async loadBuffer(url: string, cacheKey: string): Promise<ArrayBuffer> {
+    if (this.cache) {
+      const hit = await this.cache.get(cacheKey);
+      if (hit instanceof ArrayBuffer) return hit.slice(0);
+    }
+    const fetched = await new Resource({ url }).fetchArrayBuffer();
+    if (!fetched) throw new Error('fetch returned no data');
+    if (this.cache) void this.cache.put(cacheKey, fetched.slice(0));
+    return fetched;
   }
 }

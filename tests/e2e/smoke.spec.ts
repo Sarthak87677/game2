@@ -39,6 +39,7 @@ test.describe('Terra Infinite — visual smoke', () => {
   });
 
   test('radically different showcase areas report different biomes', async ({ page }) => {
+    test.setTimeout(720_000);
     await waitForReady(page);
     const areas = [
       { name: 'new-york', lat: 40.7484, lon: -73.9857, h: 2500, expect: ['temperate_deciduous_forest', 'temperate_grassland', 'temperate_rainforest', 'mediterranean'] },
