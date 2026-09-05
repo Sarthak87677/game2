@@ -211,6 +211,7 @@ export class EnvironmentController {
 
   /** Adds population-scaled night lights; visible only on the night side. */
   setNightLights(places: { lat: number; lon: number; pop: number }[]): void {
+    if (this.viewer.isDestroyed()) return;
     const scene = this.viewer.scene;
     if (this.nightLights) scene.primitives.remove(this.nightLights);
     const collection = scene.primitives.add(new PointPrimitiveCollection()) as PointPrimitiveCollection;

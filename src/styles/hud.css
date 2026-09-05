@@ -104,3 +104,8 @@
 .terra-toast-warn { border-color: rgba(255,179,71,0.6); }
 .terra-toast-text { flex: 1; }
 .terra-toast button { background: transparent; border: 1px solid var(--terra-border); color: var(--terra-fg); border-radius: 6px; padding: 3px 8px; cursor: pointer; font: inherit; }
+
+.terra-mode-hint { position: absolute; left: 50%; top: 120px; transform: translateX(-50%); background: var(--terra-bg-strong); border: 1px solid var(--terra-border); border-radius: 12px; padding: 12px 18px; text-align: center; line-height: 1.6; backdrop-filter: blur(10px); animation: terra-fade 0.4s ease; z-index: 25; }
+.terra-mode-hint-title { font-weight: 700; color: var(--terra-accent); margin-bottom: 4px; letter-spacing: 0.06em; }
+@keyframes terra-fade { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.terra-reduce-motion .terra-mode-hint { animation: none; }

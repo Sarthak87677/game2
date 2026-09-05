@@ -17,6 +17,7 @@ import { DiagnosticsPanel } from './panels/DiagnosticsPanel';
 import { HelpPanel } from './panels/HelpPanel';
 import { scaleBarMetres, formatMetres } from './format';
 import { ErrorToasts } from './widgets/ErrorToasts';
+import { ModeHint } from './widgets/ModeHint';
 
 const PANEL_TITLES = { highlights: 'World Highlights', timeweather: 'Time & Weather', sources: 'Data sources & accuracy', settings: 'Settings & accessibility', diagnostics: 'Diagnostics', help: 'Controls & help', none: '' } as const;
 
@@ -85,6 +86,7 @@ export function Hud() {
         <MiniMap />
       </div>
       <TouchControls />
+      <ModeHint />
       <ErrorToasts />
       <Attribution />
       <LoadingOverlay />

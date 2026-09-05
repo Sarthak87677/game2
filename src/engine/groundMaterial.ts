@@ -163,12 +163,15 @@ function blankBiomeTexture(): HTMLCanvasElement {
 
 /** Installs the procedural near-field ground material on the globe. */
 export function installGroundMaterial(viewer: Viewer): GroundMaterialHandle {
+  // Cesium deep-clones the fabric (Material.initializeMaterial → clone), and cloning a canvas calls
+  // `new HTMLCanvasElement()`, which throws "Illegal constructor". Image uniforms therefore start as the default
+  // image id (a string, which still yields a sampler2D) and the canvases are assigned immediately afterwards.
   const material = new Material({
     fabric: {
       type: 'TerraGround',
       uniforms: {
-        biomeMap: blankBiomeTexture(),
-        palette: buildPalette(),
+        biomeMap: Material.DefaultImageId,
+        palette: Material.DefaultImageId,
         fadeNear: 2500,
         fadeFar: 25000,
         wetness: 0,
@@ -182,6 +185,8 @@ export function installGroundMaterial(viewer: Viewer): GroundMaterialHandle {
     },
     translucent: true,
   });
+  material.uniforms.biomeMap = blankBiomeTexture();
+  material.uniforms.palette = buildPalette();
   viewer.scene.globe.material = material;
   const start = performance.now();
   const remove = viewer.scene.preUpdate.addEventListener(() => {

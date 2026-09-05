@@ -30,7 +30,7 @@ export interface LocationReadout {
   provenance: { terrain: string; biome: string; place: string; buildings: string };
 }
 
-export interface DiagnosticEntry { time: string; level: 'error' | 'warn' | 'info'; message: string }
+export interface DiagnosticEntry { time: string; level: 'error' | 'warn' | 'info'; message: string; stack?: string }
 
 export interface Settings {
   locationAccess: boolean;
@@ -66,7 +66,7 @@ export interface TerraState {
   patch: (p: Partial<TerraState>) => void;
   setUi: (p: Partial<TerraState['ui']>) => void;
   setSettings: (p: Partial<Settings>) => void;
-  log: (level: DiagnosticEntry['level'], message: string) => void;
+  log: (level: DiagnosticEntry['level'], message: string, error?: unknown) => void;
 }
 
 const SETTINGS_KEY = 'terra-infinite.settings.v1';
@@ -104,5 +104,8 @@ export const useTerraStore = create<TerraState>()((set) => ({
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ }
     return { settings };
   }),
-  log: (level, message) => set((s) => ({ diagnostics: [...s.diagnostics.slice(-199), { time: new Date().toISOString().slice(11, 19), level, message }] })),
+  log: (level, message, error) => set((s) => {
+    const stack = error instanceof Error && error.stack ? error.stack.split('\n').slice(0, 6).join('\n') : undefined;
+    return { diagnostics: [...s.diagnostics.slice(-199), { time: new Date().toISOString().slice(11, 19), level, message, stack }] };
+  }),
 }));

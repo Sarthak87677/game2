@@ -1,4 +1,4 @@
-import { Cartesian3, Cartographic, Color, HeadingPitchRoll, JulianDate, Math as CMath, Matrix4, Transforms, type Entity, type Viewer } from 'cesium';
+import { Cartesian3, Cartographic, Color, ConstantPositionProperty, ConstantProperty, HeadingPitchRoll, JulianDate, Math as CMath, Matrix4, Transforms, type Entity, type Viewer } from 'cesium';
 import { InputManager } from './input';
 import { flyTo, type CameraTarget } from '@/engine/camera';
 
@@ -154,7 +154,7 @@ export class ModeController {
 
   private update(time: JulianDate): void {
     const now = performance.now();
-    const dt = this.lastTime === null ? 0.016 : Math.min(0.1, (now - this.lastTime) / 1000);
+    const dt = this.lastTime === null ? 0.016 : Math.min(0.25, (now - this.lastTime) / 1000);
     this.lastTime = now;
     void time;
     if (this.mode === 'orbit' || this.mode === 'cinematic') return;
@@ -226,7 +226,7 @@ export class ModeController {
       const maxSpeed = 45 * this.speed;
       if (frame.moveY > 0) this.driveSpeed += accel * dt * frame.moveY;
       else if (frame.moveY < 0) this.driveSpeed -= (this.driveSpeed > 0 ? accel * 2 : accel * 0.6) * dt;
-      else this.driveSpeed *= Math.max(0, 1 - 0.8 * dt);
+      else this.driveSpeed *= Math.max(0, 1 - 0.45 * dt);
       if (frame.brake) this.driveSpeed *= Math.max(0, 1 - 4 * dt);
       this.driveSpeed = Math.max(-maxSpeed * 0.3, Math.min(maxSpeed, this.driveSpeed));
       // Steering: turn rate scales with speed; heading also follows mouse look for camera aiming.
@@ -249,7 +249,7 @@ export class ModeController {
     // Block walking up walls steeper than ~60° (buildings) — keep the previous position.
     const rise = nextGround - g;
     const dist = Cartesian3.magnitude(move);
-    if (dist > 0 && rise > 0 && rise / dist > 1.7 && this.bodyHeightAgl < rise) {
+    if (dist > 0 && rise > 2.5 && rise / dist > 1.7 && this.bodyHeightAgl < rise) {
       if (isDrive) this.driveSpeed = 0;
     } else {
       this.lastGround = nextGround;
@@ -276,9 +276,8 @@ export class ModeController {
     if (ent && ent.show) {
       const hpr = new HeadingPitchRoll(this.heading - Math.PI / 2, 0, 0);
       const pos = Cartesian3.fromRadians(bodyCarto.longitude, bodyCarto.latitude, bodyCarto.height + (isDrive ? 0.7 : 0.75));
-      (ent.position as unknown as { setValue?: (v: Cartesian3) => void }).setValue?.(pos);
-      ent.position = pos as never;
-      ent.orientation = Transforms.headingPitchRollQuaternion(pos, hpr) as never;
+      ent.position = new ConstantPositionProperty(pos);
+      ent.orientation = new ConstantProperty(Transforms.headingPitchRollQuaternion(pos, hpr));
     }
     this.emit();
   }

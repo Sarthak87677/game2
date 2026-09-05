@@ -87,6 +87,18 @@ test.describe('Terra Infinite — visual smoke', () => {
     await page.waitForTimeout(1500);
     await page.keyboard.up('KeyW');
     await page.waitForTimeout(500);
+    // Third person and driving must not throw inside Cesium's render loop.
+    await page.evaluate(() => (window as unknown as { __terra: { engine: { modes: { setView: (v: string) => void } } } }).__terra.engine.modes.setView('third'));
+    await page.waitForTimeout(2500);
+    await page.evaluate(() => (window as unknown as { __terra: { setMode: (m: string) => void } }).__terra.setMode('drive'));
+    await page.keyboard.down('KeyW');
+    await page.waitForTimeout(2000);
+    await page.keyboard.up('KeyW');
+    await page.waitForTimeout(1000);
+    const renderErrors = await page.evaluate(() => (window as unknown as { __terraStore: { getState: () => { diagnostics: { message: string }[] } } }).__terraStore.getState().diagnostics.filter((d) => /Render error/.test(d.message)).map((d) => d.message));
+    expect(renderErrors, renderErrors.join('\n')).toEqual([]);
+    await page.evaluate(() => (window as unknown as { __terra: { setMode: (m: string) => void } }).__terra.setMode('walk'));
+    await page.waitForTimeout(1500);
     const s = await state(page);
     const terrainWorks = (s.streaming?.terrainTilesLoaded ?? 0) > 0;
     if (terrainWorks && s.camera?.altitudeAglM !== null && s.camera?.altitudeAglM !== undefined) {

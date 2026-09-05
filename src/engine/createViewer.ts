@@ -31,6 +31,7 @@ export function createViewer(opts: CreateViewerOptions): Viewer {
     shouldAnimate: true,
     skyAtmosphere: new SkyAtmosphere(),
     requestRenderMode: false,
+    showRenderLoopErrors: false,
     contextOptions: {
       requestWebgl1: false,
       webgl: { failIfMajorPerformanceCaveat: false, powerPreference: 'high-performance', antialias: false, preserveDrawingBuffer: false },

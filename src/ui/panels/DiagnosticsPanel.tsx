@@ -39,7 +39,7 @@ export function DiagnosticsPanel() {
         <span>OpenStreetMap</span><span>{engine?.osm ? `${engine.osmStatus.loaded} tiles loaded · ${engine.osmStatus.loading} loading · ${engine.osmStatus.failed} failed · ${flags.osmOnline === null ? 'not yet requested' : flags.osmOnline ? 'online' : `offline (${engine.osmStatus.lastError ?? 'unreachable'})`}` : 'disabled'}</span>
       </div>
       <h3>Log <button className="terra-mini" onClick={report}>Copy report</button></h3>
-      <pre className="terra-log">{diagnostics.length === 0 ? 'No errors or warnings.' : diagnostics.map((d) => `${d.time} [${d.level}] ${d.message}`).join('\n')}</pre>
+      <pre className="terra-log">{diagnostics.length === 0 ? 'No errors or warnings.' : diagnostics.map((d) => `${d.time} [${d.level}] ${d.message}${d.stack ? `\n${d.stack}` : ''}`).join('\n')}</pre>
     </div>
   );
 }

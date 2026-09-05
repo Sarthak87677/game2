@@ -81,6 +81,7 @@ export class TerraEngine {
   private destroyed = false;
   osmStatus: { loaded: number; loading: number; failed: number; online: boolean | null; lastError: string | null } = { loaded: 0, loading: 0, failed: 0, online: null, lastError: null };
   nearFieldStats: NearFieldStats | null = null;
+  private renderErrorTimes: number[] = [];
 
   private constructor(container: HTMLElement) {
     const store = useTerraStore.getState();
@@ -97,7 +98,7 @@ export class TerraEngine {
     this.modes.onChange = (s) => useTerraStore.setState({ mode: s });
     let ground: GroundMaterialHandle | null = null;
     try { ground = installGroundMaterial(this.viewer); } catch (e) {
-      store.log('warn', `Ground material unavailable: ${String(e)}`);
+      store.log('warn', `Ground material unavailable: ${String(e)}`, e);
       // Fall back to Cesium's built-in day/night shading at every distance.
       this.viewer.scene.globe.enableLighting = true;
       this.viewer.scene.globe.lightingFadeOutDistance = 1;
@@ -143,9 +144,19 @@ export class TerraEngine {
     if (!disabled.has('nominatim') && env.nominatimUrl) this.geocoders.push(new NominatimAdapter({ url: env.nominatimUrl }));
     this.weatherAdapter = env.enableLiveWeather && !disabled.has('open-meteo') ? new OpenMeteoAdapter() : null;
     useTerraStore.setState({ sources: this.registry.listSources() });
+    // Cesium stops its render loop on any exception thrown during a frame. Most such errors are transient (one bad
+    // primitive update), so restart the loop a bounded number of times and surface the stack in Diagnostics; only
+    // a persistent failure is reported as fatal.
     this.viewer.scene.renderError.addEventListener((_s: unknown, err: Error) => {
-      useTerraStore.getState().log('error', `Render error: ${err?.message ?? err}`);
-      useTerraStore.setState({ boot: { ...useTerraStore.getState().boot, phase: 'error', error: `Rendering failed: ${err?.message ?? err}` } });
+      const now = performance.now();
+      this.renderErrorTimes = this.renderErrorTimes.filter((t) => now - t < 30_000);
+      this.renderErrorTimes.push(now);
+      useTerraStore.getState().log('error', `Render error: ${err?.message ?? err}`, err);
+      if (this.renderErrorTimes.length <= 5 && !this.destroyed) {
+        window.setTimeout(() => { if (!this.destroyed) this.viewer.useDefaultRenderLoop = true; }, 250);
+      } else {
+        useTerraStore.setState({ boot: { ...useTerraStore.getState().boot, phase: 'error', error: `Rendering failed repeatedly: ${err?.message ?? err}` } });
+      }
     });
   }
 
@@ -176,40 +187,44 @@ export class TerraEngine {
 
   private async loadDataInBackground(): Promise<void> {
     const store = useTerraStore.getState();
-    const setBoot = (progress: number, message: string, phase: 'data' | 'ready' = 'data') => useTerraStore.setState((s) => ({ boot: { ...s.boot, phase, progress, message } }));
+    const setBoot = (progress: number, message: string, phase: 'data' | 'ready' = 'data') => { if (!this.destroyed) useTerraStore.setState((s) => ({ boot: { ...s.boot, phase, progress, message } })); };
     try {
       setBoot(0.35, 'Loading Natural Earth coastlines, rivers and countries…');
       this.naturalEarth = await NaturalEarth.load(fetchJson, '/data/ne', (l, t) => setBoot(0.35 + 0.2 * (l / t), `Loading reference vectors (${l}/${t})…`));
+      if (this.destroyed) return;
       useTerraStore.setState((s) => ({ dataFlags: { ...s.dataFlags, naturalEarth: true } }));
       this.refreshImagery();
     } catch (e) {
-      store.log('error', `Natural Earth failed: ${String(e)}`);
+      store.log('error', `Natural Earth failed: ${String(e)}`, e);
     }
     try {
       setBoot(0.58, 'Loading place index…');
       this.gazetteer = await OfflineGazetteer.load(fetchJson, '/data/ne');
+      if (this.destroyed) return;
       useTerraStore.setState((s) => ({ dataFlags: { ...s.dataFlags, gazetteer: true } }));
       const places = (await fetchJson('/data/ne/places_50m.json')) as { rows: [string, string, string, number, number, number, number, number][] };
       this.environment.setNightLights(places.rows.map((r) => ({ lat: r[3], lon: r[4], pop: r[5] })));
     } catch (e) {
-      store.log('error', `Gazetteer failed: ${String(e)}`);
+      store.log('error', `Gazetteer failed: ${String(e)}`, e);
     }
     if (this.naturalEarth) {
       try {
         setBoot(0.65, 'Building climate & biome atlas…');
         const terrainAvailable = this.registry.terrain.get('terrarium')?.isAvailable().available ?? false;
         this.worldMap = await buildWorldMap(this.naturalEarth, terrainAvailable ? TERRARIUM_DEFAULT_URL : null, (m) => setBoot(0.7, `Climate atlas: ${m}…`));
+        if (this.destroyed) return;
         useTerraStore.setState((s) => ({ dataFlags: { ...s.dataFlags, worldMap: true, worldMapElevation: this.worldMap?.data.hasElevation ?? false } }));
         this.ground?.setWorldMap(this.worldMap);
         this.refreshImagery();
         store.log('info', `Climate atlas built in ${this.worldMap.data.buildMs.toFixed(0)} ms (elevation ${this.worldMap.data.hasElevation ? 'measured' : 'unavailable → sea level assumed'})`);
         this.applySimulatedWeatherForCamera();
       } catch (e) {
-        store.log('error', `World map failed: ${String(e)}`);
+        store.log('error', `World map failed: ${String(e)}`, e);
       }
     }
+    if (this.destroyed) return;
     setBoot(1, 'Ready', 'ready');
-    if (window.__terra) window.__terra.ready = true;
+    if (window.__terra?.engine === this) window.__terra.ready = true;
   }
 
   private refreshImagery(): void {
@@ -218,27 +233,31 @@ export class TerraEngine {
   }
 
   async setTerrain(id: string): Promise<void> {
+    if (this.destroyed) return;
     const adapter = this.registry.terrain.get(id);
     if (!adapter) throw new Error(`Unknown terrain adapter ${id}`);
     const avail = adapter.isAvailable();
     if (!avail.available) { useTerraStore.getState().log('warn', `Terrain ${id} unavailable: ${avail.reason}`); return; }
     try {
       const provider = await adapter.createProvider();
+      if (this.destroyed) return;
       this.viewer.terrainProvider = provider;
       useTerraStore.setState({ terrainId: id });
     } catch (e) {
-      useTerraStore.getState().log('error', `Terrain ${id} failed: ${String(e)}`);
+      useTerraStore.getState().log('error', `Terrain ${id} failed: ${String(e)}`, e);
       if (id !== 'ellipsoid') await this.setTerrain('ellipsoid');
     }
   }
 
   async setImagery(id: string): Promise<void> {
+    if (this.destroyed) return;
     const adapter = this.registry.imagery.get(id);
     if (!adapter) throw new Error(`Unknown imagery adapter ${id}`);
     const avail = adapter.isAvailable();
     if (!avail.available) { useTerraStore.getState().log('warn', `Imagery ${id} unavailable: ${avail.reason}`); return; }
     try {
       const provider = await adapter.createProvider();
+      if (this.destroyed) return;
       const layers = this.viewer.imageryLayers;
       const layer = new ImageryLayer(provider);
       layers.add(layer, 0);
@@ -250,7 +269,7 @@ export class TerraEngine {
       // Real imagery keeps its detail visible under the procedural overlay; the inferred atlas is fully replaced.
       this.ground?.setUniform('detailStrength', id === 'procedural' ? 1 : 0.55);
     } catch (e) {
-      useTerraStore.getState().log('error', `Imagery ${id} failed: ${String(e)}`);
+      useTerraStore.getState().log('error', `Imagery ${id} failed: ${String(e)}`, e);
       if (id !== 'procedural') await this.setImagery('procedural');
     }
   }
@@ -398,6 +417,7 @@ export class TerraEngine {
 
   /** Derives plausible weather from the climate atlas for the camera position and date (labelled simulated). */
   applySimulatedWeatherForCamera(): void {
+    if (this.destroyed) return;
     const cam = cameraState(this.viewer);
     const sample = this.worldMap?.sample(cam.lat, cam.lon, this.naturalEarth?.isLand(cam.lat, cam.lon) ?? false);
     if (!sample) return;
