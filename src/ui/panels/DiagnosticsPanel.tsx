@@ -34,6 +34,7 @@ export function DiagnosticsPanel() {
         <span>Climate atlas</span><span>{flags.worldMap ? (flags.worldMapElevation ? 'built with measured elevation' : 'built without elevation (terrain host unreachable)') : 'building…'}</span>
         <span>Place index</span><span>{flags.gazetteer ? 'loaded' : 'loading/unavailable'}</span>
         <span>Procedural world</span><span>{engine?.nearField ? (() => { const n = engine.nearFieldStats; return n ? `${n.tiles} tiles (${n.pendingTiles} pending) · ${n.treeInstances} trees · ${n.shrubInstances} shrubs · ${n.grassInstances} grass · ${n.rockInstances} rocks · ${n.buildings} buildings · ${n.fields} fields · ${n.primitives} primitives · last gen ${n.lastGenerationMs.toFixed(0)} ms` : 'idle (fly below 6 km)'; })() : 'workers unavailable'}</span>
+        <span>Landmarks</span><span>{engine ? `${engine.landmarks.stats().visible} of ${engine.landmarks.stats().total} procedural stand-ins in range` : '—'}</span>
         <span>Traffic / lamps</span><span>{engine?.traffic ? (() => { const t = engine.traffic.stats(); return `${t.vehicles} vehicles · ${t.lamps} lamps · ${t.roads} roads (simulated)`; })() : 'disabled'}</span>
         <span>OpenStreetMap</span><span>{engine?.osm ? `${engine.osmStatus.loaded} tiles loaded · ${engine.osmStatus.loading} loading · ${engine.osmStatus.failed} failed · ${flags.osmOnline === null ? 'not yet requested' : flags.osmOnline ? 'online' : `offline (${engine.osmStatus.lastError ?? 'unreachable'})`}` : 'disabled'}</span>
       </div>

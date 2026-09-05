@@ -64,7 +64,9 @@ export function MiniMap() {
   }, [camera]);
 
   return (
-    <div className="terra-minimap" title="World overview (inferred biome atlas)" onClick={(e) => {
+    <div className="terra-minimap" title="World overview (inferred biome atlas) — click to fly there" role="button" tabIndex={0} aria-label="World overview map; click a point to fly there"
+      onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && engine && camera) { e.preventDefault(); void engine.goTo({ lat: camera.lat, lon: camera.lon, heightM: 2_500_000, pitchDeg: -90 }, { descend: false }); } }}
+      onClick={(e) => {
       if (!engine) return;
       const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
       const lon = ((e.clientX - r.left) / r.width) * 360 - 180;

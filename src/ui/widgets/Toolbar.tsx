@@ -17,7 +17,8 @@ export function Toolbar() {
   const toggle = (p: PanelId) => setUi({ panel: ui.panel === p ? 'none' : p });
   const screenshot = () => {
     if (!engine) return;
-    const url = engine.screenshot();
+    let url: string;
+    try { url = engine.screenshot(); } catch (e) { useTerraStore.getState().log('warn', `Screenshot failed: ${String(e)}`); return; }
     const a = document.createElement('a');
     a.href = url;
     a.download = `terra-infinite-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;

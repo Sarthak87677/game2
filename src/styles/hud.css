@@ -93,3 +93,14 @@
 .terra-joystick-knob { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.3); }
 .terra-touch-jump { position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; background: var(--terra-bg); border: 1px solid var(--terra-border); }
 @media (max-width: 800px) { .terra-panel { width: calc(100vw - 24px); top: 150px; } .terra-bottom-left { max-width: calc(100vw - 24px); bottom: 150px; } .terra-bottom-right { display: none; } .terra-status { display: none; } }
+
+/* Accessibility: visible focus, reduced motion, toasts */
+.terra-hud :focus-visible, .terra-unhide:focus-visible { outline: 2px solid var(--terra-accent); outline-offset: 2px; }
+.terra-reduce-motion .terra-progress div, .terra-reduce-motion .terra-loading { transition: none; }
+.terra-reduce-motion .terra-dot.busy { animation: none; }
+.terra-toasts { position: absolute; right: 12px; top: 112px; display: flex; flex-direction: column; gap: 8px; max-width: min(420px, calc(100vw - 24px)); z-index: 30; }
+.terra-toast { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 10px; background: var(--terra-bg-strong); border: 1px solid var(--terra-border); font-size: 0.9em; backdrop-filter: blur(10px); }
+.terra-toast-error { border-color: rgba(255,123,114,0.6); }
+.terra-toast-warn { border-color: rgba(255,179,71,0.6); }
+.terra-toast-text { flex: 1; }
+.terra-toast button { background: transparent; border: 1px solid var(--terra-border); color: var(--terra-fg); border-radius: 6px; padding: 3px 8px; cursor: pointer; font: inherit; }

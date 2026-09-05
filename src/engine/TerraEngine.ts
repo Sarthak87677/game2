@@ -36,6 +36,7 @@ import { ProcgenClient } from '@/world/nearField/procgenClient';
 import type { NearFieldTile } from '@/world/procedural/types';
 import { NearFieldWorld, type NearFieldStats } from '@/world/render';
 import { speciesById } from '@/world/procedural/species';
+import { LandmarkLayer } from '@/world/landmarks/LandmarkLayer';
 import type { GeocodingAdapter } from '@/data/geocoding/types';
 
 declare global {
@@ -67,6 +68,7 @@ export class TerraEngine {
   readonly heightFields = new HeightFieldSource({ cache: sharedTileCache() });
   readonly procgen = new ProcgenClient();
   readonly nearField: NearFieldWorld | null;
+  readonly landmarks: LandmarkLayer;
   naturalEarth: NaturalEarth | null = null;
   worldMap: WorldMap | null = null;
   gazetteer: OfflineGazetteer | null = null;
@@ -131,6 +133,7 @@ export class TerraEngine {
         })
       : null;
     this.clouds = new CloudSystem(this.viewer, () => this.worldMap, () => dayOfYear(this.environment.getDate()));
+    this.landmarks = new LandmarkLayer(this.viewer, { quality: () => QUALITY_PRESETS[this.quality] });
     if (!disabled.has('nominatim') && env.nominatimUrl) this.geocoders.push(new NominatimAdapter({ url: env.nominatimUrl }));
     this.weatherAdapter = env.enableLiveWeather && !disabled.has('open-meteo') ? new OpenMeteoAdapter() : null;
     useTerraStore.setState({ sources: this.registry.listSources() });
@@ -157,7 +160,7 @@ export class TerraEngine {
     window.__terra = {
       ready: false,
       engine,
-      state: () => ({ boot: useTerraStore.getState().boot, camera: useTerraStore.getState().camera, streaming: useTerraStore.getState().streaming, location: useTerraStore.getState().location, dataFlags: useTerraStore.getState().dataFlags, diagnostics: useTerraStore.getState().diagnostics }),
+      state: () => ({ boot: useTerraStore.getState().boot, camera: cameraState(engine.viewer), streaming: useTerraStore.getState().streaming, location: useTerraStore.getState().location, dataFlags: useTerraStore.getState().dataFlags, diagnostics: useTerraStore.getState().diagnostics }),
       goTo: (lat, lon, h) => engine.goTo({ lat, lon, heightM: h }),
       setMode: (m) => engine.modes.setMode(m),
     };
@@ -263,7 +266,7 @@ export class TerraEngine {
   /** Flies to a target. `heightM` is metres above ground for targets below 50 km (above the ellipsoid otherwise). */
   async goTo(target: CameraTarget, opts: { descend?: boolean; absolute?: boolean } = {}): Promise<boolean> {
     if (this.modes.getMode() !== 'orbit') this.modes.setMode('orbit');
-    const resolved = opts.absolute ? target : await resolveTargetHeight(this.viewer, target);
+    const resolved = opts.absolute ? target : await resolveTargetHeight(this.viewer, target, (lat, lon) => this.worldMap?.sample(lat, lon).elevationM ?? null);
     const ok = opts.descend === false ? await flyTo(this.viewer, resolved) : await descendTo(this.viewer, resolved);
     if (this.liveWeatherWanted) void this.useLiveWeather(true);
     else this.applySimulatedWeatherForCamera();
@@ -495,6 +498,7 @@ export class TerraEngine {
     if (this.readoutTimer !== null) window.clearInterval(this.readoutTimer);
     this.modes.destroy();
     this.nearField?.destroy();
+    this.landmarks.destroy();
     this.procgen.destroy();
     this.audio.destroy();
     this.traffic?.destroy();

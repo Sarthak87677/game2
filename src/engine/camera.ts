@@ -3,28 +3,31 @@ import { Cartesian3, Cartographic, EasingFunction, Ellipsoid, Math as CMath, sam
 export interface CameraTarget { lat: number; lon: number; heightM: number; headingDeg?: number; pitchDeg?: number }
 
 /**
- * Terrain height at a point, sampled from the active terrain provider (level 12 ≈ 40 m spacing) with the loaded
- * globe tiles as a fast path. Returns 0 when the provider cannot answer (e.g. offline ellipsoid terrain).
+ * Terrain height at a point. The terrain provider is sampled at level 12 (≈ 38 m spacing for Terrarium) because the
+ * globe's currently loaded tiles can be orbital-level and hundreds of metres off in hilly terrain; loaded tiles are
+ * only used when sampling fails, then the coarse climate-atlas elevation, then 0 (offline ellipsoid terrain).
  */
-export async function terrainHeightAt(viewer: Viewer, lat: number, lon: number): Promise<number> {
+export async function terrainHeightAt(viewer: Viewer, lat: number, lon: number, fallback?: (lat: number, lon: number) => number | null): Promise<number> {
   const carto = Cartographic.fromDegrees(lon, lat);
-  const loaded = viewer.scene.globe.getHeight(carto);
-  if (loaded !== undefined) return loaded;
   try {
     const [s] = await sampleTerrain(viewer.terrainProvider, 12, [carto]);
-    return s?.height ?? 0;
+    if (s && typeof s.height === 'number' && Number.isFinite(s.height)) return s.height;
   } catch {
-    return 0;
+    /* provider cannot answer (offline / ellipsoid) — fall through */
   }
+  const loaded = viewer.scene.globe.getHeight(Cartographic.fromDegrees(lon, lat));
+  if (loaded !== undefined && Number.isFinite(loaded)) return loaded;
+  const coarse = fallback?.(lat, lon);
+  return coarse !== null && coarse !== undefined && Number.isFinite(coarse) ? Math.max(0, coarse) : 0;
 }
 
 /**
  * Resolves a target whose heightM is ABOVE GROUND (for targets below 50 km) into an ellipsoid height by sampling the
  * terrain, so bookmarks and search results never end up underground or clamped by collision detection.
  */
-export async function resolveTargetHeight(viewer: Viewer, t: CameraTarget): Promise<CameraTarget> {
+export async function resolveTargetHeight(viewer: Viewer, t: CameraTarget, fallback?: (lat: number, lon: number) => number | null): Promise<CameraTarget> {
   if (t.heightM >= 50_000) return t;
-  const ground = await terrainHeightAt(viewer, t.lat, t.lon);
+  const ground = await terrainHeightAt(viewer, t.lat, t.lon, fallback);
   return { ...t, heightM: Math.max(ground, 0) + t.heightM };
 }
 

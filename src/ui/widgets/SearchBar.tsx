@@ -36,6 +36,11 @@ export function SearchBar() {
     <div className={`terra-search ${searchOpen ? 'open' : ''}`} role="search">
       <input
         ref={inputRef}
+        role="combobox"
+        aria-expanded={searchOpen && results.length > 0}
+        aria-controls="terra-search-listbox"
+        aria-autocomplete="list"
+        aria-activedescendant={searchOpen && results[active] ? `terra-result-${active}` : undefined}
         value={query}
         placeholder="Search a place, landmark or coordinates (e.g. 27.9881, 86.9250)"
         aria-label="Search places or coordinates"
@@ -49,9 +54,9 @@ export function SearchBar() {
         }}
       />
       {searchOpen && results.length > 0 && (
-        <ul className="terra-search-results" role="listbox">
+        <ul className="terra-search-results" role="listbox" id="terra-search-listbox">
           {results.map((r, i) => (
-            <li key={r.id} role="option" aria-selected={i === active} className={i === active ? 'active' : ''} onMouseDown={() => go(r)}>
+            <li key={r.id} id={`terra-result-${i}`} role="option" aria-selected={i === active} className={i === active ? 'active' : ''} onMouseDown={() => go(r)}>
               <span className={`terra-kind terra-kind-${r.kind}`}>{r.kind}</span>
               <span className="terra-result-name">{r.name}</span>
               <span className="terra-result-sub">{r.displayName}</span>
