@@ -4,6 +4,8 @@ import { CrowdSystem } from '@/world/crowds/CrowdSystem';
 import { WildlifeSystem } from '@/world/wildlife/WildlifeSystem';
 import { MonsoonSystem } from '@/world/climate/MonsoonSystem';
 import { ActivitiesSystem } from '@/gameplay/activities/ActivitiesSystem';
+import { VehicleSystem } from './vehicles/VehicleSystem';
+import { ShowroomSystem } from './showroom/ShowroomSystem';
 
 /**
  * Every gameplay subsystem is constructed here. Add one line per system; systems must not import each other — they
@@ -15,5 +17,7 @@ export function createGameplaySystems(engine: TerraEngine): GameplaySystem[] {
   systems.push(new WildlifeSystem(engine));
   systems.push(new MonsoonSystem(engine));
   systems.push(new ActivitiesSystem(engine));
+  systems.push(new VehicleSystem(engine));
+  systems.push(new ShowroomSystem(engine));
   return systems;
 }

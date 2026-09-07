@@ -99,6 +99,28 @@
     "bApproximate": true
   },
   {
+    "Name": "lonavala-time-trial",
+    "DisplayName": "Lonavala hill road time trial (closed course)",
+    "Region": "Pune",
+    "Lat": 18.7318,
+    "Lon": 73.3974,
+    "HeadingDeg": 195,
+    "Description": "Start gate of the closed-course hill time trial near Bhushi Dam; three vehicles wait at the line.",
+    "DataNote": "Approximate start position on the Lonavala–Aamby Valley road; the gates and vehicles are fictional game objects.",
+    "bApproximate": true
+  },
+  {
+    "Name": "showroom-worli",
+    "DisplayName": "Seaface Motors showroom, Worli (fictional showroom)",
+    "Region": "Mumbai",
+    "Lat": 19.009,
+    "Lon": 72.8168,
+    "HeadingDeg": 90,
+    "Description": "Forecourt of an original procedural car showroom at an approximate dealership-cluster position.",
+    "DataNote": "Original showroom interior — not a real dealer's interior, name or brand; position approximate.",
+    "bApproximate": true
+  },
+  {
     "Name": "taj-mahal",
     "DisplayName": "Taj Mahal, Agra (external hero destination)",
     "Region": "Agra, Uttar Pradesh",

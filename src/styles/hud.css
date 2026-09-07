@@ -124,6 +124,7 @@
 .terra-vehicle-lamp.on { opacity: 1; color: #ffe27a; }
 .terra-vehicle-lamp.blink { opacity: 1; color: #ffb347; animation: terra-blink 0.8s steps(2) infinite; }
 .terra-vehicle-name { font-size: 0.85em; opacity: 0.85; }
+.terra-vehicle-heading { font-size: 0.8em; opacity: 0.85; }
 @keyframes terra-blink { to { opacity: 0.2; } }
 .terra-overlay-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100vw - 32px)); background: var(--terra-bg-strong); border: 1px solid var(--terra-border); border-radius: 14px; padding: 16px 20px; backdrop-filter: blur(14px); z-index: 40; animation: terra-fade 0.25s ease; }
 .terra-overlay-card h3 { margin: 0 0 8px; color: var(--terra-accent); }

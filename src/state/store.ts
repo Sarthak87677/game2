@@ -42,7 +42,14 @@ export interface GameplayState {
   /** Free-form status line from the active journey/activity (e.g. "Aboard 12123 to Pune · next stop Lonavala"). */
   status: string | null;
   /** Vehicle instrument readout when driving a gameplay vehicle. */
-  vehicle: { name: string; speedKmh: number; headlights: boolean; indicator: 'off' | 'left' | 'right' | 'hazard'; gear: string } | null;
+  vehicle: {
+    name: string; speedKmh: number; headlights: boolean; indicator: 'off' | 'left' | 'right' | 'hazard'; gear: string;
+    /** Optional extras from the vehicle system (additive): compass heading, navigation target, camera and damage. */
+    headingDeg?: number;
+    destination?: { name: string; bearingDeg: number; distanceM: number } | null;
+    camera?: 'third' | 'first' | 'dashboard';
+    damage?: number;
+  } | null;
 }
 
 export interface Settings {
