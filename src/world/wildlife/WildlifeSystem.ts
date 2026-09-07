@@ -10,7 +10,7 @@ import type { GameplayContext, GameplaySystem } from '@/gameplay/types';
 import { useTerraStore } from '@/state/store';
 import { fnv1a, Rng } from '@/util/hash';
 import { enuOffsetM, offsetToLonLat } from '@/util/geo';
-import { classifyPlace, type PlaceContext } from '@/world/crowds/placeContext';
+import { classifyPlace, groundFallback, type PlaceContext } from '@/world/crowds/placeContext';
 import { advanceFlock, createFlock, memberPosition, type Flock } from './flocks';
 import { AnimalSprites, ANIMAL_LABEL, type AnimalKind, type AnimalSprite } from './sprites';
 import { reportSighting } from './sightings';
@@ -44,6 +44,7 @@ export class WildlifeSystem implements GameplaySystem {
   private butterflyAnchor: { lat: number; lon: number; h: number } | null = null;
   private wanted = { cattle: 0, dog: 0, butterflies: 0, flocks: [] as { kind: AnimalKind; count: number }[] };
   private justSpawned = false;
+  private fallbackH = 0;
   enabled = true;
 
   constructor(private readonly engine: TerraEngine) {
@@ -67,6 +68,7 @@ export class WildlifeSystem implements GameplaySystem {
     if (!this.enabled) centre = null;
     if (!centre) { this.centre = null; this.despawnAll(); return; }
     this.centre = centre;
+    this.fallbackH = groundFallback(this.engine, p);
     if (now - this.lastContext > CONTEXT_MS || this.justSpawned) {
       this.lastContext = now;
       this.context = classifyPlace(this.engine, centre.lat, centre.lon);
@@ -128,7 +130,7 @@ export class WildlifeSystem implements GameplaySystem {
         if (members.length === 0) break;
         const a = this.rng.range(0, Math.PI * 2), d = this.rng.range(60, 140);
         const ll = offsetToLonLat(centre.lat, centre.lon, Math.cos(a) * d, Math.sin(a) * d);
-        const h = this.groundAt(ll.lat, ll.lon) ?? this.engine.groundHeightAt(ll.lat, ll.lon) ?? 0;
+        const h = this.groundAt(ll.lat, ll.lon) ?? this.fallbackH;
         const altitude = w.kind === 'pigeon' ? 12 : w.kind === 'gull' ? 18 : w.kind === 'egret' ? 14 : w.kind === 'crow' ? 16 : 25;
         const spread = w.kind === 'pigeon' ? 6 : 9;
         const speed = w.kind === 'pigeon' ? 9 : w.kind === 'egret' ? 6 : 8;
@@ -144,7 +146,7 @@ export class WildlifeSystem implements GameplaySystem {
     for (const b of this.butterflies) if (b.active) bHave++;
     if (bWant > 0 && (!this.butterflyAnchor || enuDist(this.butterflyAnchor, centre) > 45)) {
       const ll = offsetToLonLat(centre.lat, centre.lon, this.rng.range(-12, 12), this.rng.range(-12, 12));
-      this.butterflyAnchor = { lat: ll.lat, lon: ll.lon, h: this.groundAt(ll.lat, ll.lon) ?? this.engine.groundHeightAt(ll.lat, ll.lon) ?? 0 };
+      this.butterflyAnchor = { lat: ll.lat, lon: ll.lon, h: this.groundAt(ll.lat, ll.lon) ?? this.fallbackH };
     }
     for (const b of this.butterflies) {
       if (bHave >= bWant) break;
@@ -164,7 +166,7 @@ export class WildlifeSystem implements GameplaySystem {
       const ll = offsetToLonLat(centre.lat, centre.lon, Math.cos(a) * d, Math.sin(a) * d);
       if (this.blocked(ll.lat, ll.lon)) continue;
       g.lat = ll.lat; g.lon = ll.lon;
-      g.h = this.groundAt(ll.lat, ll.lon) ?? this.engine.groundHeightAt(ll.lat, ll.lon) ?? 0;
+      g.h = this.groundAt(ll.lat, ll.lon) ?? this.fallbackH;
       g.hAt = now + this.rng.range(0, 1000);
       g.sprite = this.sprites.get(g.kind, this.rng.int(5));
       g.frame = -1;
@@ -215,7 +217,7 @@ export class WildlifeSystem implements GameplaySystem {
       const px = (g.lon - centre.lon) * mLon, py = (g.lat - centre.lat) * mLat;
       const pd2 = px * px + py * py;
       if (pd2 < 9 && pd2 > 0.001) { const pd = Math.sqrt(pd2); const push = (3 - pd) * dt * 1.5; g.lon += (px / pd) * push / mLon; g.lat += (py / pd) * push / mLat; }
-      if (now > g.hAt) { g.hAt = now + 1000; const h = this.groundAt(g.lat, g.lon); if (h !== null) g.h = h; }
+      if (now > g.hAt) { g.hAt = now + 1000; g.h = this.groundAt(g.lat, g.lon) ?? this.fallbackH; }
       Cartesian3.fromDegrees(g.lon, g.lat, g.h, undefined, scratchPos);
       g.bb.position = scratchPos;
       if (moving) { g.animT += dt * 3; this.setFrame(g, Math.floor(g.animT) % 2); } else this.setFrame(g, 0);

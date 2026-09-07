@@ -14,7 +14,7 @@ import { fnv1a, Rng } from '@/util/hash';
 import { enuOffsetM, offsetToLonLat } from '@/util/geo';
 import { estimatedPopulation, localSolarHour, targetPedestrians, weatherCrowdFactor } from './density';
 import { VARIANTS_PER_PALETTE, type PaletteId } from './palettes';
-import { classifyPlace, type PlaceContext } from './placeContext';
+import { classifyPlace, groundFallback, type PlaceContext } from './placeContext';
 import { PedestrianSprites, STAND_FRAME, WALK_FRAMES, type SpriteSet } from './sprites';
 import { WalkNetwork, type LatLon, type WalkSegment } from './paths';
 import { StallLayer, type StallSpot } from './Stalls';
@@ -78,6 +78,7 @@ export class CrowdSystem implements GameplaySystem {
   private nearbySpots: StallSpot[] = [];
   private neighbourScratch: WalkSegment[] = [];
   private justSpawned = false;
+  private fallbackH = 0;
   enabled = true;
 
   constructor(private readonly engine: TerraEngine) {
@@ -119,6 +120,7 @@ export class CrowdSystem implements GameplaySystem {
     }
     if (!this.enabled) centre = null;
     if (!centre) { if (this.active > 0) this.despawnAll(); return; }
+    this.fallbackH = groundFallback(this.engine, p);
     if (now - this.lastContext > CONTEXT_MS || this.justSpawned) {
       this.lastContext = now;
       this.context = classifyPlace(this.engine, centre.lat, centre.lon);
@@ -128,7 +130,7 @@ export class CrowdSystem implements GameplaySystem {
       const wf = weatherCrowdFactor(weather?.condition);
       this.target = targetPedestrians(this.context.kind, this.localHour, FULL_RADIUS_M, MAX_PEDESTRIANS, wf);
       this.estimate = estimatedPopulation(this.context.kind, this.localHour, 1000);
-      this.stalls.sync(centre.lat, centre.lon, CROWD_HOTSPOTS);
+      this.stalls.sync(centre.lat, centre.lon, CROWD_HOTSPOTS, this.fallbackH);
       this.stalls.spotsNear(centre.lat, centre.lon, FULL_RADIUS_M, this.nearbySpots);
       const sun = this.engine.environment.sunElevationDeg(centre.lat, centre.lon);
       this.ambience.update({ kind: this.context.ambience, crowd: Math.min(1, this.active / 60), storm: weather?.condition === 'storm', rain: (weather?.precipitation ?? 0) > 0.1, night: sun < -6, templeNear: this.context.hotspot?.kind === 'temple', altitudeAglM: p.embodied ? 0 : (this.engine.altitudeAboveGround() ?? 0) }, this.engine.audio.isEnabled, now);
@@ -222,7 +224,7 @@ export class CrowdSystem implements GameplaySystem {
     ped.speed = rng.range(0.9, 1.6);
     ped.frame = -1;
     ped.animT = rng.next();
-    ped.h = this.groundAt(ped.lat, ped.lon) ?? this.engine.groundHeightAt(ped.lat, ped.lon) ?? 0;
+    ped.h = this.groundAt(ped.lat, ped.lon) ?? this.fallbackH;
     ped.hAt = now + rng.range(0, 1000);
     this.setFrame(ped, ped.mode === 'linger' ? STAND_FRAME : 0);
     ped.bb.show = true;
@@ -299,8 +301,7 @@ export class CrowdSystem implements GameplaySystem {
       // Ground height, refreshed about once a second (staggered).
       if (now > ped.hAt) {
         ped.hAt = now + 900 + rng.next() * 300;
-        const g = this.groundAt(ped.lat, ped.lon);
-        if (g !== null) ped.h = g;
+        ped.h = this.groundAt(ped.lat, ped.lon) ?? this.fallbackH;
       }
       Cartesian3.fromDegrees(ped.lon, ped.lat, ped.h, undefined, scratchPos);
       ped.bb.position = scratchPos;
