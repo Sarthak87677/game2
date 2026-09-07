@@ -39,6 +39,7 @@ import { NearFieldWorld, type NearFieldStats } from '@/world/render';
 import { speciesById } from '@/world/procedural/species';
 import { LandmarkLayer } from '@/world/landmarks/LandmarkLayer';
 import { GameplayHost } from '@/gameplay/GameplayHost';
+import { applyHeroExclusions } from '@/world/hero/heroExclusions';
 import type { SpawnPoint } from '@/gameplay/types';
 import type { GeocodingAdapter } from '@/data/geocoding/types';
 
@@ -496,7 +497,8 @@ export class TerraEngine {
       density: () => QUALITY_PRESETS[this.quality].vegetationDensity,
     }, z, x, y);
     if (!ctx) return null;
-    return this.procgen.generate(ctx);
+    // Hero destinations (Taj Mahal) own their footprint: procedural content generated under them is dropped.
+    return applyHeroExclusions(await this.procgen.generate(ctx));
   }
 
   /** Captures the current frame as a PNG data URL. */
