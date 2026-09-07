@@ -129,6 +129,8 @@ export class TerraEngine {
         },
       });
       this.modes.extraHeightSampler = (lat, lon) => this.osm?.heightAt(lat, lon) ?? this.nearField?.heightAt(lat, lon) ?? null;
+    // On the open sea the terrain (bathymetry) is below the water surface; keep walkers and vehicles on the surface.
+    this.modes.addHeightSampler((lat, lon) => (this.naturalEarth && !this.landAt(lat, lon) ? 0.3 : null));
     } else {
       this.overpass = null;
       this.osm = null;
@@ -381,7 +383,7 @@ export class TerraEngine {
     if (moved || now - this.lastReadout.t > 2000) {
       this.lastReadout = { lat: cam.lat, lon: cam.lon, t: now };
       patch.location = this.describe(cam.lat, cam.lon);
-      const sample = this.worldMap?.sample(cam.lat, cam.lon, this.naturalEarth?.isLand(cam.lat, cam.lon) ?? false);
+      const sample = this.worldMap?.sample(cam.lat, cam.lon, this.landAt(cam.lat, cam.lon));
       this.audio.update({ biome: sample?.biome ?? 'ocean', weather: useTerraStore.getState().weather, altitudeAglM: cam.altitudeAglM ?? cam.heightM, sunElevationDeg: patch.location.sunElevationDeg ?? 0, nearWater: (sample?.distCoastKm ?? 999) < 2 || sample?.surface !== 'land', urban: this.osm ? Math.min(1, this.osmStatus.loaded / 12) : 0 });
       if (this.lastReverse.name && !moved) patch.location.place = this.lastReverse.name;
       void this.maybeReverseGeocode(cam.lat, cam.lon, cam.altitudeAglM);
@@ -389,10 +391,28 @@ export class TerraEngine {
     useTerraStore.setState(patch);
   }
 
+  /**
+   * Land/water at a point. Natural Earth vectors decide; inside a fine-coastline detail region the measured terrain
+   * refines the ~1 km vector fringe (reclaimed and low coastal city land is above sea level in the DEM, open water is
+   * bathymetry below it). Unknown terrain leaves the vector answer unchanged.
+   */
+  landAt(lat: number, lon: number): boolean {
+    const ne = this.naturalEarth;
+    if (!ne) return true;
+    if (ne.isLand(lat, lon)) return true;
+    if (!ne.hasFineCoastline(lat, lon)) return false;
+    const h = this.viewer.scene.globe.getHeight(Cartographic.fromDegrees(lon, lat));
+    return h !== undefined && h > 1.0;
+  }
+
   /** Human-readable description of a point, with provenance. */
   describe(lat: number, lon: number): LocationReadout {
     const date = this.environment.getDate();
-    const surfaceInfo = this.naturalEarth?.surfaceAt(lat, lon) ?? null;
+    const vectorInfo = this.naturalEarth?.surfaceAt(lat, lon) ?? null;
+    // Coastal-fringe refinement from the measured terrain (see landAt).
+    const surfaceInfo = vectorInfo && vectorInfo.kind === 'ocean' && this.landAt(lat, lon)
+      ? { ...vectorInfo, kind: 'land' as const, country: this.naturalEarth?.countryAt(lat, lon) ?? null, marine: null }
+      : vectorInfo;
     const sample = this.worldMap?.sample(lat, lon, surfaceInfo ? surfaceInfo.kind !== 'ocean' : false) ?? null;
     const place = this.gazetteer?.describeLocation(lat, lon) ?? `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
     const season = seasonFor(date, lat);
@@ -431,7 +451,7 @@ export class TerraEngine {
   applySimulatedWeatherForCamera(): void {
     if (this.destroyed) return;
     const cam = cameraState(this.viewer);
-    const sample = this.worldMap?.sample(cam.lat, cam.lon, this.naturalEarth?.isLand(cam.lat, cam.lon) ?? false);
+    const sample = this.worldMap?.sample(cam.lat, cam.lon, this.landAt(cam.lat, cam.lon));
     if (!sample) return;
     const date = this.environment.getDate();
     const r = hash2(Math.round(cam.lat * 2), Math.round(cam.lon * 2), Math.floor(date.getTime() / 3_600_000 / 6));

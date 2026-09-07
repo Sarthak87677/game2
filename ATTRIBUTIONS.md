@@ -4,7 +4,7 @@ Terra Infinite displays the attribution strip at the bottom of the screen at all
 
 ## Geographic data
 
-* **Natural Earth** — Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com (public domain). Processed subset in `public/data/ne/`.
+* **Natural Earth** — Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com (public domain). Processed subset in `public/data/ne/` (1:50m/1:110m globally, plus 1:10m land clipped to gameplay detail regions).
 * **Terrain Tiles (Mapzen / AWS Open Data)** — elevation from SRTM (NASA/JPL), NED/3DEP (USGS), ETOPO1 (NOAA NGDC), GMTED2010 (USGS), ArcticDEM (Polar Geospatial Center), EU-DEM (European Environment Agency), and national datasets listed at https://registry.opendata.aws/terrain-tiles/.
 * **OpenStreetMap** — © OpenStreetMap contributors, Open Database Licence (ODbL) 1.0. Features via the Overpass API; geocoding via Nominatim / Photon.
 * **NASA GIBS** — imagery courtesy NASA Global Imagery Browse Services (GIBS), part of NASA EOSDIS.

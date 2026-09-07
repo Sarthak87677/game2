@@ -81,6 +81,49 @@ const land50 = await load('ne_50m_land');
 write('land_50m.json', featureCollection(land50, () => ({})));
 const land110 = await load('ne_110m_land');
 write('land_110m.json', featureCollection(land110, () => ({})));
+// Fine (1:10m) coastline for gameplay detail regions only. The 1:50m set generalises narrow peninsulas away
+// (all of southern Mumbai — Colaba, Fort, Marine Drive — is "ocean" at 1:50m). Whole-planet 1:10m land is ~10 MB, so
+// the polygons are clipped (Sutherland–Hodgman against each region rectangle) and stored at 4-decimal precision.
+const DETAIL_REGIONS = [
+  { id: 'india', name: 'India and neighbours', west: 66, south: 5, east: 98, north: 37 },
+];
+function clipRing(ring, b) {
+  const edges = [
+    [(p) => p[0] >= b.west, (p, q) => [b.west, p[1] + ((q[1] - p[1]) * (b.west - p[0])) / (q[0] - p[0])]],
+    [(p) => p[0] <= b.east, (p, q) => [b.east, p[1] + ((q[1] - p[1]) * (b.east - p[0])) / (q[0] - p[0])]],
+    [(p) => p[1] >= b.south, (p, q) => [p[0] + ((q[0] - p[0]) * (b.south - p[1])) / (q[1] - p[1]), b.south]],
+    [(p) => p[1] <= b.north, (p, q) => [p[0] + ((q[0] - p[0]) * (b.north - p[1])) / (q[1] - p[1]), b.north]],
+  ];
+  let out = ring;
+  for (const [inside, intersect] of edges) {
+    const input = out;
+    out = [];
+    if (input.length === 0) break;
+    let prev = input[input.length - 1];
+    for (const cur of input) {
+      if (inside(cur)) {
+        if (!inside(prev)) out.push(intersect(prev, cur));
+        out.push(cur);
+      } else if (inside(prev)) out.push(intersect(prev, cur));
+      prev = cur;
+    }
+  }
+  return out;
+}
+const land10 = await load('ne_10m_land');
+const fine = [];
+const r4 = (v) => Number(v.toFixed(4));
+for (const region of DETAIL_REGIONS) {
+  for (const f of land10.features) {
+    if (!f.geometry) continue;
+    for (const poly of f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates]) {
+      const rings = poly.map((ring) => dedupeRing(clipRing(ring, region).map((c) => [r4(c[0]), r4(c[1])]))).filter((ring) => ring.length >= 4);
+      if (rings.length === 0 || rings[0].length < 4) continue;
+      fine.push({ type: 'Feature', properties: { region: region.id }, geometry: { type: 'Polygon', coordinates: rings } });
+    }
+  }
+}
+write('land_10m_detail.json', { type: 'FeatureCollection', regions: DETAIL_REGIONS, features: fine });
 const lakes = await load('ne_50m_lakes');
 write('lakes_50m.json', featureCollection(lakes, (p) => ({ name: prop(p, 'name', 'NAME') ?? null })));
 const rivers = await load('ne_50m_rivers_lake_centerlines');
