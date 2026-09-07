@@ -155,6 +155,28 @@ export class NearFieldWorld {
     return buildingHeightAt(rec.buildings, p.x, p.y);
   }
 
+  /**
+   * Procedural buildings of fully built tiles within `radiusM` of a point, with footprints converted to [lon, lat]
+   * rings (used by the interiors system to offer enterable near-field buildings). Additive, optional hook.
+   */
+  buildingsNear(lat: number, lon: number, radiusM: number): { id: string; footprint: [number, number][]; heightM: number; style: BuildingSpec['style']; source: BuildingSpec['source']; baseZ: number }[] {
+    const out: { id: string; footprint: [number, number][]; heightM: number; style: BuildingSpec['style']; source: BuildingSpec['source']; baseZ: number }[] = [];
+    for (const rec of this.tiles.values()) {
+      if (!rec.data || rec.lod !== 'full' || rec.buildings.length === 0) continue;
+      const centre = tileLocalPoint(rec.data.anchorLat, rec.data.anchorLon, lat, lon);
+      for (const b of rec.buildings) {
+        if (b.footprint.length < 3) continue;
+        let cx = 0, cy = 0;
+        for (const [x, y] of b.footprint) { cx += x; cy += y; }
+        cx /= b.footprint.length; cy /= b.footprint.length;
+        if (Math.hypot(cx - centre.x, cy - centre.y) > radiusM) continue;
+        const footprint = b.footprint.map(([x, y]) => { const ll = offsetToLonLat(rec.data!.anchorLat, rec.data!.anchorLon, x, y); return [ll.lon, ll.lat] as [number, number]; });
+        out.push({ id: `${rec.key}:${b.id}`, footprint, heightM: b.heightM, style: b.style, source: b.source, baseZ: b.baseZ });
+      }
+    }
+    return out;
+  }
+
   stats(): NearFieldStats {
     return this.cachedStats;
   }

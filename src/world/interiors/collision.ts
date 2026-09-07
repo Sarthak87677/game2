@@ -5,7 +5,7 @@
  * stair cores. The walker's ground is the candidate surface nearest to its current height, which lets it follow a
  * ramp continuously and keeps it on the right storey without any explicit floor state.
  */
-import { DOOR_HEIGHT_M, RAILING_HEIGHT_M, WALL_THICKNESS_M, stairSurfaceZ } from './grammar';
+import { DOOR_HEIGHT_M, RAILING_HEIGHT_M, WALL_THICKNESS_M, pointInRing, stairSurfaceZ } from './grammar';
 import type { Door, FloorPlan, InteriorPlan, WallSegment, WindowSpec } from './types';
 
 const inRect = (r: { x0: number; y0: number; x1: number; y1: number }, x: number, y: number, pad = 0) => x >= r.x0 - pad && x <= r.x1 + pad && y >= r.y0 - pad && y <= r.y1 + pad;
@@ -184,5 +184,20 @@ export function wallPieces(floor: FloorPlan, wallHeight: number): Box[] {
 /** True when some wall box covers the point (x, y, z) — used by tests to prove doors are open and lintels solid. */
 export function wallSolidAt(boxes: readonly Box[], x: number, y: number, z: number): boolean {
   for (const b of boxes) if (x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1 && z >= b.z0 && z <= b.z1) return true;
+  return false;
+}
+
+/** True when the point is inside the footprint polygon or within `pad` metres of its boundary. */
+export function pointInFootprint(plan: InteriorPlan, x: number, y: number, pad = 0): boolean {
+  const ring = plan.footprint;
+  if (ring.length >= 3 && pointInRing(ring, x, y)) return true;
+  if (pad <= 0) return false;
+  for (let i = 0; i < ring.length; i++) {
+    const [ax, ay] = ring[i], [bx, by] = ring[(i + 1) % ring.length];
+    const dx = bx - ax, dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    const t = len2 < 1e-9 ? 0 : Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / len2));
+    if (Math.hypot(ax + t * dx - x, ay + t * dy - y) <= pad) return true;
+  }
   return false;
 }
