@@ -18,9 +18,13 @@
       "file": "Destinations.json",
       "rowStruct": "FTerraDestinationRow",
       "sourceType": "Destination[]",
-      "sourceExports": [],
-      "rows": 0,
-      "status": "missing-in-source"
+      "sourceExports": [
+        "MAHARASHTRA_CITIES",
+        "MAHARASHTRA_DESTINATIONS",
+        "ALL_MAHARASHTRA_PLACES"
+      ],
+      "rows": 260,
+      "status": "exported"
     },
     {
       "file": "Stations.json",

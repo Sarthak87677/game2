@@ -269,11 +269,18 @@ export function buildExport(dataModule) {
   for (const spec of TABLES) {
     const rows = [];
     const sources = [];
+    // The same object may be re-exported through several arrays (e.g. cities, destinations and the combined
+    // "all places" list); count each source object once, and only reject genuinely different rows sharing a name.
+    const seenItems = new Set();
     for (const [name, value] of exportsList) {
       if (!Array.isArray(value) || value.length === 0) continue;
       if (!value.every(spec.match)) continue;
       sources.push(name);
-      for (const item of value) rows.push(spec.map(item));
+      for (const item of value) {
+        if (seenItems.has(item)) continue;
+        seenItems.add(item);
+        rows.push(spec.map(item));
+      }
     }
     const seen = new Set();
     for (const row of rows) {
