@@ -47,3 +47,29 @@ TERRA_FIXTURES=1 npm run dev   # synthetic OSM responder for offline development
 ## Next task
 
 Run `npm run build && npm run perf` on a machine with a GPU and network access to the OSM/Overpass hosts, paste the table into PERFORMANCE.md, and use the Diagnostics panel at the showcase ground spots to check real-OSM rendering (this sandbox could only exercise the synthetic fixture).
+
+## Track: unreal (2026-09-07)
+
+**Completed**
+* Shared-data exporter `scripts/export-unreal-data.mjs` → `unreal/TerraInfinite/Content/Data/*.json` (10 tables +
+  manifest), shape-based detection, deterministic, `--check` mode, npm scripts `unreal:export` / `unreal:check`.
+* Unreal Engine 5.4 project scaffold: `.uproject`, `DefaultEngine/Game/Input/Scalability.ini`,
+  `Secrets.ini.example` + `.gitignore`, C++ module with game mode, config-built Enhanced Input, player character,
+  Chaos vehicle pawn, geo cell streaming, interior generator, journey state machine, perf diagnostics + benchmark
+  JSON + quality governor, activities, JSON data loader, one row struct per table. `docs/UNREAL.md` documents
+  requirements, licensing, build, benchmark map and the open gates.
+
+**Tested (how)**
+* `tests/unit/exportUnrealData.test.ts` (11 tests) — committed tables equal a fresh export; detection contract per
+  table; campus/grammar normalisation; duplicate ids rejected. `npm run typecheck && npm run lint && npm test` pass.
+
+**Broken / not verified**
+* The entire `unreal/` C++ module: never compiled (no Unreal, no GPU in the sandbox). No map, no screenshots, no e2e.
+  Treat every gameplay claim for the Unreal client as *unverified* until gates 1–10 in `docs/UNREAL.md` close.
+* Vehicle has no wheel setup (needs an original skeletal mesh); room furnishing is a logging stub; journey vessels
+  are cubes; Mass crowd/traffic unconfigured; no UMG HUD.
+
+**Next**
+* On a workstation with UE 5.4+ and Cesium for Unreal 2.x: build, fix API drift, create `L_Benchmark`, run
+  `terra.Benchmark.Run`, paste numbers into `PERFORMANCE.md`, add `docs/screenshots/unreal-*.png`.
+* Re-run the exporter when the data/journeys/interiors tracks land their tables (the test will remind you).

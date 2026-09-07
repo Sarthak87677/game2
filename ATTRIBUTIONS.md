@@ -13,6 +13,13 @@ Terra Infinite displays the attribution strip at the bottom of the screen at all
 * **Cesium ion** — Cesium World Terrain, © Microsoft Bing (optional, token required).
 * **Open-Meteo** — Weather data by Open-Meteo.com (CC BY 4.0), optional live/historical weather.
 
+## Unreal Engine client (scaffold, `unreal/`)
+
+* **Unreal Engine 5** — Epic Games EULA (source is not redistributed here; the project references the engine only).
+* **Cesium for Unreal** — Apache License 2.0, © Cesium GS, Inc. Engine assets it streams carry their own credits (Cesium World Terrain, Cesium OSM Buildings © OpenStreetMap contributors) shown by Cesium's credit overlay.
+* **Google Photorealistic 3D Tiles** — optional, only with a user-supplied key; Google Map Tiles API terms require visible Google attribution, no caching beyond the session and no offline use. Never bundled.
+* **Engine basic shapes** (`/Engine/BasicShapes/Cube`) are used as stand-in geometry for procedural interiors and journey vessels; every use is labelled procedural.
+
 ## Software
 
 * **CesiumJS** — Apache License 2.0, © Cesium GS, Inc. Includes bundled assets (star map, moon and water normal textures, IAU2006 XYS data, Draco/KTX2 decoders).

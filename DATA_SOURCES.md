@@ -29,6 +29,16 @@ Provenance vocabulary used in the app and below:
 | Terra Infinite (this project) | Climate anchor table (`src/world/climate/anchors.ts`) | this repository | Global (200+ stations) | Station monthly normals, rounded | Curated 2026 from published 1991–2020 style normals (approximate) | MIT | None | No | **Inferred:** Köppen–Geiger class, monthly temperature/precipitation, biome, phenology (season, flowering, fruiting). |
 | CesiumJS | Engine assets (star map, moon texture, water normal map, IAU2006 XYS data) | https://cesium.com/platform/cesiumjs/ | n/a | n/a | Cesium 1.145 | Apache 2.0 | "CesiumJS" | No | Sky box, moon, water waves, ICRF transforms. |
 
+## Unreal client sources (scaffold)
+
+The Unreal client (`unreal/TerraInfinite`) consumes the same shared data (`src/data/maharashtra/**`, exported to `Content/Data/*.json`) and picks its terrain/buildings source from user-supplied credentials (`Config/Secrets.ini`, git-ignored):
+
+| Provider | Dataset | Coverage | Licence / conditions | API key | Used for |
+|---|---|---|---|---|---|
+| Google Maps Platform | Photorealistic 3D Tiles (Map Tiles API) | Major cities incl. Mumbai/Pune | Google Maps Platform terms: attribution always visible, no caching/offline use, billed per root-tile request after the free quota | **Yes** (`GoogleTilesKey`, optional) | Optional hyperrealistic city mesh; never the default |
+| Cesium ion | Cesium World Terrain (asset 1), Cesium OSM Buildings (asset 96188) | Global | Cesium ion terms (free tier for non-commercial) | **Yes** (`CesiumIonToken`, optional) | Terrain + buildings when a token exists |
+| Open fallback | AWS Terrarium / Copernicus DEM (converted to quantized-mesh), OSM buildings (ODbL), Natural Earth (PD), OSM / ourairports.com railway, road and airport data | Global | As listed in the table above | No | Default when no key is present |
+
 ## Usage limits and etiquette
 
 * **Overpass**: one request at a time, ≥1.5 s spacing, 25 s server timeout, responses cached 7 days in IndexedDB, automatic back-off on HTTP 429/504. Never bulk-download.

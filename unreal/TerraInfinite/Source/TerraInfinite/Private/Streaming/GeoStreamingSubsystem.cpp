@@ -235,7 +235,7 @@ void UGeoStreamingSubsystem::Tick(float DeltaTime)
     while (Pending.Num() > 0 && Loads < MaxLoadsPerFrame && (FPlatformTime::Seconds() - Start) * 1000.0 < BudgetMs)
     {
         const TPair<FTerraCellKey, int32> Next = Pending[0];
-        Pending.RemoveAt(0, 1, EAllowShrinking::No);
+        Pending.RemoveAt(0);
         LoadCell(Next.Key, Next.Value);
         ++Loads;
     }

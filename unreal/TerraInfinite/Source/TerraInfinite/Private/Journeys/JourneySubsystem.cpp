@@ -12,6 +12,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Algo/Reverse.h"
 
 // ------------------------------------------------------------------------------------------------ vessel
 
