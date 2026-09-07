@@ -119,8 +119,13 @@ describe('export-unreal-data: table detection by shape (contract for the other t
     expect(m.tables.find((t) => t.file === 'Spawns.json')?.status).toBe('exported');
   });
 
+  it('counts the same object once when it is re-exported through several arrays', () => {
+    const out = buildExport({ A: [spawn], B: [spawn], All: [spawn] });
+    expect(out.files['Spawns.json']).toHaveLength(1);
+  });
+
   it('rejects duplicate row names across exports', () => {
-    expect(() => buildExport({ A: [spawn], B: [spawn] })).toThrow(/duplicate row name/);
+    expect(() => buildExport({ A: [spawn], B: [{ ...spawn }] })).toThrow(/duplicate row name/);
   });
 
   it('spawns match the SpawnPoint contract fields used by the UE row struct', () => {
