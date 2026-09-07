@@ -1,0 +1,143 @@
+{
+  "measuredAt": "2026-09-07T13:45:36.612Z",
+  "quick": true,
+  "url": "http://127.0.0.1:5173/?terraFixtures=1&terraQuality=low&terraMinFps=1",
+  "bootSeconds": 94.7,
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "softwareRenderer": true,
+  "hardware": {
+    "cpuCores": 4,
+    "deviceMemoryGb": 8,
+    "gpuVendor": "Google",
+    "gpuRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "graphicsApi": "WebGL2 via ANGLE (SwiftShader (Vulkan software rasteriser))",
+    "angleBackend": "SwiftShader (Vulkan software rasteriser)",
+    "softwareRenderer": true,
+    "maxTextureSize": 8192,
+    "screen": {
+      "width": 1920,
+      "height": 1080,
+      "devicePixelRatio": 1
+    },
+    "vram": "not exposed by WebGL",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+    "platform": "Linux"
+  },
+  "preset": "low",
+  "readiness": {
+    "phase": "ready",
+    "message": "Ready",
+    "error": null,
+    "blocking": [],
+    "degraded": [
+      "Climate atlas: built without measured elevation (terrain host unreachable); sea level assumed",
+      "Terrain: terrain host not answering (1 failed tiles in 45 s) → flat ellipsoid",
+      "FPS gate overridden to 1 fps (?terraMinFps)"
+    ],
+    "fpsSustainedMs": 51842.69999999995,
+    "fpsGatePassed": true,
+    "minFps": 1
+  },
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+  "viewport": "1920x1080",
+  "spotSeconds": 5,
+  "results": [
+    {
+      "id": "mumbai-marine-drive",
+      "name": "Mumbai Marine Drive / CSMT traffic area",
+      "lat": 18.9432,
+      "lon": 72.8236,
+      "heightM": 300,
+      "seconds": 7,
+      "fps": 0.6,
+      "avgFps": 0.6,
+      "onePercentLowFps": 0.4,
+      "frameMs": 1755.9,
+      "p99Ms": 2656.2,
+      "frames": 4,
+      "heapMb": 89,
+      "globeTiles": 17,
+      "terrainTiles": 0,
+      "drawCalls": 97,
+      "primitives": 33,
+      "actors": 300,
+      "adaptiveStep": 9,
+      "resolutionScale": 0.45
+    },
+    {
+      "id": "campus",
+      "name": "SGIS-inspired campus (procedural)",
+      "lat": 16.7335,
+      "lon": 74.4015,
+      "heightM": 300,
+      "seconds": 5,
+      "fps": 0.8,
+      "avgFps": 0.8,
+      "onePercentLowFps": 0.4,
+      "frameMs": 1302.5,
+      "p99Ms": 2634.7,
+      "frames": 4,
+      "heapMb": 144,
+      "globeTiles": 17,
+      "terrainTiles": 0,
+      "drawCalls": 95,
+      "primitives": 34,
+      "actors": 150,
+      "adaptiveStep": 10,
+      "resolutionScale": 0.375
+    },
+    {
+      "id": "air-mumbai",
+      "name": "Air-travel view over Mumbai (3 000 m)",
+      "lat": 19.09,
+      "lon": 72.87,
+      "heightM": 3000,
+      "seconds": 5.1,
+      "fps": 3.8,
+      "avgFps": 3.8,
+      "onePercentLowFps": 1.3,
+      "frameMs": 261.6,
+      "p99Ms": 798.9,
+      "frames": 20,
+      "heapMb": 105,
+      "globeTiles": 18,
+      "terrainTiles": 0,
+      "drawCalls": 108,
+      "primitives": 45,
+      "actors": 150,
+      "adaptiveStep": 10,
+      "resolutionScale": 0.375
+    }
+  ],
+  "soak": {
+    "seconds": 40,
+    "heapSamples": [
+      {
+        "t": 5,
+        "heapMb": 100.5
+      },
+      {
+        "t": 10,
+        "heapMb": 100.9
+      },
+      {
+        "t": 17,
+        "heapMb": 99.9
+      }
+    ],
+    "p99PerMinute": [
+      {
+        "minute": 1,
+        "p99Ms": 2707.5,
+        "avgFps": 1.22,
+        "frames": 13
+      }
+    ],
+    "failures": [],
+    "gcAvailable": true,
+    "heapMinute1Mb": 100.9,
+    "heapMinute5Mb": 99.9,
+    "heapGrowthPct": -1
+  },
+  "pageErrors": []
+}
