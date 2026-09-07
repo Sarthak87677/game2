@@ -100,6 +100,7 @@ export class TerraEngine {
   /** `?terraMinFps=` override for the boot gate and the ladder (tests, software renderers). */
   private readonly minFpsOverride: number | null;
   private lastApplied: QualitySettings | null = null;
+  private terrainRecoveryTimer: number | null = null;
 
   private constructor(container: HTMLElement) {
     const store = useTerraStore.getState();
@@ -303,8 +304,10 @@ export class TerraEngine {
       if (!terrainFallbackReason && !this.streaming.hasTilesLoadedOnce() && snap.terrainTilesLoaded === 0 && now - started > TERRAIN_FALLBACK_MS && !(this.viewer.terrainProvider instanceof EllipsoidTerrainProvider)) {
         terrainFallbackReason = `terrain host not answering (${snap.terrainTileErrors} failed tiles in ${Math.round((now - started) / 1000)} s) → flat ellipsoid`;
         useTerraStore.getState().log('warn', `Terrain fallback: ${terrainFallbackReason}`);
+        const wanted = useTerraStore.getState().terrainId;
         await this.setTerrain('ellipsoid');
         if (this.destroyed) return;
+        this.scheduleTerrainRecovery(wanted);
       }
       const decision = gate.update({
         terrainActive: !!this.viewer.terrainProvider,
@@ -331,6 +334,35 @@ export class TerraEngine {
       setBoot(0.85 + 0.13 * Math.min(1, decision.fpsSustainedMs / gate.sustainMs), decision.message);
       await new Promise((r) => window.setTimeout(r, 250));
     }
+  }
+
+  /**
+   * After the flat-ellipsoid fallback, keep probing the terrain host (one small tile a minute); when it answers again,
+   * restore measured terrain and clear the degradation so a slow first minute does not cost the whole session.
+   */
+  private scheduleTerrainRecovery(terrainId: string): void {
+    if (this.terrainRecoveryTimer !== null || terrainId === 'ellipsoid') return;
+    const probeUrl = TERRARIUM_DEFAULT_URL.replace('{z}', '1').replace('{x}', '1').replace('{y}', '0');
+    this.terrainRecoveryTimer = window.setInterval(() => {
+      if (this.destroyed) { this.clearTerrainRecovery(); return; }
+      const ctrl = new AbortController();
+      const timeout = window.setTimeout(() => ctrl.abort(), 10_000);
+      fetch(probeUrl, { signal: ctrl.signal, cache: 'no-store' })
+        .then(async (res) => {
+          if (!res.ok || this.destroyed) return;
+          this.clearTerrainRecovery();
+          await this.setTerrain(terrainId);
+          if (this.destroyed) return;
+          useTerraStore.getState().log('info', 'Terrain host reachable again — measured terrain restored');
+          useTerraStore.setState((st) => (st.readiness ? { readiness: { ...st.readiness, degraded: st.readiness.degraded.filter((d) => !d.startsWith('Terrain:')) } } : {}));
+        })
+        .catch(() => { /* still unreachable; try again next minute */ })
+        .finally(() => window.clearTimeout(timeout));
+    }, 60_000);
+  }
+
+  private clearTerrainRecovery(): void {
+    if (this.terrainRecoveryTimer !== null) { window.clearInterval(this.terrainRecoveryTimer); this.terrainRecoveryTimer = null; }
   }
 
   /** Runs the in-app benchmark at the current spot and appends the JSON line to the Diagnostics log. */
@@ -692,6 +724,7 @@ export class TerraEngine {
 
   destroy(): void {
     this.destroyed = true;
+    this.clearTerrainRecovery();
     this.gameplay.destroy();
     this.adaptive.destroy();
     if (this.readoutTimer !== null) window.clearInterval(this.readoutTimer);
