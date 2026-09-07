@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { collectErrors, waitForReady, waitForTiles } from './helpers';
 
-type TerraWindow = Window & {
+// Not intersected with Window: TerraEngine's global declaration types state()/gameplay() as unknown.
+interface TerraWindow {
   __terra: {
     goTo: (lat: number, lon: number, h: number, heading?: number, pitch?: number) => Promise<boolean>;
     spawn: (s: unknown) => Promise<void>;
@@ -15,7 +16,7 @@ type TerraWindow = Window & {
       groundHeightAt: (lat: number, lon: number) => number | null;
     };
   };
-};
+}
 
 const tajStats = (page: import('@playwright/test').Page) =>
   page.evaluate(() => (window as unknown as TerraWindow).__terra.engine.gameplay.systems.find((s) => s.id === 'taj-mahal')?.stats?.() ?? null);

@@ -6,6 +6,9 @@ import { haversineM } from '@/util/geo';
 import { fnv1a } from '@/util/hash';
 import type { QualitySettings } from '@/engine/quality';
 
+/** Grace period before a landmark is placed without a terrain height (ellipsoid), in ms. */
+const OFFLINE_GRACE_MS = 4000;
+
 interface Placed { model: LandmarkModel; collection: PrimitiveCollection; primitive: Primitive; anchoredHeight: number | null }
 
 export interface LandmarkLayerOptions { quality: () => QualitySettings; models?: LandmarkModel[]; showRadiusM?: number }
@@ -20,6 +23,8 @@ export class LandmarkLayer {
   private readonly labels: LabelCollection;
   private readonly placed = new Map<string, Placed>();
   private readonly labelIds = new Map<string, ReturnType<LabelCollection['add']>>();
+  /** When a model first came into range without a terrain height; after a grace period it is placed on the ellipsoid. */
+  private readonly waitingSince = new Map<string, number>();
   private appearances: VegetationAppearances | null = null;
   private readonly remove: () => void;
   private lastTick = 0;
@@ -57,11 +62,16 @@ export class LandmarkLayer {
       if (d <= radius) {
         // Placement waits for a terrain height: Cesium bakes an instance's model matrix into world coordinates, so
         // a primitive cannot be moved afterwards — it is rebuilt instead when detailed terrain changes the base.
-        if (!this.placed.has(key)) { if (this.groundAt(m) !== null) this.place(m); }
-        else this.reanchor(this.placed.get(key)!);
+        if (!this.placed.has(key)) {
+          // Terrain can be unavailable (offline sandbox, blocked host): after a short grace period the stand-in is
+          // placed on the ellipsoid and re-anchored as soon as a terrain height arrives.
+          if (this.groundAt(m) !== null) { this.place(m); this.waitingSince.delete(key); }
+          else if (!this.waitingSince.has(key)) this.waitingSince.set(key, now);
+          else if (now - this.waitingSince.get(key)! > OFFLINE_GRACE_MS) { this.place(m); this.waitingSince.delete(key); }
+        } else this.reanchor(this.placed.get(key)!);
       } else if (this.placed.has(key)) {
         this.unload(key);
-      }
+      } else this.waitingSince.delete(key);
     }
   }
 
