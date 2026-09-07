@@ -51,6 +51,7 @@ export class LandmarkLayer {
     if (!this.enabled || cam.height > 40_000) { this.unloadAll(); return; }
     const lat = CMath.toDegrees(cam.latitude), lon = CMath.toDegrees(cam.longitude);
     for (const m of this.models) {
+      if (m.hero) continue; // rendered as walkable geometry by a hero gameplay system
       const d = haversineM(lat, lon, m.lat, m.lon);
       const key = m.name;
       if (d <= radius) {
