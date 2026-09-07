@@ -81,8 +81,12 @@ export function connectRoads(roads: GraphRoad[], nodes: Map<string, GraphNode>):
 export function disconnectRoads(tile: string, nodes: Map<string, GraphNode>): void {
   for (const [k, node] of nodes) {
     node.arms = node.arms.filter((a) => a.road.tile !== tile);
-    if (node.arms.length === 0) nodes.delete(k);
-    else node.signal = node.arms.length >= 3 && node.arms.some((a) => SIGNAL_KINDS.has(a.road.kind));
+    const distinct = new Set(node.arms.map((a) => a.road.id));
+    if (distinct.size < 2) {
+      // A junction needs two roads; a lone remaining arm is an ordinary vertex again.
+      for (const a of node.arms) a.road.nodes[a.index] = null;
+      nodes.delete(k);
+    } else node.signal = node.arms.length >= 3 && node.arms.some((a) => SIGNAL_KINDS.has(a.road.kind));
   }
 }
 

@@ -362,10 +362,21 @@ export class VehicleSystem implements GameplaySystem {
 
   private updateSpray(body: VehicleBody, speed: number): void {
     const want = this.wetness > 0.3 && Math.abs(speed) > 3;
-    if (!this.spray) {
-      if (!want) return;
-      const scratch = new Cartesian3();
-      this.spray = this.collection.add(new ParticleSystem({
+    if (!this.spray && !want) return;
+    const spray: ParticleSystem = this.spray ?? this.createSpray();
+    this.spray = spray;
+    const rear = body.spec.wheels.filter((w) => !w.steers);
+    const rx = rear.length ? rear.reduce((a, w) => a + w.x, 0) / rear.length : -1;
+    // Emitter behind the rear axle, cone pointing backwards and slightly up (emitter +z is the cone axis).
+    spray.modelMatrix = body.modelMatrix;
+    SPRAY_TRS.translation.x = rx - 0.4; SPRAY_TRS.translation.z = 0.25;
+    spray.emitterModelMatrix = Matrix4.fromTranslationRotationScale(SPRAY_TRS, spray.emitterModelMatrix);
+    spray.emissionRate = want ? Math.min(90, Math.abs(speed) * 3) * this.wetness : 0;
+  }
+
+  private createSpray(): ParticleSystem {
+    const scratch = new Cartesian3();
+    return this.collection.add(new ParticleSystem({
         image: makeSprayTexture(),
         emitter: new ConeEmitter(CMath.toRadians(35)),
         emissionRate: 0,
@@ -384,25 +395,19 @@ export class VehicleSystem implements GameplaySystem {
           Cartesian3.multiplyByScalar(down, -6 * dt, down);
           Cartesian3.add(particle.velocity, down, particle.velocity);
         },
-      }));
-    }
-    const rear = body.spec.wheels.filter((w) => !w.steers);
-    const rx = rear.length ? rear.reduce((a, w) => a + w.x, 0) / rear.length : -1;
-    // Emitter behind the rear axle, cone pointing backwards and slightly up (emitter +z is the cone axis).
-    this.spray.modelMatrix = body.modelMatrix;
-    SPRAY_TRS.translation.x = rx - 0.4; SPRAY_TRS.translation.z = 0.25;
-    this.spray.emitterModelMatrix = Matrix4.fromTranslationRotationScale(SPRAY_TRS, this.spray.emitterModelMatrix);
-    this.spray.emissionRate = want ? Math.min(90, Math.abs(speed) * 3) * this.wetness : 0;
+      })) as ParticleSystem;
   }
 
   private ensureFade(): PostProcessStage | null {
     if (this.fade) return this.fade;
     try {
-      this.fade = this.engine.viewer.scene.postProcessStages.add(new PostProcessStage({
+      const stage = new PostProcessStage({
         fragmentShader: 'uniform sampler2D colorTexture; uniform float u_fade; in vec2 v_textureCoordinates; void main() { vec4 c = texture(colorTexture, v_textureCoordinates); out_FragColor = vec4(c.rgb * (1.0 - u_fade), c.a); }',
         uniforms: { u_fade: () => this.fadeAmount },
-      }));
-      this.fade.enabled = false;
+      });
+      this.engine.viewer.scene.postProcessStages.add(stage);
+      stage.enabled = false;
+      this.fade = stage;
     } catch { this.fade = null; }
     return this.fade;
   }
@@ -559,6 +564,7 @@ export class VehicleSystem implements GameplaySystem {
       'impacts / resets': `${this.stats_.impacts} / ${this.stats_.resets}`,
       'time trial': this.trial ? `running (next ${this.trial.state.next})` : 'idle',
       damage: this.active?.body ? this.active.body.damageLevel.toFixed(2) : '—',
+      horn: this.horn ? 'on' : 'off',
     };
   }
 

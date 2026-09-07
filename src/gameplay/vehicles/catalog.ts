@@ -138,11 +138,11 @@ export const VEHICLE_CATALOG: VehicleSpec[] = [
     lengthM: 4.4, widthM: 1.92, heightM: 1.24, massKg: 1380, seats: 2,
     colours: ['#f2b705', '#c8102e', '#f5f5f5', '#101214', '#1fa7a0'], accent: '#0e1013',
     parts: [
-      { x: 0.2, y: 0, z: 0.44, l: 4.4, w: 1.92, h: 0.5, tone: 'paint' },
+      { x: 0, y: 0, z: 0.44, l: 4.4, w: 1.92, h: 0.5, tone: 'paint' },
       { x: -0.4, y: 0, z: 0.92, l: 1.9, w: 1.6, h: 0.5, tone: 'paint' },
       glassStrip(-0.4, 1.94, 1.62, 0.94, 0.34),
       { x: -2.1, y: 0, z: 0.86, l: 0.2, w: 1.5, h: 0.08, tone: 'dark' },
-      { x: 2.2, y: 0, z: 0.32, l: 0.14, w: 1.8, h: 0.24, tone: 'dark' },
+      { x: 2.12, y: 0, z: 0.32, l: 0.14, w: 1.8, h: 0.24, tone: 'dark' },
     ],
     wheels: carWheels(1.4, 0.88, 0.34, 0.28),
     lamps: carLamps(2.25, -2.15, 0.66, 0.58, 0.2),
@@ -161,7 +161,7 @@ export const VEHICLE_CATALOG: VehicleSpec[] = [
       glassStrip(0, 10.6, 2.54, 2.2, 0.8),
       { x: 5.45, y: 0, z: 2.2, l: 0.14, w: 2.3, h: 0.9, tone: 'glass' },
       { x: 1.5, y: 1.26, z: 1.1, l: 1.1, w: 0.04, h: 2.1, tone: 'dark' }, { x: -3.5, y: 1.26, z: 1.1, l: 1.1, w: 0.04, h: 2.1, tone: 'dark' },
-      { x: 5.5, y: 0, z: 0.5, l: 0.12, w: 2.4, h: 0.4, tone: 'dark' }, { x: -5.5, y: 0, z: 0.5, l: 0.12, w: 2.4, h: 0.4, tone: 'dark' },
+      { x: 5.44, y: 0, z: 0.5, l: 0.12, w: 2.4, h: 0.4, tone: 'dark' }, { x: -5.44, y: 0, z: 0.5, l: 0.12, w: 2.4, h: 0.4, tone: 'dark' },
     ],
     wheels: [
       { x: 3.4, y: 1.05, radiusM: 0.5, widthM: 0.3, steers: true }, { x: 3.4, y: -1.05, radiusM: 0.5, widthM: 0.3, steers: true },

@@ -45,7 +45,7 @@ export function buildShowroomLayout(display: VehicleKind[]): ShowroomLayout {
   // Display plinths in two rows facing the glass.
   const plinths: Plinth[] = [];
   const stands: Stand[] = [];
-  const kinds = display.length >= 4 ? display.slice(0, 6) : [...display, 'hatchback', 'sedan', 'suv', 'sports'].slice(0, 4);
+  const kinds: VehicleKind[] = display.length >= 4 ? display.slice(0, 6) : ([...display, 'hatchback', 'sedan', 'suv', 'sports'] as VehicleKind[]).slice(0, 4);
   kinds.forEach((kind, i) => {
     const row = i < 3 ? 0 : 1;
     const col = i % 3;
@@ -65,7 +65,7 @@ export function buildShowroomLayout(display: VehicleKind[]): ShowroomLayout {
   // Lounge seating.
   for (const y of [7, 8.6]) blocks.push({ x: 12.5, y, z: 0.2 + 0.25, l: 0.9, w: 1.4, h: 0.5, colour: '#385a7a' });
   // Workshop bay at the back-left: two lift rails, a tool bench and a vehicle on the lift.
-  const workshop = { x: -11, y: 8, kind: (display[0] ?? 'hatchback') as VehicleKind };
+  const workshop: { x: number; y: number; kind: VehicleKind } = { x: -11, y: 8, kind: display[0] ?? 'hatchback' };
   blocks.push({ x: workshop.x, y: workshop.y + 0.9, z: 0.2 + 0.2, l: 5.0, w: 0.35, h: 0.4, colour: '#c8462e', id: 'lift' });
   blocks.push({ x: workshop.x, y: workshop.y - 0.9, z: 0.2 + 0.2, l: 5.0, w: 0.35, h: 0.4, colour: '#c8462e' });
   blocks.push({ x: workshop.x - 4.2, y: workshop.y, z: 0.2 + 0.45, l: 0.8, w: 3.0, h: 0.9, colour: '#5a5e64' });
