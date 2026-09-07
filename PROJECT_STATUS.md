@@ -47,3 +47,26 @@ TERRA_FIXTURES=1 npm run dev   # synthetic OSM responder for offline development
 ## Next task
 
 Run `npm run build && npm run perf` on a machine with a GPU and network access to the OSM/Overpass hosts, paste the table into PERFORMANCE.md, and use the Diagnostics panel at the showcase ground spots to check real-OSM rendering (this sandbox could only exercise the synthetic fixture).
+
+## Track `maharashtra-data` (branch `claude/track-data`, 2026-09-07)
+
+Full summary: `docs/tracks/data.md`.
+
+**Completed**
+* Maharashtra gazetteer: 260 annotated, approximate places (`src/data/maharashtra/cities.ts`, `destinations.ts`) incl. the 16 urban regions, hill stations, Konkan coast, forts, temples, caves, stations, airports, campuses, museums, parks, dams, and the external Taj Mahal hero destination; every entry has a `dataNote`.
+* Offline synchronous search (`MaharashtraIndex`) merged into `TerraEngine.search`; all places appended to `WORLD_HIGHLIGHTS` (`mh-*`), five `showcase-maharashtra-*` areas with tours.
+* Eight new landmark archetypes and 23 Maharashtra stand-ins (Gateway of India, CSMT, Sea Link, Haji Ali + causeway, Elephanta marker, stadiums, forts, Bibi Ka Maqbara, Deekshabhoomi, Ellora, Ajanta, temples), all labelled procedural.
+* Taj Mahal hero (`src/world/hero/`): walkable gate, charbagh, terrace, plinth, mausoleum, minarets, mosque/jawab, approximate interior with "Enter mausoleum (approximate interior)"; streams within 6 km; procedural content excluded from its footprint.
+
+**Tested (how)**
+* `npm run typecheck && npm run lint && npm test`: 27 files / 238 unit tests pass (5 new Maharashtra test files).
+* `tests/e2e/maharashtra.spec.ts` in headless Chromium (SwiftShader, fixture dev server): search resolves 12/12 named places; goTo Taj Mahal streams 5 hero primitives (~13 400 vertices) and a spawn on the plinth stands at base + 8 m; spawn at the Gateway of India lands in walk mode with a stand-in visible. First run: search and Taj tests passed; the Gateway test failed only on `landmarks.visible ≥ 1` because no terrain height was available offline — fixed by placing stand-ins on the ellipsoid after a 4 s grace period (re-run recorded in `docs/tracks/data.md`).
+* Probe screenshots: `docs/screenshots/maharashtra-taj-mahal-{gate,platform,interior}.png`, `maharashtra-{gateway-of-india,csmt,shaniwar-wada,deekshabhoomi}.png`.
+
+**Broken / limitations**
+* Real OSM building footprints are not yet excluded from the Taj footprint (only procedural content is); `OsmLayer` belongs to no track in this plan.
+* The sandbox blocked the terrain host during verification runs (base height 0 on the ellipsoid) and all OSM hosts; city probes use the synthetic fixture.
+* Landmark bodies and the Taj are abstract massing models; coordinates are approximate (±200 m–1 km).
+
+**Next**
+* Exclude OSM buildings inside hero footprints; feed `MaharashtraIndex.nearest` into the HUD readout; richer Taj lawns using the vegetation species library; verify on a GPU machine with network access.

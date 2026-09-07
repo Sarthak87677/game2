@@ -61,3 +61,12 @@ that drives the feature through `window.__terra`, a probe screenshot in `docs/sc
   *next*, not *done*.
 * `npm run typecheck && npm run lint && npm test` must pass before every commit; e2e specs run with
   `TERRA_E2E_DEV=1` against the dev server (`?terraQuality=low`, `--use-angle=swiftshader`).
+
+## Additive hooks added by tracks
+
+* **maharashtra-data** — `LandmarkModel.hero?: string` (`src/data/bookmarks/landmarkModels.ts`): a stand-in whose body is rendered by
+  a hero gameplay system; `LandmarkLayer` skips it. `applyHeroExclusions(tile)` (`src/world/hero/heroExclusions.ts`) is called once
+  per generated near-field tile in `TerraEngine.generateNearFieldTile` and drops procedural placements/buildings/fields inside hero
+  footprints (currently the Taj Mahal). `TerraEngine.search` merges `MAHARASHTRA_INDEX.search()` (`src/data/maharashtra/search.ts`)
+  into the offline results by score (`mergeSearchResults`), de-duplicated by id and position. Maharashtra places are appended to
+  `WORLD_HIGHLIGHTS` as `mh-*` bookmarks and five `showcase-maharashtra-*` areas to `SHOWCASE_AREAS`.
