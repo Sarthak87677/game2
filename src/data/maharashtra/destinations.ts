@@ -220,7 +220,7 @@ export const MAHARASHTRA_DESTINATIONS: Destination[] = defineDestinations([
   { id: 'satara-station', name: 'Satara', kind: 'station', district: 'Satara', lat: 17.6920, lon: 74.0040, description: 'Railway station of Satara on the Pune–Miraj line.', tags: ['str', 'railway', 'satara'] },
 
   // ───────────── External hero destination ─────────────
-  { id: 'taj-mahal-hero', name: 'Taj Mahal (hero destination)', kind: 'monument', district: 'Agra, Uttar Pradesh', lat: 27.1751, lon: 78.0421, description: 'Marble mausoleum of 1653 on the Yamuna at Agra, rebuilt here as the game’s walkable hero landmark.', tags: ['taj', 'agra', 'mausoleum', 'hero', 'yamuna', 'unesco'], overviewHeightM: 700, dataNote: HERO_NOTE, spawn: { lat: 27.1700, lon: 78.0421, headingDeg: 0 }, external: true },
+  { id: 'taj-mahal-hero', name: 'Taj Mahal (hero destination)', kind: 'monument', district: 'Agra, Uttar Pradesh', lat: 27.1751, lon: 78.0421, description: 'Marble mausoleum of 1653 on the Yamuna at Agra, rebuilt here as the game’s walkable hero landmark.', tags: ['taj', 'agra', 'mausoleum', 'hero', 'yamuna', 'unesco'], overviewHeightM: 700, dataNote: HERO_NOTE, spawn: { lat: 27.1716, lon: 78.0421, headingDeg: 0 }, external: true },
 ]);
 
 /** All Maharashtra places: cities and towns first, then destinations. Ids are unique across both tables. */
