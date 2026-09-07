@@ -30,7 +30,17 @@ session) works against the contracts below so that branches merge cleanly.
   `setVehicleBody(primitive)`, `driveParams`, `onFall(fallM)`.
 * Store: `gameplay: { prompt, overlay, player, status, vehicle }` via `useTerraStore.getState().setGameplay(...)`.
 * HUD: `InteractionPrompt`, `GameplayOverlayCard`, `PlayPanel` (spawn list from `src/data/maharashtra/spawns.ts`).
-* `window.__terra` (tests): `goTo`, `setMode`, `spawn(spawnPoint)`, `interact()`, `gameplay()`, `state()`.
+* `window.__terra` (tests): `goTo`, `setMode`, `spawn(spawnPoint)`, `interact()`, `gameplay()`, `state()`,
+  `benchmark(seconds?)` (perf track, optional).
+* Performance contract (perf track, additive): store slices `hardware` (CPU/GPU/API/screen, VRAM "not exposed"),
+  `adaptive` (`{ enabled, step, maxStep, stepLabel, resolutionScale, reason, fps, minFps, targetFps }` — the
+  degradation-ladder readout; kept beside `quality`, which stays the preset id string other panels read) and
+  `readiness` (boot gate decision: blocking items, degraded layers, FPS gate). `settings.protectFrameRate` toggles the
+  ladder. `engine.effectiveQuality()` returns the preset after the ladder — systems that read a `QualitySettings`
+  should use it rather than `QUALITY_PRESETS[...]`. Presets carry `targetFps`/`minFps`/`trafficDensity`/
+  `oceanReflections`; `performance` is the fifth preset. URL: `?terraMinFps=<n>` overrides the boot gate's minimum
+  frame rate (0 = no gate; SwiftShader auto-relaxes to 1 fps with a visible note). Gameplay `stats()` values whose keys
+  mention actors/vehicles/passengers/crowds etc. are summed into the Diagnostics "Actors" count.
 
 ## Tracks and file ownership
 

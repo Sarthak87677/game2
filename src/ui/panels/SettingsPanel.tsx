@@ -9,6 +9,7 @@ export function SettingsPanel() {
   const settings = useTerraStore((s) => s.settings);
   const setSettings = useTerraStore((s) => s.setSettings);
   const quality = useTerraStore((s) => s.quality);
+  const adaptive = useTerraStore((s) => s.adaptive);
   const [geoStatus, setGeoStatus] = useState<string>('');
   const cache = sharedTileCache();
   const locate = () => {
@@ -24,12 +25,15 @@ export function SettingsPanel() {
       <h3>Rendering</h3>
       <label className="terra-row">Quality preset
         <select value={quality} onChange={(e) => engine?.setQuality(e.target.value as typeof quality)}>
-          <option value="low">Low — 30 fps target on modest hardware</option>
+          <option value="performance">60-FPS Performance Mode — 0.7× resolution, no shadows/AO/bloom/clouds, short draw distance</option>
+          <option value="low">Low — 30 fps minimum on modest hardware</option>
           <option value="medium">Medium — balanced</option>
           <option value="high">High — shadows, AO, MSAA 4×</option>
           <option value="ultra">Ultra — 8× MSAA, bloom, large shadow maps</option>
         </select>
       </label>
+      <label className="terra-row"><input type="checkbox" checked={settings.protectFrameRate} onChange={(e) => setSettings({ protectFrameRate: e.target.checked })} /> Protect frame rate (dynamic resolution) — steps down shadows, ocean reflections, vegetation, traffic, draw distance and finally render resolution when the frame rate stays below the preset minimum; never nearby buildings or the player</label>
+      <p className="terra-help">Adaptive step {adaptive.step}/{adaptive.maxStep}{adaptive.stepLabel ? ` (${adaptive.stepLabel})` : ''} · resolution ×{adaptive.resolutionScale.toFixed(2)} · {adaptive.reason}</p>
       <label className="terra-row"><input type="checkbox" checked={settings.reduceMotion} onChange={(e) => setSettings({ reduceMotion: e.target.checked })} /> Reduce motion (shorter camera flights)</label>
       <label className="terra-row"><input type="checkbox" checked={settings.highContrast} onChange={(e) => setSettings({ highContrast: e.target.checked })} /> High-contrast interface</label>
       <label className="terra-row">Interface scale <input type="range" min={0.8} max={1.6} step={0.1} value={settings.uiScale} onChange={(e) => setSettings({ uiScale: Number(e.target.value) })} /> {settings.uiScale.toFixed(1)}×</label>
