@@ -39,10 +39,11 @@ import { speciesById } from '@/world/procedural/species';
 import { LandmarkLayer } from '@/world/landmarks/LandmarkLayer';
 import { GameplayHost } from '@/gameplay/GameplayHost';
 import type { SpawnPoint } from '@/gameplay/types';
+import { spawnById } from '@/data/maharashtra';
 import type { GeocodingAdapter } from '@/data/geocoding/types';
 
 declare global {
-  interface Window { __terra?: { ready: boolean; engine?: TerraEngine; state: () => unknown; goTo: (lat: number, lon: number, h: number, headingDeg?: number, pitchDeg?: number) => Promise<boolean>; setMode: (m: ModeId) => void; spawn: (s: SpawnPoint) => Promise<void>; interact: () => void; gameplay: () => unknown } }
+  interface Window { __terra?: { ready: boolean; engine?: TerraEngine; state: () => unknown; goTo: (lat: number, lon: number, h: number, headingDeg?: number, pitchDeg?: number) => Promise<boolean>; setMode: (m: ModeId) => void; spawn: (s: SpawnPoint | string) => Promise<void>; interact: () => void; gameplay: () => unknown } }
 }
 
 const fetchJson = async (url: string): Promise<unknown> => {
@@ -186,7 +187,11 @@ export class TerraEngine {
       state: () => ({ boot: useTerraStore.getState().boot, camera: cameraState(engine.viewer), streaming: useTerraStore.getState().streaming, location: useTerraStore.getState().location, dataFlags: useTerraStore.getState().dataFlags, diagnostics: useTerraStore.getState().diagnostics }),
       goTo: (lat, lon, h, headingDeg, pitchDeg) => engine.goTo({ lat, lon, heightM: h, headingDeg, pitchDeg }),
       setMode: (m) => engine.modes.setMode(m),
-      spawn: (s) => engine.gameplay.spawn(s),
+      spawn: (s) => {
+        const sp = typeof s === 'string' ? spawnById(s) : s;
+        if (!sp) return Promise.reject(new Error(`Unknown spawn point ${String(s)}`));
+        return engine.gameplay.spawn(sp);
+      },
       interact: () => engine.gameplay.interact(),
       gameplay: () => useTerraStore.getState().gameplay,
     };
