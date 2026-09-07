@@ -49,8 +49,8 @@ export function ballAt(speed: number, t: number, lateralM: number, flightS: numb
 export function simulateThrow(input: ThrowInput): ThrowResult {
   const rng = new Rng(mixSeed(input.seed, Math.round(input.distM * 100)));
   const d = Math.max(1.5, input.distM);
-  // Power error shrinks with practice… no: it is a fixed ±7% band; distance makes it matter more.
-  const speed = idealSpeed(d) * (1 + (rng.next() - 0.5) * 0.14);
+  // Fixed ±4.5% power band (about half the shots from the free-throw line go in with perfect aim); distance amplifies it.
+  const speed = idealSpeed(d) * (1 + (rng.next() - 0.5) * 0.09);
   const vx = speed * Math.cos(LAUNCH_ANGLE), vz = speed * Math.sin(LAUNCH_ANGLE);
   const h = HOOP_HEIGHT_M - RELEASE_HEIGHT_M;
   // Time when z returns to hoop height on the way down: solve vz t - g t²/2 = h.

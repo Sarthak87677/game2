@@ -11,6 +11,7 @@ import { distanceM } from '@/gameplay/GameplayHost';
 import { useTerraStore } from '@/state/store';
 import { BASKETBALL_COURT, BOAT_COURSES, CINEMATIC_TOURS, CLEANUP_PARKS, COLLECTIBLE_LANDMARKS, JOURNEY_CHECKLISTS, MUSEUMS, PHOTO_CHALLENGES, PROCEDURAL_NOTE, type BoatCourse, type CinematicTour, type CleanupPark, type PhotoChallenge } from '@/data/maharashtra/living';
 import { nearbySightings, type Sighting } from '@/world/wildlife/sightings';
+import { groundFallback } from '@/world/crowds/placeContext';
 import { fnv1a, Rng } from '@/util/hash';
 import { offsetToLonLat } from '@/util/geo';
 import { loadProgress, saveProgress, clearProgress, totalPoints, type ActivityProgress } from './persistence';
@@ -50,6 +51,7 @@ export class ActivitiesSystem implements GameplaySystem {
   private tourRunning: string | null = null;
   private spawnedSignal = false;
   private nearby: Sighting[] = [];
+  private fallbackH = 0;
 
   constructor(private readonly engine: TerraEngine) {
     this.litterCollection = engine.viewer.scene.primitives.add(new BillboardCollection({ scene: engine.viewer.scene }));
@@ -107,6 +109,7 @@ export class ActivitiesSystem implements GameplaySystem {
     this.lastSlow = now;
     this.spawnedSignal = false;
     const p = ctx.player;
+    this.fallbackH = groundFallback(this.engine, p);
     this.nearby = nearbySightings(p.lat, p.lon, 120, now);
     if (p.embodied || p.mode === 'cinematic') {
       this.collectLandmarks(p.lat, p.lon);
@@ -269,7 +272,7 @@ export class ActivitiesSystem implements GameplaySystem {
       const ll = offsetToLonLat(build.park.lat, build.park.lon, Math.cos(a) * r, Math.sin(a) * r);
       const id = `${build.park.id}:${i}`;
       if (collected.has(id)) continue;
-      const h = this.engine.groundHeightAt(ll.lat, ll.lon) ?? 0;
+      const h = this.engine.groundHeightAt(ll.lat, ll.lon) ?? this.fallbackH;
       const bb = this.litterCollection.add({ position: Cartesian3.fromDegrees(ll.lon, ll.lat, h + 0.05), verticalOrigin: VerticalOrigin.BOTTOM, sizeInMeters: true, width: 0.3, height: 0.3, translucencyByDistance: new NearFarScalar(80, 1, 160, 0) });
       bb.setImage(`litter:${i % 4}`, this.litterSprite(i % 4));
       build.litter.push({ id, lat: ll.lat, lon: ll.lon, bb });
@@ -317,8 +320,7 @@ export class ActivitiesSystem implements GameplaySystem {
   private buildCourt(): void {
     const c = BASKETBALL_COURT;
     const scene = this.engine.viewer.scene;
-    const ground = scene.globe.getHeight(Cartographic.fromDegrees(c.lon, c.lat));
-    if (ground === undefined) return;
+    const ground = scene.globe.getHeight(Cartographic.fromDegrees(c.lon, c.lat)) ?? this.fallbackH;
     const frame = Transforms.eastNorthUpToFixedFrame(Cartesian3.fromDegrees(c.lon, c.lat, ground));
     const h = (c.headingDeg * Math.PI) / 180;
     const rot = new Matrix4(Math.cos(-h), -Math.sin(-h), 0, 0, Math.sin(-h), Math.cos(-h), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); // court +y axis toward the hoop
@@ -346,6 +348,15 @@ export class ActivitiesSystem implements GameplaySystem {
     this.court = null;
   }
 
+  /** Teleports the player to the free-throw spot facing the hoop (the court is ~60 m from the campus spawn). */
+  goToCourt(): void {
+    const c = BASKETBALL_COURT;
+    const h = (c.headingDeg * Math.PI) / 180;
+    const spot = offsetToLonLat(c.lat, c.lon, Math.sin(h) * (c.hoopOffsetM - 4.6), Math.cos(h) * (c.hoopOffsetM - 4.6));
+    this.engine.gameplay.teleport(spot.lat, spot.lon, c.headingDeg);
+    this.setStatus('🏀 At the free-throw line — face the hoop and press E to shoot');
+  }
+
   /** Throws from the player's position toward the hoop; the ball animates along the arc and the result is scored. */
   throwBasketball(): ThrowResult {
     const p = this.engine.gameplay.player();
@@ -369,7 +380,7 @@ export class ActivitiesSystem implements GameplaySystem {
     if (!this.ball) {
       this.ball = scene.primitives.add(new Primitive({ geometryInstances: new GeometryInstance({ geometry: new EllipsoidGeometry({ radii: new Cartesian3(0.12, 0.12, 0.12), vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT }), attributes: { color: ColorGeometryInstanceAttribute.fromColor(Color.fromCssColorString('#e65100')) } }), appearance: new PerInstanceColorAppearance({ translucent: false, closed: true }), asynchronous: false, allowPicking: false }));
     }
-    const ground = this.engine.groundHeightAt(lat, lon) ?? groundH;
+    const ground = this.engine.groundHeightAt(lat, lon) ?? groundH ?? this.fallbackH;
     const enu = Transforms.eastNorthUpToFixedFrame(Cartesian3.fromDegrees(lon, lat, ground));
     const h = CMath.toRadians(headingDeg);
     const rot = new Matrix4(Math.cos(-h), -Math.sin(-h), 0, 0, Math.sin(-h), Math.cos(-h), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
@@ -404,7 +415,11 @@ export class ActivitiesSystem implements GameplaySystem {
       out.push({ id: `museum:${m.id}`, label: `Browse exhibits — ${m.name}`, lat: m.lat, lon: m.lon, radiusM: m.radiusM, priority: 1, run: () => this.showMuseum(m.id) });
     }
     const c = BASKETBALL_COURT;
-    if (Math.abs(c.lat - p.lat) < 0.01 && Math.abs(c.lon - p.lon) < 0.01) out.push({ id: 'basketball', label: 'Shoot a basket (face the hoop)', lat: c.lat, lon: c.lon, radiusM: 16, priority: 2, modes: ['walk'], run: () => { this.throwBasketball(); } });
+    if (Math.abs(c.lat - p.lat) < 0.01 && Math.abs(c.lon - p.lon) < 0.01) {
+      const dCourt = distanceM(p.lat, p.lon, c.lat, c.lon);
+      if (dCourt <= 16) out.push({ id: 'basketball', label: 'Shoot a basket (face the hoop)', lat: c.lat, lon: c.lon, radiusM: 16, priority: 2, modes: ['walk'], run: () => { this.throwBasketball(); } });
+      else out.push({ id: 'basketball-court', label: `Walk over to the basketball court (${Math.round(dCourt)} m)`, lat: c.lat, lon: c.lon, radiusM: 160, priority: -1, modes: ['walk'], run: () => this.goToCourt() });
+    }
     for (const build of this.parks.values()) for (const l of build.litter) out.push({ id: `litter:${l.id}`, label: `Pick up litter — ${build.park.name}`, lat: l.lat, lon: l.lon, radiusM: 2.6, priority: 3, modes: ['walk'], run: () => this.pickUp(build, l) });
     for (const s of this.nearby) {
       const logged = this.progress.observations[s.species];

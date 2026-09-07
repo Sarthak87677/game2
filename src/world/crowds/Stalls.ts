@@ -38,19 +38,19 @@ export class StallLayer {
   }
 
   /** Builds stalls for hotspots within 700 m of the point and removes those beyond 1.4 km. */
-  sync(lat: number, lon: number, hotspots: CrowdHotspot[]): void {
+  sync(lat: number, lon: number, hotspots: CrowdHotspot[], fallbackH = 0): void {
     const near = new Set<string>();
     for (const h of hotspots) {
       const d = Math.hypot((h.lat - lat) * 111_132, (h.lon - lon) * 111_320 * Math.cos((lat * Math.PI) / 180));
-      if (d < 700 && h.stalls > 0) { near.add(h.id); if (!this.built.has(h.id)) this.build(h); }
+      if (d < 700 && h.stalls > 0) { near.add(h.id); if (!this.built.has(h.id)) this.build(h, fallbackH); }
       else if (d > 1400 && this.built.has(h.id)) this.remove(h.id);
     }
   }
 
-  private build(h: CrowdHotspot): void {
+  private build(h: CrowdHotspot, fallbackH: number): void {
     const carto = Cartographic.fromDegrees(h.lon, h.lat);
-    const ground = this.scene.globe.getHeight(carto);
-    if (ground === undefined) return; // terrain not yet loaded — retried on the next sync
+    // Terrain may never load in offline sandboxes: fall back to the player's surface height.
+    const ground = this.scene.globe.getHeight(carto) ?? fallbackH;
     const rng = new Rng(fnv1a(`stalls:${h.id}`));
     const anchor = Cartesian3.fromDegrees(h.lon, h.lat, ground);
     const frame = Transforms.eastNorthUpToFixedFrame(anchor);

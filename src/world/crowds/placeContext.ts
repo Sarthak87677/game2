@@ -78,3 +78,13 @@ export function classifyPlace(engine: TerraEngine, lat: number, lon: number): Pl
   else ambience = 'village';
   return { kind, palette: paletteFor(kind), hotspot, hotspotDistM: near?.distM ?? Infinity, ambience, coastal, biome, buildings, farmland, park, forest, elevationM, osm: !!tile };
 }
+
+/**
+ * Ground height fallback used by every living-world system when the globe has no terrain loaded under a point (the
+ * sandbox cannot reach the terrain host): the player's body height when embodied (it stands on the same surface),
+ * else the climate-atlas elevation, else sea level.
+ */
+export function groundFallback(engine: TerraEngine, player: { embodied: boolean; lat: number; lon: number; heightM: number; mode: string }): number {
+  if (player.embodied && player.mode !== 'passenger') return player.heightM;
+  return Math.max(0, engine.worldMap?.sample(player.lat, player.lon).elevationM ?? 0);
+}
