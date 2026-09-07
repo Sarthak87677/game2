@@ -55,7 +55,7 @@ landmark stand-ins, and build the Taj Mahal hero destination as walkable geometr
 * Materials: white marble tone, red sandstone for gate, mosque, terrace and walls; lawn/path/water/tree colours.
 
 ## How it was verified
-* `npm run typecheck && npm run lint && npm test` — 27 unit test files, 240 tests passing (new:
+* `npm run typecheck && npm run lint && npm test` — 27 unit test files, 238 tests passing (new:
   `tests/unit/maharashtra/{destinations,search,landmarks,tajMahal,heroExclusions}.test.ts`; `bookmarks.test.ts` updated
   to the 24 showcase areas).
 * `tests/e2e/maharashtra.spec.ts` (headless Chromium, SwiftShader, `TERRA_E2E_DEV=1` against the fixture dev server):
@@ -63,7 +63,9 @@ landmark stand-ins, and build the Taj Mahal hero destination as walkable geometr
   2. `goTo` Taj Mahal streams the hero (5 primitives, > 10 000 vertices), landmark table ≥ 50, spawning on the plinth
      puts the third-person camera above base + 8 m;
   3. spawn at the Gateway of India lands in walk mode at the spawn point with a stand-in visible.
-  Results: see the section in `PROJECT_STATUS.md` for the run record.
+  Run record (2026-09-07, sandbox, terrain host blocked, synthetic OSM fixture): run 1 — tests 1 and 2 passed, test 3
+  failed only on `landmarks.visible ≥ 1` (no terrain height → stand-ins never placed); after adding the 4 s ellipsoid
+  fallback in `LandmarkLayer`, run 2 — test 3 passed (3.6 min). All three tests pass on the pushed head.
 * Probe screenshots (`scripts/dev/probe-scene.mjs`, daytime, `?terraQuality=low`) in `docs/screenshots/`:
   `maharashtra-taj-mahal-gate.png`, `maharashtra-taj-mahal-platform.png`, `maharashtra-taj-mahal-interior.png`,
   `maharashtra-gateway-of-india.png`, `maharashtra-csmt.png`, `maharashtra-shaniwar-wada.png`,
