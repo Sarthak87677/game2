@@ -44,3 +44,13 @@ describe('fine (1:10m) coastline detail regions', () => {
     expect(fine.isLand(0, -30)).toBe(false); // Atlantic
   });
 });
+
+describe('spawn points against the coastline', () => {
+  it('every Maharashtra spawn point is on land or inside a fine-coastline region where the terrain refines it', async () => {
+    const { MAHARASHTRA_SPAWNS } = await import('@/data/maharashtra/spawns');
+    const fine = load(true);
+    for (const sp of MAHARASHTRA_SPAWNS) {
+      expect(fine.isLand(sp.lat, sp.lon) || fine.hasFineCoastline(sp.lat, sp.lon), sp.id).toBe(true);
+    }
+  });
+});
