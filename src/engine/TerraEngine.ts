@@ -22,6 +22,7 @@ import { useTerraStore, type LocationReadout } from '@/state/store';
 import { hash2 } from '@/util/hash';
 import { TERRARIUM_DEFAULT_URL } from '@/data/adapters/terrain';
 import { WORLD_HIGHLIGHTS } from '@/data/bookmarks/highlights';
+import { MAHARASHTRA_INDEX, mergeSearchResults } from '@/data/maharashtra/search';
 import { OverpassAdapter } from '@/data/adapters/features/overpass';
 import { OsmLayer } from '@/world/osm/OsmLayer';
 import { NominatimAdapter } from '@/data/adapters/geocoding/nominatim';
@@ -38,6 +39,7 @@ import { NearFieldWorld, type NearFieldStats } from '@/world/render';
 import { speciesById } from '@/world/procedural/species';
 import { LandmarkLayer } from '@/world/landmarks/LandmarkLayer';
 import { GameplayHost } from '@/gameplay/GameplayHost';
+import { applyHeroExclusions } from '@/world/hero/heroExclusions';
 import type { SpawnPoint } from '@/gameplay/types';
 import { spawnById } from '@/data/maharashtra';
 import type { GeocodingAdapter } from '@/data/geocoding/types';
@@ -481,8 +483,12 @@ export class TerraEngine {
     const coords = parseCoordinates(q);
     const results: GeocodeResult[] = [];
     if (coords) results.push({ id: `coords:${coords.lat},${coords.lon}`, name: `${coords.lat.toFixed(5)}, ${coords.lon.toFixed(5)}`, displayName: 'Go to coordinates', kind: 'physical', lat: coords.lat, lon: coords.lon, heightM: 3000, source: 'terra-bookmarks', score: 100 });
-    if (this.gazetteer) results.push(...this.gazetteer.search(q, limit));
-    else results.push(...WORLD_HIGHLIGHTS.filter((b) => b.name.toLowerCase().includes(q.toLowerCase())).slice(0, limit).map((b) => ({ id: b.id, name: b.name, displayName: `${b.name} · ${b.country ?? b.continent}`, kind: 'bookmark' as const, lat: b.lat, lon: b.lon, heightM: b.camera.heightM, source: 'terra-bookmarks' as const, score: 50 })));
+    const offline: GeocodeResult[] = this.gazetteer
+      ? this.gazetteer.search(q, limit)
+      : WORLD_HIGHLIGHTS.filter((b) => b.name.toLowerCase().includes(q.toLowerCase())).slice(0, limit).map((b) => ({ id: b.id, name: b.name, displayName: `${b.name} · ${b.country ?? b.continent}`, kind: 'bookmark' as const, lat: b.lat, lon: b.lon, heightM: b.camera.heightM, source: 'terra-bookmarks' as const, score: 50 }));
+    // The Maharashtra gazetteer answers synchronously (no data load needed) and is merged by score; duplicates of the
+    // same bookmark or position are dropped so a place appears once.
+    results.push(...mergeSearchResults(offline, MAHARASHTRA_INDEX.search(q, limit), limit));
     // Street-level and obscure places come from the optional network geocoder; used only when the offline index is thin.
     if (q.length >= 3 && results.length < 4 && this.geocoders.length > 0 && navigator.onLine !== false) {
       const seen = new Set(results.map((r) => `${r.lat.toFixed(2)},${r.lon.toFixed(2)}`));
@@ -673,7 +679,8 @@ export class TerraEngine {
       density: () => this.effectiveQuality().vegetationDensity,
     }, z, x, y);
     if (!ctx) return null;
-    return this.procgen.generate(ctx);
+    // Hero destinations (Taj Mahal) own their footprint: procedural content generated under them is dropped.
+    return applyHeroExclusions(await this.procgen.generate(ctx));
   }
 
   /** Captures the current frame as a PNG data URL. */

@@ -92,3 +92,12 @@ tables **by shape**, so tracks may name their exports freely:
 Unknown fields are kept in `ExtraJson`; missing tables are exported empty and flagged `missing-in-source` in
 `Content/Data/Manifest.json`. Run `node scripts/export-unreal-data.mjs` after changing data and commit the JSON;
 `tests/unit/exportUnrealData.test.ts` fails otherwise. Optional `dataNote` fields on any row are carried through.
+
+## Additive hooks added by tracks
+
+* **maharashtra-data** — `LandmarkModel.hero?: string` (`src/data/bookmarks/landmarkModels.ts`): a stand-in whose body is rendered by
+  a hero gameplay system; `LandmarkLayer` skips it. `applyHeroExclusions(tile)` (`src/world/hero/heroExclusions.ts`) is called once
+  per generated near-field tile in `TerraEngine.generateNearFieldTile` and drops procedural placements/buildings/fields inside hero
+  footprints (currently the Taj Mahal). `TerraEngine.search` merges `MAHARASHTRA_INDEX.search()` (`src/data/maharashtra/search.ts`)
+  into the offline results by score (`mergeSearchResults`), de-duplicated by id and position. Maharashtra places are appended to
+  `WORLD_HIGHLIGHTS` as `mh-*` bookmarks and five `showcase-maharashtra-*` areas to `SHOWCASE_AREAS`.

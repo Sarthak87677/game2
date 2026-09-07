@@ -6,6 +6,7 @@ import { MonsoonSystem } from '@/world/climate/MonsoonSystem';
 import { ActivitiesSystem } from '@/gameplay/activities/ActivitiesSystem';
 import { VehicleSystem } from './vehicles/VehicleSystem';
 import { ShowroomSystem } from './showroom/ShowroomSystem';
+import { TajMahalSystem } from '@/world/hero/TajMahal';
 
 /**
  * Every gameplay subsystem is constructed here. Add one line per system; systems must not import each other — they
@@ -19,5 +20,6 @@ export function createGameplaySystems(engine: TerraEngine): GameplaySystem[] {
   systems.push(new ActivitiesSystem(engine));
   systems.push(new VehicleSystem(engine));
   systems.push(new ShowroomSystem(engine));
+  systems.push(new TajMahalSystem(engine)); // maharashtra-data: Taj Mahal hero destination
   return systems;
 }
