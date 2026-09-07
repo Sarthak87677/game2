@@ -1,0 +1,35 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.4",
+  "Category": "Games",
+  "Description": "Terra Infinite - principal Unreal Engine 5 client (Maharashtra vertical slice). Scaffolded without an Unreal install or GPU: not yet built anywhere. See docs/UNREAL.md.",
+  "Modules": [
+    {
+      "Name": "TerraInfinite",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "AdditionalDependencies": [
+        "Engine",
+        "CoreUObject",
+        "EnhancedInput",
+        "ChaosVehicles",
+        "CesiumRuntime"
+      ]
+    }
+  ],
+  "Plugins": [
+    { "Name": "CesiumForUnreal", "Enabled": true, "MarketplaceURL": "https://www.fab.com/listings/cesium-for-unreal", "TargetAllowList": [ "Game", "Editor" ] },
+    { "Name": "ChaosVehiclesPlugin", "Enabled": true },
+    { "Name": "EnhancedInput", "Enabled": true },
+    { "Name": "Niagara", "Enabled": true },
+    { "Name": "Water", "Enabled": true },
+    { "Name": "PCG", "Enabled": true },
+    { "Name": "MassEntity", "Enabled": true },
+    { "Name": "MassGameplay", "Enabled": true },
+    { "Name": "MassAI", "Enabled": true },
+    { "Name": "MassCrowd", "Enabled": true },
+    { "Name": "MassTraffic", "Enabled": true, "Optional": true, "MarketplaceURL": "https://www.fab.com/listings/city-sample" },
+    { "Name": "ZoneGraph", "Enabled": true },
+    { "Name": "ModelingToolsEditorMode", "Enabled": false }
+  ]
+}

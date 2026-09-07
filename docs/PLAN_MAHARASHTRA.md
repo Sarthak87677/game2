@@ -61,3 +61,24 @@ that drives the feature through `window.__terra`, a probe screenshot in `docs/sc
   *next*, not *done*.
 * `npm run typecheck && npm run lint && npm test` must pass before every commit; e2e specs run with
   `TERRA_E2E_DEV=1` against the dev server (`?terraQuality=low`, `--use-angle=swiftshader`).
+
+## Unreal export contract (additive, owned by the unreal track)
+
+`scripts/export-unreal-data.mjs` reads the module namespace of `src/data/maharashtra/index.ts` and recognises
+tables **by shape**, so tracks may name their exports freely:
+
+| Table | Recognised when every array item has… |
+|---|---|
+| Spawns | `id, lat, lon, headingDeg, region, approximate` (`SpawnPoint`) |
+| Destinations | `id, kind, district, lat, lon, overviewHeightM` |
+| Stations | `id, code, platforms, lat, lon` |
+| RailCorridors | `id, stations[], path[], service` |
+| Airports | `id, iata, runwayHeadingDeg, runwayLengthM` |
+| Ports | `id, kind ∈ {jetty,harbour,marina,cruise-terminal}, lat, lon` and no `district` |
+| WaterRoutes | `id, vessel, path[], from, to` |
+| Campuses / CampusBuildings | export **name** matches `/campus/i`; an object (or array of objects) with `id, name, origin|position|center, headingDeg, buildings[]`; each building `id, name, category|kind|type, position|lat/lon, headingDeg, widthM, depthM, floors|levels, footprint?` |
+| InteriorGrammar | export **name** matches `/grammar/i`; an object keyed by category (or array with `category`) with `floorHeightM, corridorWidthM, roomMinM, roomMaxM, roomTypes[]` plus any numeric/string parameters |
+
+Unknown fields are kept in `ExtraJson`; missing tables are exported empty and flagged `missing-in-source` in
+`Content/Data/Manifest.json`. Run `node scripts/export-unreal-data.mjs` after changing data and commit the JSON;
+`tests/unit/exportUnrealData.test.ts` fails otherwise. Optional `dataNote` fields on any row are carried through.
