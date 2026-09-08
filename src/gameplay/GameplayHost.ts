@@ -3,6 +3,7 @@ import type { TerraEngine } from '@/engine/TerraEngine';
 import { useTerraStore } from '@/state/store';
 import type { GameplayContext, GameplayOverlay, GameplaySystem, Interaction, PlayerSnapshot, SpawnPoint } from './types';
 import { createGameplaySystems } from './registry';
+import { interactionScore } from './selection';
 
 const EMBODIED = new Set(['walk', 'drive', 'passenger']);
 
@@ -65,8 +66,8 @@ export class GameplayHost {
         const allowed = it.modes ?? ['walk', 'drive'];
         if (!allowed.includes(mode)) continue;
         const d = distanceM(p.lat, p.lon, it.lat, it.lon);
-        if (d > it.radiusM) continue;
-        const score = d - (it.priority ?? 0) * 1000;
+        const score = interactionScore(d, it);
+        if (score === null) continue;
         if (score < bestScore) { bestScore = score; best = it; }
       }
     }
