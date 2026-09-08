@@ -174,8 +174,12 @@ export class InteriorSystem implements GameplaySystem {
     // OpenStreetMap buildings (real footprints, generated interiors).
     const osm = this.engine.osm;
     if (osm) {
-      const tile = osm.tileFor(lat, lon);
-      if (tile) {
+      // Every loaded tile whose bounds come within reach of the player (buildings near a tile edge belong to a
+      // neighbouring tile).
+      for (const tile of osm.loadedTiles) {
+        const bb = tile.bbox;
+        const clampLat = Math.max(bb.south, Math.min(bb.north, lat)), clampLon = Math.max(bb.west, Math.min(bb.east, lon));
+        if (haversineM(lat, lon, clampLat, clampLon) > CANDIDATE_RADIUS_M + 40) continue;
         for (const b of tile.buildings) {
           if (b.outer.length < 4) continue;
           const category = categoryForOsmBuilding(b.type, b.name) ?? null;
