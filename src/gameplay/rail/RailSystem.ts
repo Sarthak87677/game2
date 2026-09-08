@@ -559,6 +559,19 @@ export class RailSystem implements GameplaySystem {
     return { phase: this.phase, trains: this.trains.length, models, tracks: this.tracks.size, platforms: this.platforms.size, profiles: profiles || '—' };
   }
 
+  /** Probe hook: move the player's train to a fraction of its remaining journey (0..1) without arriving. */
+  debugJump(fraction: number): void {
+    const t = this.playerTrain;
+    if (!t || t.stops.length === 0) return;
+    const last = t.stops[t.stops.length - 1].s;
+    const target = t.s + (last - t.s) * Math.max(0, Math.min(0.999, fraction));
+    t.s = target;
+    t.stops = t.stops.filter((st) => (st.s - target) * t.direction > 1);
+    if (t.stops.length === 0) t.stops = [{ s: last, station: t.track.nearestStationIndex(last) }];
+    t.state = 'run';
+    void t.track.buildProfile(this.engine, t.s).catch(() => undefined);
+  }
+
   /** Test hook: state summary for e2e specs. */
   debug(): { phase: Phase; station: string | null; train: { label: string; s: number; v: number; state: TrainState; stops: number; doors: number } | null } {
     const t = this.playerTrain;
