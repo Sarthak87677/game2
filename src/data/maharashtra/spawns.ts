@@ -9,7 +9,7 @@ const OSM_NOTE = 'Terrain is measured; buildings come from OpenStreetMap when on
  */
 export const MAHARASHTRA_SPAWNS: SpawnPoint[] = [
   { id: 'sgis-campus', name: 'SGIS-inspired campus, Atigre (Kolhapur)', region: 'Kolhapur', lat: 16.7335, lon: 74.4015, headingDeg: 20, description: 'Landscaped entrance of the school-inspired hero campus.', dataNote: CAMPUS_NOTE, approximate: true },
-  { id: 'gateway-of-india', name: 'Gateway of India, Mumbai', region: 'Mumbai', lat: 18.9218, lon: 72.8340, headingDeg: 90, description: 'Apollo Bunder waterfront by the basalt arch and the ferry jetties.', dataNote: OSM_NOTE, approximate: true },
+  { id: 'gateway-of-india', name: 'Gateway of India, Mumbai', region: 'Mumbai', lat: 18.9226, lon: 72.8332, headingDeg: 120, description: 'Apollo Bunder promenade facing the basalt arch and the ferry jetties.', dataNote: OSM_NOTE, approximate: true },
   { id: 'marine-drive', name: 'Marine Drive, Mumbai', region: 'Mumbai', lat: 18.9432, lon: 72.8236, headingDeg: 340, description: 'The promenade along Back Bay.', dataNote: OSM_NOTE, approximate: true },
   { id: 'csmt', name: 'Chhatrapati Shivaji Maharaj Terminus', region: 'Mumbai', lat: 18.9400, lon: 72.8353, headingDeg: 180, description: 'Forecourt of the Victorian-Gothic terminus.', dataNote: OSM_NOTE, approximate: true },
   { id: 'shaniwar-wada', name: 'Shaniwar Wada, Pune', region: 'Pune', lat: 18.5195, lon: 73.8553, headingDeg: 0, description: 'Delhi Gate of the Peshwa fortification.', dataNote: OSM_NOTE, approximate: true },
@@ -17,6 +17,8 @@ export const MAHARASHTRA_SPAWNS: SpawnPoint[] = [
   { id: 'deekshabhoomi', name: 'Deekshabhoomi, Nagpur', region: 'Nagpur', lat: 21.1287, lon: 79.0656, headingDeg: 0, description: 'Grounds of the stupa.', dataNote: OSM_NOTE, approximate: true },
   { id: 'mahabaleshwar', name: 'Mahabaleshwar', region: 'Satara', lat: 17.9237, lon: 73.6586, headingDeg: 270, description: 'Hill-station plateau in the Western Ghats.', dataNote: OSM_NOTE, approximate: true },
   { id: 'ganpatipule', name: 'Ganpatipule beach', region: 'Ratnagiri', lat: 17.1461, lon: 73.2653, headingDeg: 270, description: 'Konkan coast beach.', dataNote: OSM_NOTE, approximate: true },
+  { id: 'lonavala-time-trial', name: 'Lonavala hill road time trial (closed course)', region: 'Pune', lat: 18.7318, lon: 73.3974, headingDeg: 195, description: 'Start gate of the closed-course hill time trial near Bhushi Dam; three vehicles wait at the line.', dataNote: 'Approximate start position on the Lonavala–Aamby Valley road; the gates and vehicles are fictional game objects.', approximate: true },
+  { id: 'showroom-worli', name: 'Seaface Motors showroom, Worli (fictional showroom)', region: 'Mumbai', lat: 19.0090, lon: 72.8168, headingDeg: 90, description: 'Forecourt of an original procedural car showroom at an approximate dealership-cluster position.', dataNote: 'Original showroom interior — not a real dealer\'s interior, name or brand; position approximate.', approximate: true },
   { id: 'taj-mahal', name: 'Taj Mahal, Agra (external hero destination)', region: 'Agra, Uttar Pradesh', lat: 27.1731, lon: 78.0421, headingDeg: 0, description: 'Great Gate approach to the charbagh garden.', dataNote: 'Hero stand-in at the real position; gardens and interior are an approximate original reconstruction.', approximate: true },
 ];
 

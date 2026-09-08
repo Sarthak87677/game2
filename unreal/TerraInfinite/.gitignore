@@ -1,0 +1,35 @@
+# Unreal Engine build products and per-machine files (never committed)
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+.vs/
+.vscode/
+.idea/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.xcodeproj
+*.xcworkspace
+*.code-workspace
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+Makefile
+CMakeLists.txt
+*.pri
+*.pro
+.ue4dependencies
+.uedependencies
+
+# Credentials: only the .example is tracked
+Config/Secrets.ini
+Config/*Secrets*.ini
+!Config/Secrets.ini.example
+
+# Editor-generated per-user config
+Config/DefaultEditorPerProjectUserSettings.ini
+Saved/Config/

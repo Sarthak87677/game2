@@ -144,12 +144,17 @@ describe('SHOWCASE_AREAS', () => {
     'Grand Canyon',
     'Tristan da Cunha',
     'Great Ocean Road — Twelve Apostles',
+    'Mumbai waterfront — Gateway to Sea Link',
+    'Pune old city — Shaniwar Wada and the Peths',
+    'Kolhapur — Mahalaxmi temple to Panhala',
+    'Konkan coast — Ganpatipule to Sindhudurg',
+    'Western Ghats — Mahabaleshwar, Kaas and Koyna',
   ];
 
-  it('contains exactly the 19 expected areas', () => {
-    expect(SHOWCASE_AREAS.length).toBe(19);
+  it('contains exactly the 24 expected areas (19 global + 5 Maharashtra)', () => {
+    expect(SHOWCASE_AREAS.length).toBe(24);
     expect(SHOWCASE_AREAS.map((a) => a.name)).toEqual(EXPECTED_NAMES);
-    expect(new Set(SHOWCASE_AREAS.map((a) => a.id)).size).toBe(19);
+    expect(new Set(SHOWCASE_AREAS.map((a) => a.id)).size).toBe(24);
   });
 
   it('every area is a valid bookmark with biome, ground spot and tour', () => {

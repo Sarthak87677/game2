@@ -10,10 +10,11 @@
  * values with lower confidence.
  */
 import { defineBookmarks } from './defaults';
+import { MAHARASHTRA_HIGHLIGHTS } from './maharashtraHighlights';
 import type { Bookmark } from './types';
 
-/** All curated highlights (≥160 entries spanning every continent). */
-export const WORLD_HIGHLIGHTS: Bookmark[] = defineBookmarks([
+/** All curated highlights (≥160 global entries spanning every continent, plus the Maharashtra gazetteer as `mh-*` bookmarks). */
+export const WORLD_HIGHLIGHTS: Bookmark[] = [...defineBookmarks([
   // ───────────────────────────── Europe ─────────────────────────────
   { id: 'eiffel-tower', name: 'Eiffel Tower', category: 'landmark', continent: 'Europe', country: 'France', lat: 48.8584, lon: 2.2945, description: 'Wrought-iron lattice tower on the Champ de Mars, the emblem of Paris.', tags: ['paris', 'tower'], camera: { headingDeg: 30 } },
   { id: 'paris', name: 'Paris', category: 'city', continent: 'Europe', country: 'France', lat: 48.8566, lon: 2.3522, description: 'The French capital along the Seine, with its boulevards, bridges and monuments.', tags: ['france', 'capital'] },
@@ -275,4 +276,4 @@ export const WORLD_HIGHLIGHTS: Bookmark[] = defineBookmarks([
   { id: 'point-nemo', name: 'Point Nemo', category: 'ocean', continent: 'Ocean', lat: -48.8767, lon: -123.3933, description: 'The oceanic pole of inaccessibility: the point farthest from any land, in the South Pacific.', tags: ['pole of inaccessibility', 'south pacific', 'remote'], camera: { heightM: 50000 } },
   { id: 'challenger-deep', name: 'Challenger Deep, Mariana Trench', category: 'ocean', continent: 'Ocean', lat: 11.3733, lon: 142.5917, description: 'The deepest known point of the oceans, nearly 11 km down in the Mariana Trench.', tags: ['mariana trench', 'pacific', 'deepest'], camera: { heightM: 50000 } }, // approx
   { id: 'sargasso-sea', name: 'Sargasso Sea', category: 'ocean', continent: 'Ocean', lat: 30.0000, lon: -60.0000, description: 'Gyre-bound sea of floating sargassum weed in the North Atlantic, with no land shore.', tags: ['atlantic', 'gyre', 'bermuda triangle'], camera: { heightM: 50000 } }, // approx
-]);
+]), ...MAHARASHTRA_HIGHLIGHTS];
