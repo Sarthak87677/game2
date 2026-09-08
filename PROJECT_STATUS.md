@@ -268,6 +268,7 @@ Full summary: `docs/tracks/journeys.md`.
 **Next**
 * Arcade flight mode reusing fly mode with speed limits and bank visuals; ambient air traffic and ferries; cabin/train interiors from the interiors grammar; verify the ghat profile and elevated metro on a machine with terrain access; wire journeys into the activities checklists.
 
+
 ## Track: vehicles (branch `claude/track-vehicles`, 2026-09-08)
 
 **Completed**
@@ -287,7 +288,9 @@ Full summary: `docs/tracks/journeys.md`.
   pedestrians, density by local hour and place population, 400 m full / 1.5 km coarse / frozen beyond, 3D bodies
   lent by the vehicle system to the nearest traffic, exclusion circle for the time trial.
 * Pedestrians (`Pedestrians.ts`): pooled walkers on pavements near the player, Maharashtra/India/generic clothing
-  palettes, bobbing walk cycle with swinging legs, player and vehicle avoidance, time-of-day activity.
+  palettes, bobbing walk cycle with swinging legs, player and vehicle avoidance, time-of-day activity. Stands down
+  automatically when the living-world `crowds` system is registered (it is, on `main`); traffic braking can read
+  crowd positions through `TrafficLayer.setPedestrianSource` once the crowds side wires it.
 * Showroom (`src/gameplay/showroom/`, `showroom`): five curated approximate Maharashtra positions plus OSM
   `shop=car` nodes when online; generated interior (floor, glass front, six plinths with catalog vehicles,
   information stands with spec overlays, reception, lounge, workshop bay with a lifted vehicle, forecourt parking,
@@ -302,9 +305,12 @@ Full summary: `docs/tracks/journeys.md`.
   junctions/turns/crossings, showroom layout, pedestrian palettes).
 * `tests/e2e/vehicles.spec.ts` in headless Chromium (SwiftShader, synthetic OSM fixtures): spawn at the Gateway →
   enter the nearest parked vehicle → drive 5 s → speed > 0 and gear D → dashboard camera, indicator and headlights
-  → stop → exit → walk mode; traffic stats show junctions, signals, pedestrians and lent bodies; Worli showroom
+  → stop → exit → walk mode; traffic stats show junctions, signals, lent bodies (and pedestrians when no crowd
+  system is registered); Worli showroom
   builds, inspect overlay opens, orbit camera runs, test drive seats the player. Screenshots in `docs/screenshots/`
-  (`vehicle-driving-third.png`, `vehicle-dashboard.png`, `showroom-floor.png`, `showroom-inspect.png`).
+  (`vehicle-driving-third.png`, `vehicle-driving-gateway.png`, `vehicle-dashboard.png`, `vehicle-night-third.png`,
+  `showroom-floor.png`, `showroom-inspect.png`, `showroom-orbit.png`, `showroom-testdrive.png`, `time-trial-start.png`,
+  `time-trial-finish.png`).
 
 **Broken / limitations**
 * No terrain or real OSM in the sandbox: everything above was verified on the ellipsoid with fixture roads; on real

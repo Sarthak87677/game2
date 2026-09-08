@@ -82,6 +82,7 @@ export class TrafficLayer {
   private pool: TrafficBodyPool | null = null;
   private player: (() => TrafficPlayer | null) | null = null;
   private exclusion: { lat: number; lon: number; radiusM: number } | null = null;
+  private pedestrianSource: (() => { lat: number; lon: number }[]) | null = null;
   readonly pedestrians: Pedestrians;
   private counts = { simulated: 0, coarse: 0, frozen: 0, bodies3d: 0, waiting: 0 };
   private byRoad = new Map<GraphRoad, Vehicle[]>();
@@ -112,6 +113,8 @@ export class TrafficLayer {
     this.pool = pool;
   }
   setPlayer(fn: (() => TrafficPlayer | null) | null): void { this.player = fn; }
+  /** Extra pedestrian positions (e.g. the crowd system's) that vehicles brake for, in addition to the built-in walkers. */
+  setPedestrianSource(fn: (() => { lat: number; lon: number }[]) | null): void { this.pedestrianSource = fn; }
   /** Suppresses traffic inside a circle (closed-course time trial). */
   setExclusion(zone: { lat: number; lon: number; radiusM: number } | null): void { this.exclusion = zone; }
 
@@ -145,6 +148,7 @@ export class TrafficLayer {
     this.coarseTick++;
     const nowS = now / 1000;
     const peds = this.pedestrians.positions();
+    if (this.pedestrianSource) { try { peds.push(...this.pedestrianSource()); } catch { /* foreign source failed; ignore */ } }
     this.byRoad.clear();
     this.counts = { simulated: 0, coarse: 0, frozen: 0, bodies3d: 0, waiting: 0 };
     // Zone assignment and per-road buckets for car following.

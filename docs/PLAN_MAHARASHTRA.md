@@ -131,6 +131,7 @@ Unknown fields are kept in `ExtraJson`; missing tables are exported empty and fl
   to `addHeightSampler`. The speedboat course registers a water-surface height sampler and a custom `setVehicleBody`
   while active and restores `driveParams` afterwards. Journey systems expose `debug()`/`debugJump()` test hooks.
 
+
 ## Additive hooks added by the vehicles track (branch `claude/track-vehicles`)
 
 All optional; nothing existing changes behaviour when they are unused.
@@ -142,9 +143,10 @@ All optional; nothing existing changes behaviour when they are unused.
   primitive vehicle bodies (`TrafficBody` interface) lent to the nearest ambient vehicles; a circle in which traffic is
   suppressed (closed-course time trial); road-graph access; the pooled pedestrian layer.
 * `Pedestrians` (`src/world/traffic/Pedestrians.ts`) is constructed by `TrafficLayer` and exposes `positions()`,
-  `stats()`, `maxWalkers` and the regional palettes (`paletteFor`). **Living-world track:** build crowds on this
-  contract (read `engine.traffic.pedestrians.positions()` for avoidance, extend the palettes) rather than a second
-  walker pool; gatherings/groups are yours.
+  `stats()`, `maxWalkers` and the regional palettes (`paletteFor`). Coordination with the living-world `crowds`
+  system: when `crowds` is registered the vehicle system sets `traffic.pedestrians.maxWalkers = 0` so streets are not
+  populated twice; the crowd system can feed its walker positions to traffic braking through
+  `TrafficLayer.setPedestrianSource(() => [{lat, lon}])` (not yet wired on the crowds side).
 * Store `gameplay.vehicle` gained optional fields `headingDeg`, `destination {name, bearingDeg, distanceM}`, `camera`,
   `damage` (`src/state/store.ts`); `InteractionPrompt` renders heading and destination when present (one line).
 * OSM adapter: `node["shop"="car"]["name"]` is requested and parsed into `pois` with `kind: 'car_showroom'`

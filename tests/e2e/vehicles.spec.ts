@@ -73,7 +73,9 @@ test.describe('Vehicles (synthetic OSM fixture)', () => {
     expect(traffic!.intersections).toBeGreaterThan(0);
     expect(traffic!.signals).toBeGreaterThan(0);
     expect(traffic!.simulated).toBeGreaterThan(0);
-    expect(traffic!.pedestrians).toBeGreaterThan(0);
+    // Traffic's own walkers stand down when the crowd system is registered (it owns pedestrians then).
+    const crowds = await page.evaluate(() => (window as unknown as W).__terra.engine.gameplay.systems.some((s) => s.id === 'crowds'));
+    if (!crowds) expect(traffic!.pedestrians).toBeGreaterThan(0);
     expect(traffic!.bodies3d).toBeGreaterThan(0);
     const s = await state(page);
     expect(s.boot.error).toBeNull();

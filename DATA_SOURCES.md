@@ -33,6 +33,7 @@ Provenance vocabulary used in the app and below:
 
 | Terra Infinite (this project) | Journeys tables (`src/data/maharashtra/stations.ts`, `corridors.ts`, `airports.ts`, `ports.ts`, `waterRoutes.ts`) | this repository | Maharashtra rail/metro/air/marine network (+ Delhi/Agra markers for the Taj hop) | 56 stations, 11 corridors, 8 airports, 7 ports, 4 water routes; coordinates written from memory of public reference values, ±300 m–1 km | Curated 2026-09 | MIT | None (every table shows its data note) | No | **Approximate:** positions, runway headings/lengths, corridor alignments (lifted to the game terrain at run time). **Simulated/fictional:** timetables, train/flight numbers, tickets, vessels, the cruise loop and the speedboat course. |
 
+
 | Terra Infinite (this project) | Maharashtra showroom positions (`src/data/maharashtra/showrooms.ts`), time-trial checkpoints (`src/gameplay/vehicles/courses.ts`), spawn points | this repository | Maharashtra | ±300 m (written from public reference values) | 2026 | MIT | None | No | **Approximate:** positions only; every building, interior, vehicle and course marker is procedural/fictional and labelled so in the UI. OSM `shop=car` nodes (ODbL) supply real dealership positions when online. |
 | CesiumJS | Engine assets (star map, moon texture, water normal map, IAU2006 XYS data) | https://cesium.com/platform/cesiumjs/ | n/a | n/a | Cesium 1.145 | Apache 2.0 | "CesiumJS" | No | Sky box, moon, water waves, ICRF transforms. |
 

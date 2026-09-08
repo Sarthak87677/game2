@@ -12,11 +12,11 @@ pedestrians, generated showrooms with inspect cameras and test drives, and a clo
 | Parked vehicles (3 per spawn point, showroom forecourts, time-trial start), pooled by distance; "Enter <vehicle>" → drive; "Exit vehicle" while stopped → walk by the door | `VehicleSystem.ts` | `tests/e2e/vehicles.spec.ts` test 1 |
 | Cameras (C: third → first → dashboard), gear display P/R/N/D, speed + heading + destination bearing in `gameplay.vehicle`, headlights (L, auto at dusk), indicators (Q/R), hazards (Z), horn (H, WebAudio), wipers in rain, tyre spray when wet, wet-grip reduction, non-graphic damage, 4 s stuck reset with fade to the nearest road point / 5 m back, engine + road + horn audio through `AmbientAudio.bus` | `VehicleSystem.ts`, `VehicleAudio.ts`, `logic.ts` | unit tests for gear/stuck/grip/impact/lamps/nearest road; e2e test 1 drives 5 s (speed > 0, gear D), toggles dashboard camera, indicator and headlights, exits to walk mode |
 | Ambient traffic: junction graph (shared nodes + inserted crossings), two-phase signals with clearance, left-lane keeping, flow through junctions, car following, emergency braking for the player and pedestrians, density by local hour and place population, full simulation within 400 m, coarse to 1.5 km, frozen beyond; 3D bodies lent by the vehicle system to the nearest traffic | `src/world/traffic/TrafficLayer.ts`, `roadGraph.ts` | `tests/unit/vehicles/roadGraph.test.ts`, `logic.test.ts`; e2e asserts intersections > 0, signals > 0, simulated > 0, pedestrians > 0, bodies3d > 0 |
-| Pedestrians: pooled walkers on pavements, Maharashtra/India/generic palettes, bobbing torso and swinging legs, player/vehicle avoidance, time-of-day activity | `src/world/traffic/Pedestrians.ts` | unit palette/activity tests; e2e pedestrian count |
+| Pedestrians: pooled walkers on pavements, Maharashtra/India/generic palettes, bobbing torso and swinging legs, player/vehicle avoidance, time-of-day activity; disabled automatically when the living-world `crowds` system is registered (it is on `main`) | `src/world/traffic/Pedestrians.ts` | unit palette/activity tests; 19 active walkers in the pre-merge probe at the Gateway; e2e asserts the count only when no crowd system exists |
 | Showroom: 5 curated approximate positions + OSM `shop=car` nodes; generated floor with 6 plinths, information stands, reception, lounge, workshop lift, forecourt parking, test-drive exit; Inspect overlay with exterior-orbit / interior / dashboard / cinematic cameras; Test drive spawns the vehicle at the exit with a return bearing | `src/gameplay/showroom/`, `src/data/maharashtra/showrooms.ts` | `tests/unit/vehicles/catalog.test.ts` (layout), e2e test 2, screenshots `showroom-floor.png`, `showroom-inspect.png` |
-| Time trial near Lonavala: gates with banners, start/abort while driving, splits, best lap in localStorage, traffic suppressed on the course | `courses.ts`, `CourseMarkers.ts`, `logic.ts` | unit state machine + storage tests; scripted probe (checkpoints captured in order, "Lap complete" overlay, best time stored) — screenshot `time-trial-start.png` |
+| Time trial near Lonavala: gates with banners, start/abort while driving, splits, best lap in localStorage, traffic suppressed on the course | `courses.ts`, `CourseMarkers.ts`, `logic.ts` | unit state machine + storage tests; scripted probe (checkpoints captured in order, "Lap complete" overlay, best time stored) — screenshots `time-trial-start.png`, `time-trial-finish.png` (no e2e spec: the lap needs real roads; the probe teleported through the gates) |
 
-Commands run before every commit: `npm run typecheck && npm run lint && npm test` (all green: 251 unit tests).
+Commands run before every commit: `npm run typecheck && npm run lint && npm test` (all green after merging `main`: 398 unit tests, 36 of them from this track).
 E2E: `TERRA_E2E_DEV=1 TERRA_E2E_PORT=5180 npx playwright test tests/e2e/vehicles.spec.ts` against
 `TERRA_FIXTURES=1 npx vite --port 5180` — both tests pass (about 11 minutes on SwiftShader).
 
@@ -34,15 +34,16 @@ vehicle request bus, two spawn points (`lonavala-time-trial`, `showroom-worli`),
   not exercised (no live OSM here).
 * Traffic vehicles do not avoid parked vehicles; coarse-zone vehicles skip signals by design.
 * The rain/wet screenshots show the effect but SwiftShader frame rates (1–3 fps) make spray sparse.
-* Pedestrians walk only along roads (no crossings, no gatherings) — the living-world track owns crowds and should
-  build on `Pedestrians.positions()`.
+* Pedestrians walk only along roads (no crossings, no gatherings). Because `main` registers the living-world
+  `crowds` system, the traffic walkers are switched off there and only the crowd billboards remain; traffic braking
+  for crowd pedestrians needs the crowds side to call `TrafficLayer.setPedestrianSource`.
 
 ## Files touched
 
 New: `src/gameplay/vehicles/{catalog,VehicleBody,VehicleSystem,VehicleAudio,logic,requests,courses,CourseMarkers,ground}.ts`,
 `src/gameplay/showroom/{ShowroomSystem,showroomLayout}.ts`, `src/data/maharashtra/showrooms.ts`,
 `src/world/traffic/{roadGraph,Pedestrians}.ts`, `tests/unit/vehicles/*.test.ts`, `tests/e2e/vehicles.spec.ts`,
-`docs/screenshots/vehicle-*.png`, `showroom-*.png`, `time-trial-start.png`, this file.
+`docs/screenshots/vehicle-*.png`, `showroom-*.png`, `time-trial-*.png`, this file.
 Modified (additive): `src/world/traffic/TrafficLayer.ts` (rewritten simulation, same public stats fields),
 `src/engine/audio.ts`, `src/state/store.ts`, `src/ui/widgets/InteractionPrompt.tsx`, `src/styles/hud.css`,
 `src/gameplay/registry.ts`, `src/data/maharashtra/{index,spawns}.ts`, `src/data/adapters/features/{overpass,osmParse}.ts`,
