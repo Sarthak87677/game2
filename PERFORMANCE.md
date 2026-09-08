@@ -116,6 +116,25 @@ npm run perf -- --url=http://127.0.0.1:5173/?terraFixtures=1 --quality=low --min
 4. Prints the Markdown tables and writes `docs/performance-<stamp>.json` (hardware, readiness/degradation list, every
    row, soak samples, page errors).
 
+## 2b. Preset cost comparison (same spot, same renderer)
+
+Measured 2026-09-08 at the Gateway of India spawn (18.9226, 72.8332, 60 m, ground level, synthetic OSM fixture),
+switching only the preset and letting each settle for 9 s, median of ten 1.2 s frame-time samples. SwiftShader, so
+the absolute frame rate is meaningless — the ratio is the point: it is the same scene, the same draw calls and the
+same shaders, with only the preset's work removed.
+
+| Preset | Median frame time | Implied fps | Relative work |
+|---|---|---|---|
+| High | 4 898 ms | 0.20 | 1.00× |
+| Performance | 359 ms | 2.78 | **0.073× (13.6× less work per frame)** |
+
+Settings actually applied at Performance (read back from the live scene): ground atmosphere off, tile preloading off,
+maximum screen-space error 6, resolution scale 0.6, FXAA off, MSAA 1, HDR off.
+
+This is what a bottom-tier integrated GPU (AMD Radeon 820M, Intel UHD) gets by starting in Performance mode instead
+of High. It does not promise any particular frame rate on a given GPU — only that the renderer is asked to do about
+one fourteenth of the per-frame work.
+
 ## 3. Recorded numbers — SwiftShader software rendering (NOT a GPU)
 
 Environment for every run below: cloud sandbox, 4 vCPUs, 8 GB, headless Chromium, renderer
