@@ -300,7 +300,7 @@ Full summary: `docs/tracks/journeys.md`.
   → stop → exit → walk mode; traffic stats show junctions, signals, lent bodies (and pedestrians when no crowd
   system is registered); Worli showroom
   builds, inspect overlay opens, orbit camera runs, test drive seats the player. Screenshots in `docs/screenshots/`
-  (`vehicle-driving-third.png`, `vehicle-driving-gateway.png`, `vehicle-dashboard.png`, `vehicle-night-third.png`,
+  (`vehicle-driving-third.png`, `vehicle-driving-gateway.png`, `vehicle-dashboard.png`, `vehicle-dashboard-rickshaw-rain.png`, `vehicle-night-third.png`,
   `showroom-floor.png`, `showroom-inspect.png`, `showroom-orbit.png`, `showroom-testdrive.png`, `time-trial-start.png`,
   `time-trial-finish.png`).
 

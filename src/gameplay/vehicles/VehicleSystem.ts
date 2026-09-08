@@ -506,11 +506,13 @@ export class VehicleSystem implements GameplaySystem {
     const p = ctx.player;
     if (this.active) {
       const speed = Math.abs(this.lastSpeed);
-      if (speed < 0.5) out.push({ id: 'vehicle:exit', label: 'Exit vehicle', lat: p.lat, lon: p.lon, radiusM: 50, modes: ['drive'], run: () => this.exit() });
+      // Priorities: leaving the driver's seat beats sightseeing prompts from other systems (boarding, reading about
+      // a landmark) that also reach into drive mode; the time-trial start gate beats the exit prompt.
+      if (speed < 0.5) out.push({ id: 'vehicle:exit', label: 'Exit vehicle', lat: p.lat, lon: p.lon, radiusM: 50, modes: ['drive'], priority: 3, run: () => this.exit() });
       TIME_TRIAL_COURSES.forEach((c, i) => {
         const s = c.checkpoints[0];
-        if (this.trial) out.push({ id: `trial:${c.id}:abort`, label: 'Abort time trial', lat: p.lat, lon: p.lon, radiusM: 50, modes: ['drive'], priority: -1, run: () => this.endTrial(false) });
-        else out.push({ id: `trial:${c.id}:start`, label: `Start time trial — ${c.name} (closed course)`, lat: s.lat, lon: s.lon, radiusM: 30, modes: ['drive'], priority: 2, run: () => this.startTrial(i, performance.now()) });
+        if (this.trial) out.push({ id: `trial:${c.id}:abort`, label: 'Abort time trial', lat: p.lat, lon: p.lon, radiusM: 50, modes: ['drive'], priority: 2, run: () => this.endTrial(false) });
+        else out.push({ id: `trial:${c.id}:start`, label: `Start time trial — ${c.name} (closed course)`, lat: s.lat, lon: s.lon, radiusM: 30, modes: ['drive'], priority: 4, run: () => this.startTrial(i, performance.now()) });
       });
       return out;
     }
@@ -518,7 +520,8 @@ export class VehicleSystem implements GameplaySystem {
       if (!v.body || v.groundM === null) continue;
       if (distanceM(p.lat, p.lon, v.lat, v.lon) > 60) continue;
       const spec = vehicleSpec(v.kind);
-      out.push({ id: `vehicle:enter:${v.id}`, label: `Enter ${spec.name}`, lat: v.lat, lon: v.lon, radiusM: Math.max(4.5, spec.lengthM / 2 + 2.2), modes: ['walk'], run: () => this.enter(v) });
+      // Standing right next to a car is a deliberate choice: outrank wide-radius prompts from other systems.
+      out.push({ id: `vehicle:enter:${v.id}`, label: `Enter ${spec.name}`, lat: v.lat, lon: v.lon, radiusM: Math.max(4.5, spec.lengthM / 2 + 2.2), modes: ['walk'], priority: 3, run: () => this.enter(v) });
     }
     return out;
   }
