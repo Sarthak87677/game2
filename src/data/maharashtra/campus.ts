@@ -172,7 +172,7 @@ const LABS: HeroLayoutSpec = {
 };
 
 const SPORTS_HALL: HeroLayoutSpec = {
-  elevator: false, terrace: false, entrance: 'west',
+  elevator: false, terrace: false, entrance: 'south',
   floors: [{ name: 'Indoor sports hall', hall: { label: 'Indoor sports hall', kind: 'sports-hall' }, rooms: [{ label: 'Equipment store', kind: 'store', widthM: 5 }, { label: 'Changing rooms', kind: 'washroom', widthM: 6 }] }],
 };
 
@@ -249,7 +249,7 @@ export const SGIS_CAMPUS: CampusSpec = {
     { id: 'auditorium', name: 'Auditorium', category: 'school', east: 45, north: 152, wM: 42, dM: 26, rotationDeg: 0, heightM: 9.5, floors: 1, colour: '#c9b6a3', entrance: 'south', layout: AUDITORIUM },
     { id: 'cafeteria', name: 'Cafeteria', category: 'restaurant-cafe', east: 0, north: 210, wM: 32, dM: 16, rotationDeg: 0, heightM: 4.6, floors: 1, colour: '#e6d3b3', entrance: 'south', layout: CAFETERIA },
     { id: 'labs', name: 'Labs block', category: 'school', east: -55, north: 210, wM: 40, dM: 16, rotationDeg: 0, heightM: 7.6, floors: 2, colour: '#dfd6c8', entrance: 'south', layout: LABS },
-    { id: 'sports-hall', name: 'Indoor sports hall', category: 'school', east: 150, north: 215, wM: 44, dM: 26, rotationDeg: 0, heightM: 9.0, floors: 1, colour: '#cfd6d9', entrance: 'west', layout: SPORTS_HALL },
+    { id: 'sports-hall', name: 'Indoor sports hall', category: 'school', east: 150, north: 215, wM: 44, dM: 26, rotationDeg: 0, heightM: 9.0, floors: 1, colour: '#cfd6d9', entrance: 'south', layout: SPORTS_HALL },
     { id: 'hostel', name: 'Hostel-style block', category: 'hotel', east: -128, north: 120, wM: 46, dM: 14, rotationDeg: 90, heightM: 10.2, floors: 3, colour: '#e0cdb9', entrance: 'south', layout: HOSTEL },
   ],
 };
