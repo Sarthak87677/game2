@@ -61,3 +61,16 @@ that drives the feature through `window.__terra`, a probe screenshot in `docs/sc
   *next*, not *done*.
 * `npm run typecheck && npm run lint && npm test` must pass before every commit; e2e specs run with
   `TERRA_E2E_DEV=1` against the dev server (`?terraQuality=low`, `--use-angle=swiftshader`).
+
+## Living-world hooks (track living-world-activities, additive)
+
+* Registered systems: `crowds`, `wildlife`, `monsoon`, `activities` (`src/gameplay/registry.ts`).
+* `src/world/wildlife/sightings.ts` — module-level registry (`reportSighting` / `nearbySightings`) so the wildlife and
+  activities systems can share "what is near the player" without importing each other. Any track may report a sighting.
+* `src/world/crowds/placeContext.ts` — `classifyPlace(engine, lat, lon)` (hotspot / urban / rural / coast / farmland /
+  park) and `groundFallback(engine, player)` (surface height when no terrain tile is loaded). Other tracks may reuse them.
+* Activities status line: the activities system writes `gameplay.status` with a short TTL and never overwrites a foreign
+  status while the mode is `passenger` (journeys own it there).
+* `ActivitiesTab` is rendered by `PlayPanel` behind a "Spawn | Activities" tab bar; other tracks can add tabs the same way.
+* The `P` key (photograph) is handled by a window listener inside the activities system; it does not touch `input.ts`.
+

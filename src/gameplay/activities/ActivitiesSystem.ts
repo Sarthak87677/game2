@@ -418,7 +418,7 @@ export class ActivitiesSystem implements GameplaySystem {
     if (Math.abs(c.lat - p.lat) < 0.01 && Math.abs(c.lon - p.lon) < 0.01) {
       const dCourt = distanceM(p.lat, p.lon, c.lat, c.lon);
       if (dCourt <= 16) out.push({ id: 'basketball', label: 'Shoot a basket (face the hoop)', lat: c.lat, lon: c.lon, radiusM: 16, priority: 2, modes: ['walk'], run: () => { this.throwBasketball(); } });
-      else out.push({ id: 'basketball-court', label: `Walk over to the basketball court (${Math.round(dCourt)} m)`, lat: c.lat, lon: c.lon, radiusM: 160, priority: -1, modes: ['walk'], run: () => this.goToCourt() });
+      else out.push({ id: 'basketball-court', label: `Walk over to the basketball court (${Math.round(dCourt)} m)`, lat: c.lat, lon: c.lon, radiusM: 160, priority: 0, modes: ['walk'], run: () => this.goToCourt() });
     }
     for (const build of this.parks.values()) for (const l of build.litter) out.push({ id: `litter:${l.id}`, label: `Pick up litter — ${build.park.name}`, lat: l.lat, lon: l.lon, radiusM: 2.6, priority: 3, modes: ['walk'], run: () => this.pickUp(build, l) });
     for (const s of this.nearby) {
