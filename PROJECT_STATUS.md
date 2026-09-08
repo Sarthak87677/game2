@@ -153,3 +153,28 @@ Full summary: `docs/tracks/data.md`.
 
 **Next**
 * Exclude OSM buildings inside hero footprints; feed `MaharashtraIndex.nearest` into the HUD readout; richer Taj lawns using the vegetation species library; verify on a GPU machine with network access.
+
+## Track `interiors-campus` (branch `claude/track-interiors`, 2026-09-08)
+
+Full summary: `docs/tracks/interiors.md`.
+
+**Completed**
+* Deterministic interior grammar (`src/world/interiors/grammar.ts`, vocabulary `src/data/maharashtra/interiorGrammar.ts`): footprint (lon/lat or metres) + height + category → floors with rooms along a double/single-loaded corridor or a single hall, switchback stair cores (two ramps + half landing), optional elevator shaft, doors (every door links two spaces or is `decorative`), windows, furniture blocks, ceiling lights, a railed roof terrace; 12 categories; seed = hash of the footprint centroid; hero buildings pass a handcrafted room programme.
+* Collision helpers (`collision.ts`): nearest-surface height sampling (ramps followed continuously, floors chosen by the walker's height), wall move filter with door openings and sliding, wall boxes with door/window cut-outs.
+* `InteriorLevel` (Cesium): slabs, walls with openings, ramps, landings, handrails, lift cabin floors, furniture, emissive lights, room/floor/lift/decorative-door labels in a rotated ENU frame; current floor ±1 built lazily (max 5 floors resident); binds `groundOverride`/`moveFilter`.
+* `InteriorSystem` (registered as `interiors`): enterable campus buildings, OSM buildings (category from `building=*`/name, door = footprint edge midpoint nearest a road) and near-field procedural buildings; one active level; "Call elevator" overlay → fade + teleport; exit by interaction or by walking through the door; fall protection (>8 m → fade + respawn at a safe point recorded ≥2 s earlier); persistent status note "Generated interior — fictional, not surveyed".
+* SGIS-inspired campus (`src/data/maharashtra/campus.ts`, `src/world/hero/Campus.ts`): platform, gate with note label, roads, gardens, trees, bus/car parking, basketball/volleyball courts, sports field, parkour low-wall course with a step-up apron (jump assist), ten buildings (3 academic blocks, admin, library, auditorium, cafeteria, labs, indoor sports hall, hostel-style block) with window bands, canopies and parapet railings; handcrafted interiors (classrooms, labs, art/music rooms, library halls, auditorium, cafeteria, admin rooms, sports hall, hostel rooms); shells hide while inside.
+
+**Tested (how)**
+* `npm run typecheck && npm run lint && npm test`: 357 unit tests pass (9 new in `tests/unit/interiors/grammar.test.ts`: determinism, all categories, door linkage, non-overlap, stair connectivity, hero programme order, wall cut-outs, ramp walking).
+* `tests/e2e/campus.spec.ts` (headless Chromium, SwiftShader, fixture dev server): spawn at the campus → prompt "Enter Academic block A (procedural interior)" → inside with `groundOverride`/`moveFilter` bound and room labels → Shift+W up the two flights to the first floor → classroom → elevator overlay to the third floor → simulated 10 m fall respawns → exit clears the override → library hall → terrace. `tests/e2e/interiors.spec.ts`: a fixture OSM building is offered, entered, exited and re-entered with the identical seed. Both pass (3.4–5 min each on the software renderer).
+* Screenshots: `docs/screenshots/campus-{entrance,corridor,classroom,library,terrace}.png` via `scripts/dev/probe-campus.mjs`.
+
+**Broken / limitations**
+* Terrain host is blocked in the sandbox, so the campus and interiors were verified on the flat ellipsoid (base 0 m); on real terrain the campus platform sits at the highest loaded corner height.
+* Furniture has no collision; the walker is a point with a 0.25 m probe, so very thin diagonal wall gaps can be squeezed through.
+* Near-field procedural building shells are not hidden while inside (their walls are double-sided), so window cut-outs show their inner faces rather than the outside; OSM shells are back-face culled and look right.
+* Interiors above 24 storeys are capped; elevators list every floor as buttons (number keys reach only 1–9).
+
+**Next**
+* Furniture collision and door leaves that swing; stair handrails as collision; per-category wall/floor materials instead of flat colours; crowd agents inside; real terrain verification on a GPU machine.

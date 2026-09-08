@@ -30,6 +30,12 @@ session) works against the contracts below so that branches merge cleanly.
   `setVehicleBody(primitive)`, `driveParams`, `onFall(fallM)`.
 * Store: `gameplay: { prompt, overlay, player, status, vehicle }` via `useTerraStore.getState().setGameplay(...)`.
 * HUD: `InteractionPrompt`, `GameplayOverlayCard`, `PlayPanel` (spawn list from `src/data/maharashtra/spawns.ts`).
+* **Additive hooks added by track `interiors-campus`** — `NearFieldWorld.buildingsNear(lat, lon, radiusM)` returns the
+  procedural buildings of fully built near-field tiles as `[lon, lat]` footprints (used to offer enterable procedural
+  buildings; optional, no behaviour change elsewhere). The `interiors` system exposes `activeLevel()`, `activePlan()`,
+  `enter(candidate)`, `exit()`, `rideTo(floor)` and `campus` (hero campus layer with `heightAt`, `toLonLat`,
+  `setBuildingHidden`) for tests and other systems; while an interior is active it owns `modes.groundOverride`,
+  `modes.moveFilter` and the `gameplay.status` line, and it chains (never replaces) any existing `modes.onFall` handler.
 * `window.__terra` (tests): `goTo`, `setMode`, `spawn(spawnPoint)`, `interact()`, `gameplay()`, `state()`,
   `benchmark(seconds?)` (perf track, optional).
 * Performance contract (perf track, additive): store slices `hardware` (CPU/GPU/API/screen, VRAM "not exposed"),
