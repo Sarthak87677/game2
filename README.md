@@ -34,14 +34,14 @@ What the slice contains (browser client, all verified headless in Chromium with 
 `PROJECT_STATUS.md` for the exact test that covers each item):
 
 * **Player**: spawn, walk/run/jump, first/third person, `E` to interact, fade-to-safe-respawn on falls.
-* **Maharashtra data**: 16 cities and 60+ destinations searchable offline, landmark stand-ins (Gateway of India,
+* **Maharashtra data**: 70+ cities and towns and 180+ destinations searchable offline, landmark stand-ins (Gateway of India,
   CSMT, Sea Link, Shaniwar Wada, Raigad, Ajanta/Ellora, Bibi Ka Maqbara, Deekshabhoomi, …), showcase tours.
 * **Interiors**: a deterministic procedural interior grammar (residential, office, school, hotel, hospital, mall,
   restaurant, museum, station, airport, showroom, cruise) — enter a supported building through its door, use
   stairs and elevators, leave through the same door. Every generated interior is labelled *fictional*.
 * **School-inspired campus**: an original, fictionalised campus near Atigre with entrance grounds, academic
   blocks, library, laboratories, art room, auditorium, cafeteria, sports areas, admin rooms and a railed terrace.
-* **Vehicles**: generic hatchback, SUV, sports car, bus, taxi, truck and auto-rickshaw with arcade handling,
+* **Vehicles**: generic hatchback, sedan, SUV, sports car, bus, taxi, truck and auto-rickshaw with arcade handling,
   headlights/indicators/horn, stuck reset, AI traffic with lanes and emergency braking, pooled pedestrians, a closed
   time-trial course and a procedural showroom with inspection cameras and test drives.
 * **Journeys**: rail (real corridors and stations, block signalling, platforms, in-game tickets), air (Maharashtra
