@@ -32,6 +32,7 @@ way["natural"~"^(wood|wetland|scrub|heath|grassland|beach|sand)$"];
 node["place"~"^(city|town|village|hamlet|suburb)$"];
 node["tourism"~"^(attraction|viewpoint|museum)$"]["name"];
 node["historic"]["name"];
+node["shop"="car"]["name"];
 );out body geom;`;
 }
 

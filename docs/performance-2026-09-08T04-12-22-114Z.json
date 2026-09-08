@@ -1,0 +1,281 @@
+{
+  "measuredAt": "2026-09-08T04:12:22.114Z",
+  "quick": false,
+  "url": "http://127.0.0.1:4173/?terraQuality=medium&terraMinFps=0",
+  "bootSeconds": 105.8,
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "softwareRenderer": true,
+  "hardware": {
+    "cpuCores": 4,
+    "deviceMemoryGb": 8,
+    "gpuVendor": "Google",
+    "gpuRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "graphicsApi": "WebGL2 via ANGLE (SwiftShader (Vulkan software rasteriser))",
+    "angleBackend": "SwiftShader (Vulkan software rasteriser)",
+    "softwareRenderer": true,
+    "maxTextureSize": 8192,
+    "screen": {
+      "width": 1920,
+      "height": 1080,
+      "devicePixelRatio": 1
+    },
+    "vram": "not exposed by WebGL",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+    "platform": "Linux"
+  },
+  "preset": "medium",
+  "readiness": {
+    "phase": "ready",
+    "message": "Ready",
+    "error": null,
+    "blocking": [],
+    "degraded": [
+      "Climate atlas: built without measured elevation (terrain host unreachable); sea level assumed",
+      "Terrain: terrain host not answering (1 failed tiles in 45 s) → flat ellipsoid",
+      "FPS gate overridden to 0 fps (?terraMinFps)"
+    ],
+    "fpsSustainedMs": 61229.5,
+    "fpsGatePassed": true,
+    "minFps": 0
+  },
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+  "viewport": "1920x1080",
+  "spotSeconds": 20,
+  "results": [
+    {
+      "id": "mumbai-marine-drive",
+      "name": "Mumbai Marine Drive / CSMT traffic area",
+      "lat": 18.9432,
+      "lon": 72.8236,
+      "heightM": 300,
+      "seconds": 20.1,
+      "fps": 1.1,
+      "avgFps": 1.1,
+      "onePercentLowFps": 0.3,
+      "frameMs": 874.2,
+      "p99Ms": 3345.5,
+      "frames": 23,
+      "heapMb": 77,
+      "globeTiles": 26,
+      "terrainTiles": 0,
+      "drawCalls": 32,
+      "primitives": 8,
+      "actors": 0,
+      "adaptiveStep": 0,
+      "resolutionScale": 1
+    },
+    {
+      "id": "rural-satara",
+      "name": "Rural Maharashtra near Satara",
+      "lat": 17.6,
+      "lon": 74.05,
+      "heightM": 300,
+      "seconds": 21.9,
+      "fps": 1.3,
+      "avgFps": 1.3,
+      "onePercentLowFps": 0.4,
+      "frameMs": 753.5,
+      "p99Ms": 2363.5,
+      "frames": 29,
+      "heapMb": 102,
+      "globeTiles": 32,
+      "terrainTiles": 0,
+      "drawCalls": 22,
+      "primitives": 13,
+      "actors": 0,
+      "adaptiveStep": 0,
+      "resolutionScale": 1
+    },
+    {
+      "id": "campus",
+      "name": "SGIS-inspired campus (procedural)",
+      "lat": 16.7335,
+      "lon": 74.4015,
+      "heightM": 300,
+      "seconds": 20.2,
+      "fps": 1,
+      "avgFps": 1,
+      "onePercentLowFps": 0.3,
+      "frameMs": 959.2,
+      "p99Ms": 3553.3,
+      "frames": 21,
+      "heapMb": 81,
+      "globeTiles": 32,
+      "terrainTiles": 0,
+      "drawCalls": 60,
+      "primitives": 22,
+      "actors": 0,
+      "adaptiveStep": 0,
+      "resolutionScale": 1
+    },
+    {
+      "id": "lonavala-rail",
+      "name": "Train corridor near Lonavala",
+      "lat": 18.75,
+      "lon": 73.41,
+      "heightM": 300,
+      "seconds": 20.3,
+      "fps": 1.3,
+      "avgFps": 1.3,
+      "onePercentLowFps": 0.3,
+      "frameMs": 751.7,
+      "p99Ms": 2956.5,
+      "frames": 27,
+      "heapMb": 73,
+      "globeTiles": 34,
+      "terrainTiles": 0,
+      "drawCalls": 25,
+      "primitives": 11,
+      "actors": 0,
+      "adaptiveStep": 0,
+      "resolutionScale": 1
+    },
+    {
+      "id": "air-mumbai",
+      "name": "Air-travel view over Mumbai (3 000 m)",
+      "lat": 19.09,
+      "lon": 72.87,
+      "heightM": 3000,
+      "seconds": 21.5,
+      "fps": 1.2,
+      "avgFps": 1.2,
+      "onePercentLowFps": 0.4,
+      "frameMs": 858.3,
+      "p99Ms": 2695.8,
+      "frames": 25,
+      "heapMb": 91,
+      "globeTiles": 29,
+      "terrainTiles": 0,
+      "drawCalls": 61,
+      "primitives": 28,
+      "actors": 0,
+      "adaptiveStep": 0,
+      "resolutionScale": 1
+    },
+    {
+      "id": "ganpatipule",
+      "name": "Konkan coast, Ganpatipule",
+      "lat": 17.146,
+      "lon": 73.265,
+      "heightM": 300,
+      "seconds": 21.6,
+      "fps": 1.3,
+      "avgFps": 1.3,
+      "onePercentLowFps": 0.4,
+      "frameMs": 770.3,
+      "p99Ms": 2325.2,
+      "frames": 28,
+      "heapMb": 93,
+      "globeTiles": 36,
+      "terrainTiles": 0,
+      "drawCalls": 27,
+      "primitives": 13,
+      "actors": 0,
+      "adaptiveStep": 0,
+      "resolutionScale": 1
+    },
+    {
+      "id": "taj-mahal",
+      "name": "Taj Mahal, Agra",
+      "lat": 27.1751,
+      "lon": 78.0421,
+      "heightM": 300,
+      "seconds": 22.1,
+      "fps": 1.1,
+      "avgFps": 1.1,
+      "onePercentLowFps": 0.4,
+      "frameMs": 919.2,
+      "p99Ms": 2745.1,
+      "frames": 24,
+      "heapMb": 132,
+      "globeTiles": 34,
+      "terrainTiles": 0,
+      "drawCalls": 74,
+      "primitives": 32,
+      "actors": 0,
+      "adaptiveStep": 0,
+      "resolutionScale": 1
+    }
+  ],
+  "soak": {
+    "seconds": 300,
+    "heapSamples": [
+      {
+        "t": 11,
+        "heapMb": 87.7
+      },
+      {
+        "t": 22,
+        "heapMb": 93.4
+      },
+      {
+        "t": 33,
+        "heapMb": 89
+      },
+      {
+        "t": 44,
+        "heapMb": 89.7
+      },
+      {
+        "t": 54,
+        "heapMb": 89.7
+      },
+      {
+        "t": 101,
+        "heapMb": 81.6
+      },
+      {
+        "t": 112,
+        "heapMb": 84.2
+      },
+      {
+        "t": 123,
+        "heapMb": 84.6
+      },
+      {
+        "t": 188,
+        "heapMb": 94.8
+      },
+      {
+        "t": 237,
+        "heapMb": 82.2
+      },
+      {
+        "t": 247,
+        "heapMb": 86.5
+      }
+    ],
+    "p99PerMinute": [
+      {
+        "minute": 1,
+        "p99Ms": 4516.3,
+        "avgFps": 0.67,
+        "frames": 41
+      },
+      {
+        "minute": 2,
+        "p99Ms": 6831,
+        "avgFps": 1.06,
+        "frames": 68
+      },
+      {
+        "minute": 3,
+        "p99Ms": 7129.9,
+        "avgFps": 0.96,
+        "frames": 64
+      },
+      {
+        "minute": 4,
+        "p99Ms": 6647.8,
+        "avgFps": 1.07,
+        "frames": 64
+      }
+    ],
+    "failures": [],
+    "gcAvailable": true,
+    "heapMinute1Mb": 89.7,
+    "heapMinute5Mb": 86.5,
+    "heapGrowthPct": -3.6
+  },
+  "pageErrors": []
+}

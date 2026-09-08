@@ -18,6 +18,7 @@ export function InteractionPrompt() {
           <span className={`terra-vehicle-lamp ${vehicle.headlights ? 'on' : ''}`} title="Headlights (L)">☼</span>
           <span className={`terra-vehicle-lamp ${vehicle.indicator === 'left' || vehicle.indicator === 'hazard' ? 'blink' : ''}`} title="Indicator (Q)">◀</span>
           <span className={`terra-vehicle-lamp ${vehicle.indicator === 'right' || vehicle.indicator === 'hazard' ? 'blink' : ''}`} title="Indicator (R)">▶</span>
+          {vehicle.headingDeg !== undefined && <span className="terra-vehicle-heading" title="Heading · destination bearing">{String(vehicle.headingDeg).padStart(3, '0')}°{vehicle.destination ? ` · ${vehicle.destination.name} ${vehicle.destination.bearingDeg}° ${vehicle.destination.distanceM >= 1000 ? `${(vehicle.destination.distanceM / 1000).toFixed(1)} km` : `${vehicle.destination.distanceM} m`}` : ''}</span>}
           <span className="terra-vehicle-name">{vehicle.name}</span>
         </div>
       )}

@@ -1,0 +1,122 @@
+[
+  {
+    "Name": "bom",
+    "DisplayName": "Chhatrapati Shivaji Maharaj International Airport",
+    "Iata": "BOM",
+    "City": "Mumbai",
+    "Lat": 19.0896,
+    "Lon": 72.8656,
+    "RunwayHeadingDeg": 90,
+    "RunwayLengthM": 3400,
+    "Terminal": {
+      "Lat": 19.0975,
+      "Lon": 72.8745
+    },
+    "DataNote": "Airport positions, runway headings/lengths and terminal anchors are approximate public reference values; flights, gates and the terminal flow are simulated."
+  },
+  {
+    "Name": "pnq",
+    "DisplayName": "Pune Airport (Lohegaon)",
+    "Iata": "PNQ",
+    "City": "Pune",
+    "Lat": 18.5822,
+    "Lon": 73.9197,
+    "RunwayHeadingDeg": 100,
+    "RunwayLengthM": 2500,
+    "Terminal": {
+      "Lat": 18.579,
+      "Lon": 73.908
+    },
+    "DataNote": "Airport positions, runway headings/lengths and terminal anchors are approximate public reference values; flights, gates and the terminal flow are simulated."
+  },
+  {
+    "Name": "nag",
+    "DisplayName": "Dr. Babasaheb Ambedkar International Airport",
+    "Iata": "NAG",
+    "City": "Nagpur",
+    "Lat": 21.0922,
+    "Lon": 79.0472,
+    "RunwayHeadingDeg": 140,
+    "RunwayLengthM": 3200,
+    "Terminal": {
+      "Lat": 21.09,
+      "Lon": 79.056
+    },
+    "DataNote": "Airport positions, runway headings/lengths and terminal anchors are approximate public reference values; flights, gates and the terminal flow are simulated."
+  },
+  {
+    "Name": "isk",
+    "DisplayName": "Nashik Airport (Ozar)",
+    "Iata": "ISK",
+    "City": "Nashik",
+    "Lat": 20.1191,
+    "Lon": 73.9129,
+    "RunwayHeadingDeg": 90,
+    "RunwayLengthM": 3000,
+    "Terminal": {
+      "Lat": 20.114,
+      "Lon": 73.906
+    },
+    "DataNote": "Airport positions, runway headings/lengths and terminal anchors are approximate public reference values; flights, gates and the terminal flow are simulated."
+  },
+  {
+    "Name": "klh",
+    "DisplayName": "Kolhapur Airport",
+    "Iata": "KLH",
+    "City": "Kolhapur",
+    "Lat": 16.6647,
+    "Lon": 74.2894,
+    "RunwayHeadingDeg": 100,
+    "RunwayLengthM": 1900,
+    "Terminal": {
+      "Lat": 16.668,
+      "Lon": 74.283
+    },
+    "DataNote": "Airport positions, runway headings/lengths and terminal anchors are approximate public reference values; flights, gates and the terminal flow are simulated."
+  },
+  {
+    "Name": "ixu",
+    "DisplayName": "Chhatrapati Sambhajinagar Airport",
+    "Iata": "IXU",
+    "City": "Chhatrapati Sambhajinagar",
+    "Lat": 19.8627,
+    "Lon": 75.3981,
+    "RunwayHeadingDeg": 90,
+    "RunwayLengthM": 2800,
+    "Terminal": {
+      "Lat": 19.86,
+      "Lon": 75.39
+    },
+    "DataNote": "Airport positions, runway headings/lengths and terminal anchors are approximate public reference values; flights, gates and the terminal flow are simulated."
+  },
+  {
+    "Name": "agr",
+    "DisplayName": "Agra Airport (Taj Mahal hop marker)",
+    "Iata": "AGR",
+    "City": "Agra",
+    "Lat": 27.1558,
+    "Lon": 77.9609,
+    "RunwayHeadingDeg": 50,
+    "RunwayLengthM": 2700,
+    "Terminal": {
+      "Lat": 27.16,
+      "Lon": 77.97
+    },
+    "DataNote": "Airport positions, runway headings/lengths and terminal anchors are approximate public reference values; flights, gates and the terminal flow are simulated."
+  },
+  {
+    "Name": "del",
+    "DisplayName": "Indira Gandhi International Airport (marker)",
+    "Iata": "DEL",
+    "City": "Delhi",
+    "Lat": 28.5562,
+    "Lon": 77.1,
+    "RunwayHeadingDeg": 100,
+    "RunwayLengthM": 4400,
+    "Terminal": {
+      "Lat": 28.552,
+      "Lon": 77.088
+    },
+    "DataNote": "Airport positions, runway headings/lengths and terminal anchors are approximate public reference values; flights, gates and the terminal flow are simulated."
+  }
+]

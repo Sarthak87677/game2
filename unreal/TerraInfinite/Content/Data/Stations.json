@@ -1,0 +1,552 @@
+[
+  {
+    "Name": "csmt",
+    "DisplayName": "Chhatrapati Shivaji Maharaj Terminus",
+    "Code": "CSMT",
+    "District": "Mumbai City",
+    "Lat": 18.9398,
+    "Lon": 72.8355,
+    "Platforms": 18,
+    "DataNote": ""
+  },
+  {
+    "Name": "churchgate",
+    "DisplayName": "Churchgate",
+    "Code": "CCG",
+    "District": "Mumbai City",
+    "Lat": 18.9352,
+    "Lon": 72.827,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "mumbai-central",
+    "DisplayName": "Mumbai Central",
+    "Code": "MMCT",
+    "District": "Mumbai City",
+    "Lat": 18.969,
+    "Lon": 72.8194,
+    "Platforms": 7,
+    "DataNote": ""
+  },
+  {
+    "Name": "byculla",
+    "DisplayName": "Byculla",
+    "Code": "BY",
+    "District": "Mumbai City",
+    "Lat": 18.977,
+    "Lon": 72.833,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "dadar",
+    "DisplayName": "Dadar",
+    "Code": "DR",
+    "District": "Mumbai City",
+    "Lat": 19.0186,
+    "Lon": 72.8438,
+    "Platforms": 14,
+    "DataNote": ""
+  },
+  {
+    "Name": "bandra",
+    "DisplayName": "Bandra",
+    "Code": "BA",
+    "District": "Mumbai Suburban",
+    "Lat": 19.0544,
+    "Lon": 72.8406,
+    "Platforms": 7,
+    "DataNote": ""
+  },
+  {
+    "Name": "andheri",
+    "DisplayName": "Andheri",
+    "Code": "ADH",
+    "District": "Mumbai Suburban",
+    "Lat": 19.1197,
+    "Lon": 72.8464,
+    "Platforms": 9,
+    "DataNote": ""
+  },
+  {
+    "Name": "borivali",
+    "DisplayName": "Borivali",
+    "Code": "BVI",
+    "District": "Mumbai Suburban",
+    "Lat": 19.229,
+    "Lon": 72.857,
+    "Platforms": 10,
+    "DataNote": ""
+  },
+  {
+    "Name": "kurla",
+    "DisplayName": "Kurla",
+    "Code": "CLA",
+    "District": "Mumbai Suburban",
+    "Lat": 19.0656,
+    "Lon": 72.879,
+    "Platforms": 8,
+    "DataNote": ""
+  },
+  {
+    "Name": "ghatkopar",
+    "DisplayName": "Ghatkopar",
+    "Code": "GC",
+    "District": "Mumbai Suburban",
+    "Lat": 19.086,
+    "Lon": 72.9085,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "thane",
+    "DisplayName": "Thane",
+    "Code": "TNA",
+    "District": "Thane",
+    "Lat": 19.186,
+    "Lon": 72.9755,
+    "Platforms": 10,
+    "DataNote": ""
+  },
+  {
+    "Name": "dombivli",
+    "DisplayName": "Dombivli",
+    "Code": "DI",
+    "District": "Thane",
+    "Lat": 19.218,
+    "Lon": 73.087,
+    "Platforms": 5,
+    "DataNote": ""
+  },
+  {
+    "Name": "kalyan",
+    "DisplayName": "Kalyan Junction",
+    "Code": "KYN",
+    "District": "Thane",
+    "Lat": 19.235,
+    "Lon": 73.13,
+    "Platforms": 8,
+    "DataNote": ""
+  },
+  {
+    "Name": "mankhurd",
+    "DisplayName": "Mankhurd",
+    "Code": "MNKD",
+    "District": "Mumbai Suburban",
+    "Lat": 19.048,
+    "Lon": 72.931,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "vashi",
+    "DisplayName": "Vashi",
+    "Code": "VSH",
+    "District": "Thane",
+    "Lat": 19.065,
+    "Lon": 72.999,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "belapur",
+    "DisplayName": "CBD Belapur",
+    "Code": "BEPR",
+    "District": "Thane",
+    "Lat": 19.019,
+    "Lon": 73.038,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "panvel",
+    "DisplayName": "Panvel Junction",
+    "Code": "PNVL",
+    "District": "Raigad",
+    "Lat": 18.99,
+    "Lon": 73.118,
+    "Platforms": 7,
+    "DataNote": ""
+  },
+  {
+    "Name": "neral",
+    "DisplayName": "Neral Junction",
+    "Code": "NRL",
+    "District": "Raigad",
+    "Lat": 19.025,
+    "Lon": 73.317,
+    "Platforms": 3,
+    "DataNote": ""
+  },
+  {
+    "Name": "karjat",
+    "DisplayName": "Karjat Junction",
+    "Code": "KJT",
+    "District": "Raigad",
+    "Lat": 18.9107,
+    "Lon": 73.3236,
+    "Platforms": 5,
+    "DataNote": ""
+  },
+  {
+    "Name": "lonavala",
+    "DisplayName": "Lonavala",
+    "Code": "LNL",
+    "District": "Pune",
+    "Lat": 18.753,
+    "Lon": 73.407,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "shivajinagar",
+    "DisplayName": "Shivajinagar",
+    "Code": "SVJR",
+    "District": "Pune",
+    "Lat": 18.532,
+    "Lon": 73.85,
+    "Platforms": 3,
+    "DataNote": ""
+  },
+  {
+    "Name": "pune",
+    "DisplayName": "Pune Junction",
+    "Code": "PUNE",
+    "District": "Pune",
+    "Lat": 18.5285,
+    "Lon": 73.8745,
+    "Platforms": 6,
+    "DataNote": ""
+  },
+  {
+    "Name": "matheran",
+    "DisplayName": "Matheran",
+    "Code": "MAE",
+    "District": "Raigad",
+    "Lat": 18.987,
+    "Lon": 73.27,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "igatpuri",
+    "DisplayName": "Igatpuri",
+    "Code": "IGP",
+    "District": "Nashik",
+    "Lat": 19.696,
+    "Lon": 73.562,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "nashik-road",
+    "DisplayName": "Nashik Road",
+    "Code": "NK",
+    "District": "Nashik",
+    "Lat": 19.947,
+    "Lon": 73.838,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "manmad",
+    "DisplayName": "Manmad Junction",
+    "Code": "MMR",
+    "District": "Nashik",
+    "Lat": 20.251,
+    "Lon": 74.439,
+    "Platforms": 6,
+    "DataNote": ""
+  },
+  {
+    "Name": "jalgaon",
+    "DisplayName": "Jalgaon Junction",
+    "Code": "JL",
+    "District": "Jalgaon",
+    "Lat": 21.007,
+    "Lon": 75.566,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "bhusawal",
+    "DisplayName": "Bhusawal Junction",
+    "Code": "BSL",
+    "District": "Jalgaon",
+    "Lat": 21.045,
+    "Lon": 75.785,
+    "Platforms": 8,
+    "DataNote": ""
+  },
+  {
+    "Name": "akola",
+    "DisplayName": "Akola Junction",
+    "Code": "AK",
+    "District": "Akola",
+    "Lat": 20.706,
+    "Lon": 77.002,
+    "Platforms": 6,
+    "DataNote": ""
+  },
+  {
+    "Name": "badnera",
+    "DisplayName": "Badnera Junction (Amravati)",
+    "Code": "BD",
+    "District": "Amravati",
+    "Lat": 20.859,
+    "Lon": 77.736,
+    "Platforms": 5,
+    "DataNote": ""
+  },
+  {
+    "Name": "nagpur",
+    "DisplayName": "Nagpur Junction",
+    "Code": "NGP",
+    "District": "Nagpur",
+    "Lat": 21.152,
+    "Lon": 79.088,
+    "Platforms": 8,
+    "DataNote": ""
+  },
+  {
+    "Name": "sambhajinagar",
+    "DisplayName": "Chhatrapati Sambhajinagar",
+    "Code": "AWB",
+    "District": "Chhatrapati Sambhajinagar",
+    "Lat": 19.867,
+    "Lon": 75.323,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "nanded",
+    "DisplayName": "Hazur Sahib Nanded",
+    "Code": "NED",
+    "District": "Nanded",
+    "Lat": 19.148,
+    "Lon": 77.32,
+    "Platforms": 5,
+    "DataNote": ""
+  },
+  {
+    "Name": "solapur",
+    "DisplayName": "Solapur",
+    "Code": "SUR",
+    "District": "Solapur",
+    "Lat": 17.666,
+    "Lon": 75.907,
+    "Platforms": 5,
+    "DataNote": ""
+  },
+  {
+    "Name": "satara",
+    "DisplayName": "Satara",
+    "Code": "STR",
+    "District": "Satara",
+    "Lat": 17.665,
+    "Lon": 74.025,
+    "Platforms": 3,
+    "DataNote": ""
+  },
+  {
+    "Name": "sangli",
+    "DisplayName": "Sangli",
+    "Code": "SLI",
+    "District": "Sangli",
+    "Lat": 16.857,
+    "Lon": 74.568,
+    "Platforms": 3,
+    "DataNote": ""
+  },
+  {
+    "Name": "miraj",
+    "DisplayName": "Miraj Junction",
+    "Code": "MRJ",
+    "District": "Sangli",
+    "Lat": 16.826,
+    "Lon": 74.643,
+    "Platforms": 6,
+    "DataNote": ""
+  },
+  {
+    "Name": "kolhapur",
+    "DisplayName": "Chhatrapati Shahu Maharaj Terminus, Kolhapur",
+    "Code": "KOP",
+    "District": "Kolhapur",
+    "Lat": 16.703,
+    "Lon": 74.243,
+    "Platforms": 4,
+    "DataNote": ""
+  },
+  {
+    "Name": "roha",
+    "DisplayName": "Roha",
+    "Code": "ROHA",
+    "District": "Raigad",
+    "Lat": 18.442,
+    "Lon": 73.12,
+    "Platforms": 3,
+    "DataNote": ""
+  },
+  {
+    "Name": "chiplun",
+    "DisplayName": "Chiplun",
+    "Code": "CHI",
+    "District": "Ratnagiri",
+    "Lat": 17.533,
+    "Lon": 73.522,
+    "Platforms": 3,
+    "DataNote": ""
+  },
+  {
+    "Name": "ratnagiri",
+    "DisplayName": "Ratnagiri",
+    "Code": "RN",
+    "District": "Ratnagiri",
+    "Lat": 16.998,
+    "Lon": 73.311,
+    "Platforms": 3,
+    "DataNote": ""
+  },
+  {
+    "Name": "kudal",
+    "DisplayName": "Kudal",
+    "Code": "KUDL",
+    "District": "Sindhudurg",
+    "Lat": 16.012,
+    "Lon": 73.687,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "sawantwadi",
+    "DisplayName": "Sawantwadi Road",
+    "Code": "SWV",
+    "District": "Sindhudurg",
+    "Lat": 15.934,
+    "Lon": 73.786,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-versova",
+    "DisplayName": "Versova (Metro)",
+    "Code": "VRS",
+    "District": "Mumbai Suburban",
+    "Lat": 19.129,
+    "Lon": 72.821,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-dn-nagar",
+    "DisplayName": "D N Nagar (Metro)",
+    "Code": "DNN",
+    "District": "Mumbai Suburban",
+    "Lat": 19.125,
+    "Lon": 72.832,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-azad-nagar",
+    "DisplayName": "Azad Nagar (Metro)",
+    "Code": "AZN",
+    "District": "Mumbai Suburban",
+    "Lat": 19.125,
+    "Lon": 72.839,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-andheri",
+    "DisplayName": "Andheri (Metro)",
+    "Code": "ADHM",
+    "District": "Mumbai Suburban",
+    "Lat": 19.1195,
+    "Lon": 72.848,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-weh",
+    "DisplayName": "Western Express Highway (Metro)",
+    "Code": "WEH",
+    "District": "Mumbai Suburban",
+    "Lat": 19.116,
+    "Lon": 72.859,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-chakala",
+    "DisplayName": "Chakala (Metro)",
+    "Code": "CKL",
+    "District": "Mumbai Suburban",
+    "Lat": 19.111,
+    "Lon": 72.867,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-airport-road",
+    "DisplayName": "Airport Road (Metro)",
+    "Code": "APR",
+    "District": "Mumbai Suburban",
+    "Lat": 19.109,
+    "Lon": 72.873,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-marol-naka",
+    "DisplayName": "Marol Naka (Metro)",
+    "Code": "MRN",
+    "District": "Mumbai Suburban",
+    "Lat": 19.107,
+    "Lon": 72.88,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-saki-naka",
+    "DisplayName": "Saki Naka (Metro)",
+    "Code": "SKN",
+    "District": "Mumbai Suburban",
+    "Lat": 19.103,
+    "Lon": 72.888,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-asalpha",
+    "DisplayName": "Asalpha (Metro)",
+    "Code": "ASL",
+    "District": "Mumbai Suburban",
+    "Lat": 19.097,
+    "Lon": 72.895,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-jagruti-nagar",
+    "DisplayName": "Jagruti Nagar (Metro)",
+    "Code": "JGN",
+    "District": "Mumbai Suburban",
+    "Lat": 19.091,
+    "Lon": 72.9,
+    "Platforms": 2,
+    "DataNote": ""
+  },
+  {
+    "Name": "m1-ghatkopar",
+    "DisplayName": "Ghatkopar (Metro)",
+    "Code": "GCM",
+    "District": "Mumbai Suburban",
+    "Lat": 19.0863,
+    "Lon": 72.908,
+    "Platforms": 2,
+    "DataNote": ""
+  }
+]

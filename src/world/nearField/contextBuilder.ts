@@ -44,9 +44,14 @@ export async function buildGenerationContext(deps: ContextBuilderDeps, z: number
   const lat = (b.north + b.south) / 2;
   const lon = (b.east + b.west) / 2;
   const sample = wm.sample(lat, lon, true);
-  const vector = deps.naturalEarth?.()?.surfaceAt(lat, lon) ?? null;
-  const surface = vector ? vector.kind : sample.surface;
+  const ne = deps.naturalEarth?.() ?? null;
+  const vector = ne?.surfaceAt(lat, lon) ?? null;
   const heightField = await deps.heightFields.forTile(z, x, y);
+  // Coastal-fringe refinement inside fine-coastline regions: the ~1 km vector fringe of a coastal city is land when
+  // the measured terrain at the tile centre is above sea level (open water is bathymetry, below it).
+  const centreHeight = heightField ? heightField.heights[Math.floor(heightField.height / 2) * heightField.width + Math.floor(heightField.width / 2)] : null;
+  const refinedLand = vector?.kind === 'ocean' && ne?.hasFineCoastline(lat, lon) === true && centreHeight !== null && centreHeight > 1.0;
+  const surface = refinedLand ? 'land' : vector ? vector.kind : sample.surface;
   const osmLayer = deps.osm();
   const osm = osmLayer?.tileFor(lat, lon) ?? null;
   const gaz = deps.gazetteer();
