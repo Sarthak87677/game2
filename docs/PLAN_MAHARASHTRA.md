@@ -101,3 +101,16 @@ Unknown fields are kept in `ExtraJson`; missing tables are exported empty and fl
   footprints (currently the Taj Mahal). `TerraEngine.search` merges `MAHARASHTRA_INDEX.search()` (`src/data/maharashtra/search.ts`)
   into the offline results by score (`mergeSearchResults`), de-duplicated by id and position. Maharashtra places are appended to
   `WORLD_HIGHLIGHTS` as `mh-*` bookmarks and five `showcase-maharashtra-*` areas to `SHOWCASE_AREAS`.
+
+## Living-world hooks (track living-world-activities, additive)
+
+* Registered systems: `crowds`, `wildlife`, `monsoon`, `activities` (`src/gameplay/registry.ts`).
+* `src/world/wildlife/sightings.ts` — module-level registry (`reportSighting` / `nearbySightings`) so the wildlife and
+  activities systems can share "what is near the player" without importing each other. Any track may report a sighting.
+* `src/world/crowds/placeContext.ts` — `classifyPlace(engine, lat, lon)` (hotspot / urban / rural / coast / farmland /
+  park) and `groundFallback(engine, player)` (surface height when no terrain tile is loaded). Other tracks may reuse them.
+* Activities status line: the activities system writes `gameplay.status` with a short TTL and never overwrites a foreign
+  status while the mode is `passenger` (journeys own it there).
+* `ActivitiesTab` is rendered by `PlayPanel` behind a "Spawn | Activities" tab bar; other tracks can add tabs the same way.
+* The `P` key (photograph) is handled by a window listener inside the activities system; it does not touch `input.ts`.
+

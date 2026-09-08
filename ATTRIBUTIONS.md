@@ -36,3 +36,12 @@ Vegetation, ground materials, rocks, crops, generic settlement buildings, night 
 * **Taj Mahal hero** (`src/world/hero/`) — an original procedural reconstruction: massing follows public reference dimensions, everything else is an approximate interpretation, labelled as such in the world and in the entry overlay. No photographs, textures or models of the monument are bundled.
 * **SGIS-inspired campus position** — the public map position of the school near Atigre is used only as an anchor; the game's campus is an original, fictionalised reconstruction with no affiliation.
 
+## Living world and activities (Maharashtra slice)
+
+Procedural pedestrians (canvas-painted abstract figures with regional clothing colour sets), food/market stalls with generic
+Marathi/English sign words, festival string lights, cattle/dog/bird/butterfly sprites, the synthesised regional ambience
+(filtered noise and oscillators, no recordings), the monsoon/dry-season preset, cinematic tour keyframes, photo challenges,
+landmark summaries, journey checklists, boat checkpoint courses, fictional museum exhibit texts, litter objects and the campus
+basketball court are original Terra Infinite content (MIT). No photographs, real people, brands, logos or third-party
+artwork are used; place coordinates are approximate public reference values, not surveyed data.
+

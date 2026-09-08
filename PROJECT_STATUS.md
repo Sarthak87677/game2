@@ -14,6 +14,62 @@ Resumable task ledger. Update after every completed task. Dates are UTC.
 | 6. Optimisation | **done (first pass)** | Budgets in place (tile caches, OSM/near-field radii and LRU unloading, in-flight limits, impostor LOD, vertex caps, request scheduling, adaptive presets, `?terraQuality` override). Profiling found and fixed a real streaming bug (throttled terrain requests were treated as failures). `npm run perf` records real numbers (see PERFORMANCE.md); the sandbox only has software WebGL, so they are SwiftShader numbers — GPU measurement is the next task. |
 | 7. Verification & Packaging | **done** | 217 unit tests, 8 Playwright end-to-end tests all passing on the current build (smoke ×6, synthetic city, nature, landmarks), production build, CI workflow, all documents. Visually inspected frames in `docs/screenshots/`. No console errors in the verified runs apart from expected blocked-host network failures in the sandbox. |
 
+## Track: living-world-activities (branch `claude/track-living`, 2026-09-07)
+
+**Completed**
+* `crowds` system (`src/world/crowds/**`): pool of 120 billboard pedestrians (canvas-painted abstract figures, four walk
+  frames, seven outfit kinds in regional colour palettes — sarees, kurtas, salwar-kameez, shirts, generic school
+  uniforms), walking on a virtual pavement offset from loaded OSM roads (never on the carriageway, never on
+  motorways/trunks), wandering around hotspot anchors where no roads are loaded, gathering at stalls, stepping aside for
+  the player; density by place kind (hotspot table + OSM building counts) × local solar hour × weather; full simulation
+  within 300 m, statistical estimate beyond; procedural stalls with generic Marathi/English sign boards, festival string
+  lights toggle (persisted), synthesised regional ambience (city/village/forest/station/coast/hills + bells, chimes,
+  crows, gulls, thunder) that runs only when the user has enabled audio.
+* `wildlife` system (`src/world/wildlife/**`): cattle and street dogs in villages/rural areas, bird flocks (gulls on the
+  coast, egrets over farmland, crows and pigeons in cities, small birds over forest/hills) with a cheap flock model,
+  butterflies in parks/gardens/campus/lake fronts by day; pooled billboards within 300 m; sightings registry feeding the
+  nature logbook.
+* `monsoon` system (`src/world/climate/monsoon.ts`, `MonsoonSystem.ts`): Maharashtra phases (winter, hot dry, pre-monsoon,
+  monsoon, retreat) → deterministic 6-hour weather blocks (heavy rain, storms, hill fog, dust in April–May) pushed through
+  `engine.setWeather`, dry-season browning through the ground material's season tint. Toggle in the Activities tab.
+* `activities` system (`src/gameplay/activities/**`): photography challenges (17 subjects, `P` key, heading + frustum
+  check, golden-hour bonus), landmark collection (28, auto-collected on approach, "Read about" overlay), 8 cinematic
+  heritage/scenic tours, nature observation logbook, 3 rail/road-trip checklists, 2 boat checkpoint courses, campus
+  basketball (procedural court + hoop, projectile model, animated ball, streaks), 4 museums with fictional exhibit
+  overlays, 6 park cleanups (litter billboards). Progress persists in localStorage; HUD status line via `gameplay.status`;
+  "Activities" tab inside the Play panel (`src/ui/panels/ActivitiesTab.tsx`).
+* Data: `src/data/maharashtra/living.ts` (all coordinates approximate, every entry carries a `dataNote`).
+* Already covered by existing engine code and verified rather than re-implemented: wind-reactive crops (crop cards carry
+  wind weight 1 in the vegetation shader), fruit on mango and coconut species (species library phenology).
+
+**Tested (how)**
+* `npm run typecheck && npm run lint && npm test` — 238 unit tests pass (21 new: monsoon phases/picks, photo scoring,
+  persistence round-trip, basketball model, crowd density/time-of-day, palettes, walk network, ambience mix, flocks,
+  sightings, data integrity).
+* `tests/e2e/living.spec.ts` (headless Chromium, SwiftShader, synthetic OSM fixture, `TERRA_E2E_DEV=1 TERRA_E2E_PORT=5180`):
+  spawn at Marine Drive → pedestrians > 0 (107–120 simulated), gulls/crows/pigeons present, monsoon preset active,
+  landmark collected; spawn at the campus → basketball prompt offered, walk-over teleport, court built, a throw scored;
+  spawn at the Gateway → facing the arch scores the photo and persists it, facing away does not. Passes in 5.5 min.
+* Probe screenshots in `docs/screenshots/`: `living-crowd-csmt-forecourt.png`, `living-village-cattle.png`,
+  `living-monsoon-mahabaleshwar.png`, `living-basketball-court.png`.
+
+**Broken / limitations**
+* The sandbox cannot reach the terrain host, so every living-world entity uses the player's surface height as the ground
+  fallback; on real terrain the per-entity `globe.getHeight` refresh applies. Stalls and the court are flat (no slope
+  adaptation beyond per-stall height sampling).
+* Green-season tint is not applied to the ground material (that shader is owned by the perf/engine tracks); the monsoon
+  shows through rain, fog, wetness darkening and the crowd thinning. Jackfruit is not in the species library (not owned
+  by this track), so only mango/coconut fruit.
+* Road markings on near-field roads were not attempted (GroundPrimitive cost on software GL).
+* Pedestrians are camera-facing sprites, not skinned meshes; they do not avoid each other, only the player and roads.
+* Boat checkpoint courses count in any mode; there is no vessel of our own — they hook the journeys track's ferries/boats.
+* Ambience cannot be heard in headless tests; only the mixing rule is unit-tested and the layer state is reported in stats.
+
+**Next**
+* Skinned pedestrian meshes with real walk cycles and inter-pedestrian avoidance; crowd LOD by impostor atlas.
+* Slope-aware stall/court placement on real terrain; road markings when a GPU is available.
+* Green-season ground tint uniform (needs a small additive uniform in `groundMaterial.ts`).
+
 ## Verified commands
 
 ```
