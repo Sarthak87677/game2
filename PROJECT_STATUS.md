@@ -235,3 +235,29 @@ Full summary: `docs/tracks/interiors.md`.
 
 **Next**
 * Furniture collision and door leaves that swing; stair handrails as collision; per-category wall/floor materials instead of flat colours; crowd agents inside; real terrain verification on a GPU machine.
+
+## Track `journeys` (branch `claude/track-journeys`, 2026-09-08)
+
+Full summary: `docs/tracks/journeys.md`.
+
+**Completed**
+* Data (`src/data/maharashtra/{stations,corridors,airports,ports,waterRoutes}.ts`, exported to `unreal/.../Content/Data`): 56 stations (incl. all 12 Metro line 1 stations), 11 corridors with shape points (Western/Central/Harbour, Metro 1, Mumbai–Pune via the Bhor ghat, Mumbai–Nashik–Bhusawal–Nagpur, Pune–Miraj–Kolhapur, Konkan, Neral–Matheran, Pune–Solapur, Manmad–Nanded), 8 airports (BOM, PNQ, NAG, ISK, KLH, IXU + DEL/AGR markers), 7 ports, 4 water routes. Every table carries an approximate/simulated data note.
+* Rail (`src/gameplay/rail/**`, system `rail`): enter station → departure board (deterministic simulated timetable, one ticket per service) → fictional ticket → wait on a platform slab with a height sampler → the train arrives along the corridor, stops with the boarding coach at the platform, doors slide open → board → window seat / stand by the door → passenger mode with station stops, door cycles, text announcements, speed limits (ghat/heritage sections), simple block signalling shared with two ambient trains per corridor → leave at any stop; "Skip to arrival". Four train variants (local EMU, metro, loco + coaches intercity, heritage). Track profiles are sampled from the terrain provider in chunks and lifted over crests (`trackProfile.ts`), with a per-frame floor against loaded terrain tiles; rails are drawn near the player.
+* Air (`src/gameplay/air/**`, system `air`): terminal → destination choice → check-in (window/cabin seat) → abstract security → gate → board an original primitive airliner (fuselage, wings, tail, engines, retractable gear, cabin interior) → taxi, take-off roll, climb, great-circle cruise, descent, landing, taxi-in → leave at the destination terminal. Time-compressed so BOM–PNQ ≈ 3 min real time, `[`/`]` adjust; "Skip to arrival"; runway and terminal scenery at both ends.
+* Marine (`src/gameplay/marine/**`, system `marine`): Gateway ↔ Mandwa and Ferry Wharf ↔ Rewas ferries (docked models at the jetties, deck/bow camera, bob, arrival, return trip), Alibaug speedboat checkpoint course (drive mode on a water height sampler, 60 km/h cap, 8 virtual buoys, lap time, back-to-buoy when aground), and the original cruise ship "MV Terra Konkan" (Ballard Pier, 673 km Konkan loop): three walkable decks with restaurant, music lounge, theatre, cabins corridor, pool, viewing lounges and bridge built as an interior-like level that moves with the ship (`groundOverride` deck sampler + `translateBody`), ramps as stairs, walls that block, overboard respawn, status names the room.
+* Status line for every journey (`gameplay.status`), cleared on exit; `stats()` for Diagnostics; `debug()` test hooks.
+
+**Tested (how)**
+* `npm run typecheck && npm run lint && npm test`: 387 unit tests pass (6 new journeys files: geometry/great-circle, data continuity and station order, schedule determinism, track profile, block signalling, train motion, flight plan phases/altitude/compression, cruise deck sampler).
+* `tests/e2e/journeys.spec.ts` (headless Chromium, SwiftShader, fixture dev server, `TERRA_E2E_DEV=1`): 3/3 pass — rail CSMT → ticket → board → "Aboard … → Pune Junction" → skip → leave at Pune (camera within 0.01° of Pune Junction); air BOM → check-in → security → gate → board → taxiing status → cruise → skip → leave at PNQ; marine Gateway ferry → deck camera → skip → Mandwa, speedboat course (drive mode, speed between 5 and 16.8 m/s), cruise ship boarding with the walker carried > 40 m by the moving ship on the promenade deck → skip → dock → disembark.
+* Screenshots: `docs/screenshots/journeys-{rail-platform,rail-window-ghat,air-window-cruise,air-cabin-cruise,ferry-deck,cruise-lido-deck,cruise-restaurant}.png`.
+* `npm run build` passes.
+
+**Broken / limitations**
+* The sandbox blocks the terrain host from Chromium, so every verified run used the flat ellipsoid: the ghat window screenshot shows flat savanna, and the terrain-lifted track profile is verified only by unit tests plus the sampling code path (chunks time out after 12 s and fall back to the climate-atlas elevation).
+* Software rendering at 1–3 fps clamps `dt` to 0.25 s, so time compression is far slower than intended in the sandbox; on real hardware the ratios are as documented.
+* Cruise room walls block the walker through the deck sampler only (no `moveFilter`), so a fast diagonal step can occasionally clip a wall corner; no fade on the overboard respawn (teleport + status line).
+* No arcade flight activity (optional in the brief); no ambient ferries/aircraft; trains have no lights or sound; door panels slide as one piece per coach.
+
+**Next**
+* Arcade flight mode reusing fly mode with speed limits and bank visuals; ambient air traffic and ferries; cabin/train interiors from the interiors grammar; verify the ghat profile and elevated metro on a machine with terrain access; wire journeys into the activities checklists.

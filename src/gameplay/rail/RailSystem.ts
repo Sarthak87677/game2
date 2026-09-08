@@ -46,7 +46,7 @@ interface Train {
 interface Platform { station: Station; track: TrackRuntime; s: number; centre: Cartesian3; lat: number; lon: number; headingRad: number; levelM: number; model: BodyModel; dispose: () => void }
 
 const SEATS: Record<'window' | 'door', SeatSpec> = {
-  window: { forward: 1.6, left: -0.85, up: 2.7, lookDeg: 60, label: 'Window seat' },
+  window: { forward: 2.4, left: -0.9, up: 2.75, lookDeg: 88, label: 'Window seat' },
   door: { forward: -8.5, left: 0.2, up: 2.95, lookDeg: 90, label: 'Standing by the door' },
 };
 const TICKET_NOTE = 'Simulated timetable and fictional in-game ticket — no real money, no real trains. Positions approximate.';
