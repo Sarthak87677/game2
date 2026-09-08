@@ -28,6 +28,10 @@ weight 1 in `VegetationMaterial`), fruit on mango and coconut species (species p
   = built, a throw returns a result and records 1 attempt; Gateway spawn → `takePhoto()` scores when facing the arch,
   fails when facing away, and the score persists in `terra-infinite.activities.v1`; no page errors, no gameplay errors
   in diagnostics.
+* Regression check of the pre-existing specs on this branch (`smoke.spec.ts`, `city.spec.ts`, same dev server): 5 of 7
+  pass; `city.spec.ts` (building collision lookup returns null) and the smoke "search navigates by place name" test
+  fail — **both fail identically on a clean `main` worktree in this sandbox** (verified side by side on port 5181), so
+  they are environment/timing issues of the sandbox, not regressions from this track.
 * Probe runs with `scripts/dev/probe-scene.mjs` (stats read through `window.__terra.engine.gameplay.stats()`):
   CSMT forecourt 120 pedestrians / 14 stalls at 2 hotspots / gulls+crows+pigeons; Atigre village 29 pedestrians, 4 cattle,
   2 dogs, 10 egrets, 10 butterflies; Marine Drive 107 pedestrians, litter ×10 in range.

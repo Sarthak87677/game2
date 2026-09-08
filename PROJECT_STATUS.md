@@ -50,6 +50,10 @@ Resumable task ledger. Update after every completed task. Dates are UTC.
   spawn at Marine Drive → pedestrians > 0 (107–120 simulated), gulls/crows/pigeons present, monsoon preset active,
   landmark collected; spawn at the campus → basketball prompt offered, walk-over teleport, court built, a throw scored;
   spawn at the Gateway → facing the arch scores the photo and persists it, facing away does not. Passes in 5.5 min.
+* Regression check of the pre-existing specs on this branch (`smoke.spec.ts`, `city.spec.ts`, same dev server): 5 of 7
+  pass; `city.spec.ts` (building collision lookup returns null) and the smoke "search navigates by place name" test
+  fail — **both fail identically on a clean `main` worktree in this sandbox** (verified side by side on port 5181), so
+  they are environment/timing issues of the sandbox, not regressions from this track.
 * Probe screenshots in `docs/screenshots/`: `living-crowd-csmt-forecourt.png`, `living-village-cattle.png`,
   `living-monsoon-mahabaleshwar.png`, `living-basketball-court.png`.
 
