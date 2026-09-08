@@ -59,7 +59,7 @@ Full summary: `docs/tracks/data.md`.
 * Taj Mahal hero (`src/world/hero/`): walkable gate, charbagh, terrace, plinth, mausoleum, minarets, mosque/jawab, approximate interior with "Enter mausoleum (approximate interior)"; streams within 6 km; procedural content excluded from its footprint.
 
 **Tested (how)**
-* `npm run typecheck && npm run lint && npm test`: 27 files / 238 unit tests pass (5 new Maharashtra test files).
+* `npm run typecheck && npm run lint && npm test`: 28 files / 238 unit tests pass (5 new Maharashtra test files).
 * `tests/e2e/maharashtra.spec.ts` in headless Chromium (SwiftShader, fixture dev server): search resolves 12/12 named places; goTo Taj Mahal streams 5 hero primitives (~13 400 vertices) and a spawn on the plinth stands at base + 8 m; spawn at the Gateway of India lands in walk mode with a stand-in visible. First run: search and Taj tests passed; the Gateway test failed only on `landmarks.visible ≥ 1` because no terrain height was available offline — fixed by placing stand-ins on the ellipsoid after a 4 s grace period (re-run recorded in `docs/tracks/data.md`).
 * Probe screenshots: `docs/screenshots/maharashtra-taj-mahal-{gate,platform,interior}.png`, `maharashtra-{gateway-of-india,csmt,shaniwar-wada,deekshabhoomi}.png`.
 
