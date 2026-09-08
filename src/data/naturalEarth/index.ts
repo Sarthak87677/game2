@@ -94,9 +94,13 @@ export interface MarineProps { name: string; kind: string }
 export interface NamedProps { name: string | null }
 export interface RiverProps { name: string | null; rank: number }
 
+export interface DetailRegion { id: string; name: string; west: number; south: number; east: number; north: number }
+
 export interface NaturalEarthFiles {
   land: FeatureCollection | null;
   landCoarse: FeatureCollection | null;
+  /** Optional 1:10m coastline clipped to detail regions; the collection carries a `regions` list. */
+  landFine?: (FeatureCollection<{ region: string }> & { regions?: DetailRegion[] }) | null;
   lakes: FeatureCollection<NamedProps> | null;
   glaciers: FeatureCollection<NamedProps> | null;
   rivers: FeatureCollection<RiverProps> | null;
@@ -119,6 +123,9 @@ export interface SurfaceInfo {
 export class NaturalEarth {
   readonly land: PolygonSet;
   readonly landCoarse: PolygonSet;
+  /** 1:10m coastline clipped to gameplay detail regions (see scripts/process-assets.mjs); may be empty. */
+  readonly landFine: PolygonSet<{ region: string }>;
+  readonly fineRegions: DetailRegion[];
   readonly lakes: PolygonSet<NamedProps>;
   readonly glaciers: PolygonSet<NamedProps>;
   readonly rivers: LineSet<RiverProps>;
@@ -129,6 +136,8 @@ export class NaturalEarth {
   constructor(files: NaturalEarthFiles) {
     this.land = new PolygonSet(files.land);
     this.landCoarse = new PolygonSet(files.landCoarse);
+    this.landFine = new PolygonSet(files.landFine ?? null);
+    this.fineRegions = files.landFine?.regions ?? [];
     this.lakes = new PolygonSet(files.lakes);
     this.glaciers = new PolygonSet(files.glaciers);
     this.rivers = new LineSet(files.rivers);
@@ -138,9 +147,9 @@ export class NaturalEarth {
   }
 
   static async load(fetchJson: FetchJson, baseUrl = '/data/ne', onProgress?: (loaded: number, total: number) => void): Promise<NaturalEarth> {
-    const names: (keyof NaturalEarthFiles)[] = ['land', 'landCoarse', 'lakes', 'glaciers', 'rivers', 'countries', 'regions', 'marine'];
+    const names: (keyof NaturalEarthFiles)[] = ['land', 'landCoarse', 'landFine', 'lakes', 'glaciers', 'rivers', 'countries', 'regions', 'marine'];
     const fileNames: Record<keyof NaturalEarthFiles, string> = {
-      land: 'land_50m.json', landCoarse: 'land_110m.json', lakes: 'lakes_50m.json', glaciers: 'glaciated_50m.json',
+      land: 'land_50m.json', landCoarse: 'land_110m.json', landFine: 'land_10m_detail.json', lakes: 'lakes_50m.json', glaciers: 'glaciated_50m.json',
       rivers: 'rivers_50m.json', countries: 'countries_110m.json', regions: 'regions_110m.json', marine: 'marine_110m.json',
     };
     let loaded = 0;
@@ -166,22 +175,45 @@ export class NaturalEarth {
   surfaceAt(lat: number, lon: number): SurfaceInfo {
     const glacier = this.glaciers.at(lat, lon);
     const lake = glacier ? null : this.lakes.at(lat, lon);
-    const isLand = glacier !== null || lake !== null || this.land.contains(lat, lon) || this.landCoarse.contains(lat, lon);
+    const isLand = glacier !== null || lake !== null || this.landFine.contains(lat, lon) || this.land.contains(lat, lon) || this.landCoarse.contains(lat, lon);
     const kind: SurfaceKind = glacier ? 'glacier' : lake ? 'lake' : isLand ? 'land' : 'ocean';
-    const country = isLand ? this.countries.at(lat, lon)?.props ?? null : null;
+    const country = isLand ? this.countryAt(lat, lon) : null;
     const region = this.regions.at(lat, lon, true)?.props ?? null;
     const marine = kind === 'ocean' ? this.marine.at(lat, lon)?.props ?? null : null;
     return { kind, country, region, marine, lakeName: lake?.props.name ?? null };
   }
 
+  /**
+   * Country polygon at a point; on the coastal fringe (where the 1:110m country outline is narrower than the fine
+   * coastline) the nearest country within ~9 km is used.
+   */
+  countryAt(lat: number, lon: number): CountryProps | null {
+    const direct = this.countries.at(lat, lon)?.props ?? null;
+    if (direct) return direct;
+    for (const d of [0.03, 0.08]) {
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2;
+        const hit = this.countries.at(lat + Math.sin(a) * d, lon + (Math.cos(a) * d) / Math.max(0.2, Math.cos((lat * Math.PI) / 180)))?.props ?? null;
+        if (hit) return hit;
+      }
+    }
+    return null;
+  }
+
   isLand(lat: number, lon: number): boolean {
-    return this.land.contains(lat, lon) || this.landCoarse.contains(lat, lon) || this.lakes.contains(lat, lon) || this.glaciers.contains(lat, lon);
+    return this.landFine.contains(lat, lon) || this.land.contains(lat, lon) || this.landCoarse.contains(lat, lon) || this.lakes.contains(lat, lon) || this.glaciers.contains(lat, lon);
+  }
+
+  /** True when the point lies inside a region that carries the fine (1:10m) coastline. */
+  hasFineCoastline(lat: number, lon: number): boolean {
+    return this.fineRegions.some((r) => lon >= r.west && lon <= r.east && lat >= r.south && lat <= r.north);
   }
 
   /** Serialisable geometry bundle for workers (land + lakes + glaciers rings). */
-  toWorkerBundle(): { land: Position[][][]; lakes: Position[][][]; glaciers: Position[][][] } {
+  toWorkerBundle(): { land: Position[][][]; landFine: Position[][][]; lakes: Position[][][]; glaciers: Position[][][] } {
     return {
       land: this.land.items.map((i) => i.rings),
+      landFine: this.landFine.items.map((i) => i.rings),
       lakes: this.lakes.items.map((i) => i.rings),
       glaciers: this.glaciers.items.map((i) => i.rings),
     };

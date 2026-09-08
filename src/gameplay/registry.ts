@@ -1,5 +1,12 @@
 import type { TerraEngine } from '@/engine/TerraEngine';
 import type { GameplaySystem } from './types';
+import { CrowdSystem } from '@/world/crowds/CrowdSystem';
+import { WildlifeSystem } from '@/world/wildlife/WildlifeSystem';
+import { MonsoonSystem } from '@/world/climate/MonsoonSystem';
+import { ActivitiesSystem } from '@/gameplay/activities/ActivitiesSystem';
+import { VehicleSystem } from './vehicles/VehicleSystem';
+import { ShowroomSystem } from './showroom/ShowroomSystem';
+import { TajMahalSystem } from '@/world/hero/TajMahal';
 import { InteriorSystem } from './interiors/InteriorSystem';
 
 /**
@@ -8,6 +15,13 @@ import { InteriorSystem } from './interiors/InteriorSystem';
  */
 export function createGameplaySystems(engine: TerraEngine): GameplaySystem[] {
   const systems: GameplaySystem[] = [];
+  systems.push(new CrowdSystem(engine));
+  systems.push(new WildlifeSystem(engine));
+  systems.push(new MonsoonSystem(engine));
+  systems.push(new ActivitiesSystem(engine));
+  systems.push(new VehicleSystem(engine));
+  systems.push(new ShowroomSystem(engine));
+  systems.push(new TajMahalSystem(engine)); // maharashtra-data: Taj Mahal hero destination
   systems.push(new InteriorSystem(engine));
   return systems;
 }

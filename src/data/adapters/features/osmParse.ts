@@ -137,6 +137,9 @@ export function parseOverpass(json: OverpassResponse, tile: { z: number; x: numb
       if (tags.place && /^(city|town|village|hamlet|suburb|neighbourhood)$/.test(tags.place) && tags.name && el.lat !== undefined && el.lon !== undefined) {
         const pop = Number(tags.population);
         pois.push({ id: `n${el.id}`, name: tags.name, kind: tags.place, lat: el.lat, lon: el.lon, population: Number.isFinite(pop) ? pop : null });
+      } else if (tags.shop === 'car' && tags.name && el.lat !== undefined && el.lon !== undefined) {
+        // Car dealerships (used by the showroom system for real positions; interiors stay procedural).
+        pois.push({ id: `n${el.id}`, name: tags.name, kind: 'car_showroom', lat: el.lat, lon: el.lon, population: null });
       } else if (tags.name && el.lat !== undefined && el.lon !== undefined && (tags.tourism || tags.amenity || tags.historic)) {
         pois.push({ id: `n${el.id}`, name: tags.name, kind: tags.tourism ?? tags.amenity ?? tags.historic ?? 'poi', lat: el.lat, lon: el.lon, population: null });
       }

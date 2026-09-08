@@ -1,5 +1,5 @@
 /**
- * Showcase presets: 19 curated areas used for demos, QA and e2e checks. Each
+ * Showcase presets: 19 curated global areas plus 5 Maharashtra areas (`showcaseMaharashtra.ts`) used for demos, QA and e2e checks. Each
  * extends a {@link Bookmark} with the biome the classifier is expected to
  * report, a walking-mode start point and a short guided camera tour.
  *
@@ -9,6 +9,7 @@
  * measured by this project; the app labels these values as "inferred".
  */
 import { defineBookmark, type BookmarkSeed } from './defaults';
+import { MAHARASHTRA_SHOWCASE_AREAS } from './showcaseMaharashtra';
 import type { ShowcaseArea, TourWaypoint } from './types';
 
 interface ShowcaseSeed extends BookmarkSeed {
@@ -29,7 +30,7 @@ function defineShowcase(seed: ShowcaseSeed): ShowcaseArea {
   return area;
 }
 
-/** The 19 showcase areas, in presentation order. */
+/** The 19 global showcase areas followed by the 5 Maharashtra areas, in presentation order. */
 export const SHOWCASE_AREAS: ShowcaseArea[] = [
   defineShowcase({
     id: 'showcase-new-york', name: 'New York — Manhattan & Central Park', category: 'city', continent: 'North America', country: 'United States',
@@ -268,4 +269,5 @@ export const SHOWCASE_AREAS: ShowcaseArea[] = [
       wp(-38.8570, 143.5130, 4000, 180, -35, 8), // Cape Otway
     ],
   }),
+  ...MAHARASHTRA_SHOWCASE_AREAS,
 ];

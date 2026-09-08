@@ -23,8 +23,20 @@ export class AmbientAudio {
   private birdTimer: number | null = null;
   private lastInput: AudioSceneInput | null = null;
   private enabled = false;
+  private buses = new Map<string, GainNode>();
 
   get isEnabled(): boolean { return this.enabled; }
+
+  /**
+   * Additive hook for gameplay sound (vehicles, horns, activities): a named mix bus feeding the master gain. Returns
+   * null until audio has been enabled from a user gesture, so callers must re-ask each frame and build lazily.
+   */
+  bus(name: string): { ctx: AudioContext; gain: GainNode } | null {
+    if (!this.enabled || !this.ctx || !this.master) return null;
+    let g = this.buses.get(name);
+    if (!g) { g = this.ctx.createGain(); g.gain.value = 1; g.connect(this.master); this.buses.set(name, g); }
+    return { ctx: this.ctx, gain: g };
+  }
 
   private ensure(): boolean {
     if (this.ctx) return true;
@@ -156,5 +168,6 @@ export class AmbientAudio {
     void this.ctx?.close();
     this.ctx = null;
     this.layers.clear();
+    this.buses.clear();
   }
 }

@@ -1,4 +1,5 @@
 import type { LandmarkArchetype } from '@/world/landmarks/landmarkShapes';
+import { MAHARASHTRA_LANDMARK_MODELS } from './maharashtraLandmarks';
 
 /**
  * Procedural landmark stand-ins. Coordinates and heights are measured (public reference values, ±0.001°); the geometry
@@ -17,15 +18,21 @@ export interface LandmarkModel {
   archetype: LandmarkArchetype;
   colour: string;
   note: string;
+  /**
+   * Id of a hero gameplay system that renders this landmark as walkable geometry (e.g. `taj-mahal`). The generic
+   * LandmarkLayer skips such entries so the stand-in and the hero never overlap.
+   */
+  hero?: string;
 }
 
 const NOTE = 'Procedural interpretation at the real position and height — not a surveyed model.';
 
 export const LANDMARK_MODELS: LandmarkModel[] = [
+  ...MAHARASHTRA_LANDMARK_MODELS,
   { name: 'Eiffel Tower', lat: 48.8584, lon: 2.2945, heightM: 330, footprintM: 125, headingDeg: 0, archetype: 'latticeTower', colour: '#5e4f42', note: NOTE },
   { name: 'Statue of Liberty', lat: 40.6892, lon: -74.0445, heightM: 93, footprintM: 30, headingDeg: 0, archetype: 'statueOnPedestal', colour: '#79a68f', note: NOTE },
   { name: 'Elizabeth Tower (Big Ben)', lat: 51.5007, lon: -0.1246, heightM: 96, footprintM: 12, headingDeg: 0, archetype: 'clockTower', colour: '#c9b99a', note: NOTE },
-  { name: 'Taj Mahal', lat: 27.1751, lon: 78.0421, heightM: 73, footprintM: 57, headingDeg: 0, archetype: 'domedBuilding', colour: '#f1ece4', note: NOTE },
+  { name: 'Taj Mahal', lat: 27.1751, lon: 78.0421, heightM: 73, footprintM: 57, headingDeg: 0, archetype: 'domedBuilding', colour: '#f1ece4', note: NOTE + ' Rendered by the taj-mahal hero system, not this layer.', hero: 'taj-mahal' },
   { name: 'Great Pyramid of Giza', lat: 29.9792, lon: 31.1342, heightM: 139, footprintM: 230, headingDeg: 0, archetype: 'pyramid', colour: '#c9b58a', note: NOTE },
   { name: 'Burj Khalifa', lat: 25.1972, lon: 55.2744, heightM: 828, footprintM: 110, headingDeg: 0, archetype: 'skyscraperTapered', colour: '#b8c4cf', note: NOTE },
   { name: 'Sydney Opera House', lat: -33.8568, lon: 151.2153, heightM: 65, footprintM: 120, headingDeg: 20, archetype: 'shellRoof', colour: '#f0ede6', note: NOTE },

@@ -7,6 +7,9 @@ import type { ModeState } from '@/modes/ModeController';
 import type { DataSourceInfo } from '@/data/adapters/types';
 import type { GeocodeResult } from '@/data/geocoding/types';
 import type { GameplayOverlay } from '@/gameplay/types';
+import type { HardwareInfo } from '@/perf/hardware';
+import type { AdaptiveReadout } from '@/perf/adaptive';
+import type { ReadinessDecision } from '@/perf/readiness';
 
 export type BootPhase = 'init' | 'viewer' | 'terrain' | 'data' | 'ready' | 'error';
 export type PanelId = 'none' | 'highlights' | 'settings' | 'sources' | 'diagnostics' | 'help' | 'timeweather' | 'play';
@@ -42,7 +45,14 @@ export interface GameplayState {
   /** Free-form status line from the active journey/activity (e.g. "Aboard 12123 to Pune · next stop Lonavala"). */
   status: string | null;
   /** Vehicle instrument readout when driving a gameplay vehicle. */
-  vehicle: { name: string; speedKmh: number; headlights: boolean; indicator: 'off' | 'left' | 'right' | 'hazard'; gear: string } | null;
+  vehicle: {
+    name: string; speedKmh: number; headlights: boolean; indicator: 'off' | 'left' | 'right' | 'hazard'; gear: string;
+    /** Optional extras from the vehicle system (additive): compass heading, navigation target, camera and damage. */
+    headingDeg?: number;
+    destination?: { name: string; bearingDeg: number; distanceM: number } | null;
+    camera?: 'third' | 'first' | 'dashboard';
+    damage?: number;
+  } | null;
 }
 
 export interface Settings {
@@ -54,9 +64,13 @@ export interface Settings {
   cacheMb: number;
   showAttribution: boolean;
   invertLook: boolean;
+  /** "Protect frame rate (dynamic resolution)": runs the adaptive degradation ladder. */
+  protectFrameRate: boolean;
 }
 
-export const DEFAULT_SETTINGS: Settings = { locationAccess: false, reduceMotion: false, uiScale: 1, highContrast: false, audio: false, cacheMb: 256, showAttribution: true, invertLook: false };
+export const DEFAULT_SETTINGS: Settings = { locationAccess: false, reduceMotion: false, uiScale: 1, highContrast: false, audio: false, cacheMb: 256, showAttribution: true, invertLook: false, protectFrameRate: true };
+
+export const DEFAULT_ADAPTIVE: AdaptiveReadout = { enabled: true, step: 0, maxStep: 0, stepLabel: null, resolutionScale: 1, reason: 'not started', fps: 0, minFps: 0, targetFps: 0 };
 
 export interface TerraState {
   boot: BootState;
@@ -77,6 +91,12 @@ export interface TerraState {
   searchBusy: boolean;
   dataFlags: { naturalEarth: boolean; worldMap: boolean; worldMapElevation: boolean; gazetteer: boolean; osmOnline: boolean | null; weatherOnline: boolean | null };
   gameplay: GameplayState;
+  /** Detected CPU/GPU/screen facts (perf contract); null until the viewer exists. */
+  hardware: HardwareInfo | null;
+  /** Adaptive quality ladder readout (perf contract). */
+  adaptive: AdaptiveReadout;
+  /** Boot readiness decision (blocking items, degraded layers, FPS gate); null until data loading starts. */
+  readiness: ReadinessDecision | null;
   patch: (p: Partial<TerraState>) => void;
   setGameplay: (p: Partial<GameplayState>) => void;
   setUi: (p: Partial<TerraState['ui']>) => void;
@@ -112,6 +132,9 @@ export const useTerraStore = create<TerraState>()((set) => ({
   searchResults: [],
   gameplay: { prompt: null, overlay: null, player: { spawned: false, spawnName: null, spawnId: null }, status: null, vehicle: null },
   searchBusy: false,
+  hardware: null,
+  adaptive: DEFAULT_ADAPTIVE,
+  readiness: null,
   dataFlags: { naturalEarth: false, worldMap: false, worldMapElevation: false, gazetteer: false, osmOnline: null, weatherOnline: null },
   patch: (p) => set(p),
   setUi: (p) => set((s) => ({ ui: { ...s.ui, ...p } })),

@@ -1,0 +1,134 @@
+[
+  {
+    "Name": "sgis-campus",
+    "DisplayName": "SGIS-inspired campus, Atigre (Kolhapur)",
+    "Region": "Kolhapur",
+    "Lat": 16.7335,
+    "Lon": 74.4015,
+    "HeadingDeg": 20,
+    "Description": "Landscaped entrance of the school-inspired hero campus.",
+    "DataNote": "Original, fictionalised campus reconstruction inspired by the school’s public map position; interiors are generated, not surveyed.",
+    "bApproximate": true
+  },
+  {
+    "Name": "gateway-of-india",
+    "DisplayName": "Gateway of India, Mumbai",
+    "Region": "Mumbai",
+    "Lat": 18.9226,
+    "Lon": 72.8332,
+    "HeadingDeg": 120,
+    "Description": "Apollo Bunder promenade facing the basalt arch and the ferry jetties.",
+    "DataNote": "Terrain is measured; buildings come from OpenStreetMap when online, otherwise they are procedural. Landmarks are labelled stand-ins.",
+    "bApproximate": true
+  },
+  {
+    "Name": "marine-drive",
+    "DisplayName": "Marine Drive, Mumbai",
+    "Region": "Mumbai",
+    "Lat": 18.9432,
+    "Lon": 72.8236,
+    "HeadingDeg": 340,
+    "Description": "The promenade along Back Bay.",
+    "DataNote": "Terrain is measured; buildings come from OpenStreetMap when online, otherwise they are procedural. Landmarks are labelled stand-ins.",
+    "bApproximate": true
+  },
+  {
+    "Name": "csmt",
+    "DisplayName": "Chhatrapati Shivaji Maharaj Terminus",
+    "Region": "Mumbai",
+    "Lat": 18.94,
+    "Lon": 72.8353,
+    "HeadingDeg": 180,
+    "Description": "Forecourt of the Victorian-Gothic terminus.",
+    "DataNote": "Terrain is measured; buildings come from OpenStreetMap when online, otherwise they are procedural. Landmarks are labelled stand-ins.",
+    "bApproximate": true
+  },
+  {
+    "Name": "shaniwar-wada",
+    "DisplayName": "Shaniwar Wada, Pune",
+    "Region": "Pune",
+    "Lat": 18.5195,
+    "Lon": 73.8553,
+    "HeadingDeg": 0,
+    "Description": "Delhi Gate of the Peshwa fortification.",
+    "DataNote": "Terrain is measured; buildings come from OpenStreetMap when online, otherwise they are procedural. Landmarks are labelled stand-ins.",
+    "bApproximate": true
+  },
+  {
+    "Name": "mahalaxmi-kolhapur",
+    "DisplayName": "Mahalaxmi Temple area, Kolhapur",
+    "Region": "Kolhapur",
+    "Lat": 16.695,
+    "Lon": 74.2246,
+    "HeadingDeg": 90,
+    "Description": "Old-town lanes around the temple.",
+    "DataNote": "Terrain is measured; buildings come from OpenStreetMap when online, otherwise they are procedural. Landmarks are labelled stand-ins.",
+    "bApproximate": true
+  },
+  {
+    "Name": "deekshabhoomi",
+    "DisplayName": "Deekshabhoomi, Nagpur",
+    "Region": "Nagpur",
+    "Lat": 21.1287,
+    "Lon": 79.0656,
+    "HeadingDeg": 0,
+    "Description": "Grounds of the stupa.",
+    "DataNote": "Terrain is measured; buildings come from OpenStreetMap when online, otherwise they are procedural. Landmarks are labelled stand-ins.",
+    "bApproximate": true
+  },
+  {
+    "Name": "mahabaleshwar",
+    "DisplayName": "Mahabaleshwar",
+    "Region": "Satara",
+    "Lat": 17.9237,
+    "Lon": 73.6586,
+    "HeadingDeg": 270,
+    "Description": "Hill-station plateau in the Western Ghats.",
+    "DataNote": "Terrain is measured; buildings come from OpenStreetMap when online, otherwise they are procedural. Landmarks are labelled stand-ins.",
+    "bApproximate": true
+  },
+  {
+    "Name": "ganpatipule",
+    "DisplayName": "Ganpatipule beach",
+    "Region": "Ratnagiri",
+    "Lat": 17.1461,
+    "Lon": 73.2653,
+    "HeadingDeg": 270,
+    "Description": "Konkan coast beach.",
+    "DataNote": "Terrain is measured; buildings come from OpenStreetMap when online, otherwise they are procedural. Landmarks are labelled stand-ins.",
+    "bApproximate": true
+  },
+  {
+    "Name": "lonavala-time-trial",
+    "DisplayName": "Lonavala hill road time trial (closed course)",
+    "Region": "Pune",
+    "Lat": 18.7318,
+    "Lon": 73.3974,
+    "HeadingDeg": 195,
+    "Description": "Start gate of the closed-course hill time trial near Bhushi Dam; three vehicles wait at the line.",
+    "DataNote": "Approximate start position on the Lonavala–Aamby Valley road; the gates and vehicles are fictional game objects.",
+    "bApproximate": true
+  },
+  {
+    "Name": "showroom-worli",
+    "DisplayName": "Seaface Motors showroom, Worli (fictional showroom)",
+    "Region": "Mumbai",
+    "Lat": 19.009,
+    "Lon": 72.8168,
+    "HeadingDeg": 90,
+    "Description": "Forecourt of an original procedural car showroom at an approximate dealership-cluster position.",
+    "DataNote": "Original showroom interior — not a real dealer's interior, name or brand; position approximate.",
+    "bApproximate": true
+  },
+  {
+    "Name": "taj-mahal",
+    "DisplayName": "Taj Mahal, Agra (external hero destination)",
+    "Region": "Agra, Uttar Pradesh",
+    "Lat": 27.1731,
+    "Lon": 78.0421,
+    "HeadingDeg": 0,
+    "Description": "Great Gate approach to the charbagh garden.",
+    "DataNote": "Hero stand-in at the real position; gardens and interior are an approximate original reconstruction.",
+    "bApproximate": true
+  }
+]
