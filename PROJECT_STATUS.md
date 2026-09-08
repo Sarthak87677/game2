@@ -171,7 +171,8 @@ Run `npm run build && npm run perf` on a machine with a GPU and network access t
 * Full e2e suite against the production build (`TERRA_FIXTURES=1 npx playwright test`): 12 passed / 0 failed in
   26.9 min — the readiness gate does not break the smoke, city, nature or landmark specs.
 * `npm run perf -- --quick` run recorded in `docs/performance-2026-09-07T13-45-36-612Z.json` (0.6–3.8 fps, SwiftShader,
-  ladder at rung 9–10, soak heap −1 %).
+  ladder at rung 9–10, soak heap −1 %); full run `docs/performance-2026-09-08T04-12-22-114Z.json` (7 spots × 20 s,
+  1.0–1.3 fps at medium/1080p in software, 300 s soak PASS: heap −3.6 %, p99 < 2×).
 
 **Broken / limitations**
 

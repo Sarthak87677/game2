@@ -140,10 +140,47 @@ machine.
 Soak (40 s, quick): heap 100.5 → 100.9 → 99.9 MB (−1 %), p99 2 708 ms, 1.22 fps average, **PASS** (no growth). Boot to
 ready took 94.7 s, of which 45 s was the terrain-host timeout before the ellipsoid fallback.
 
-### 3.2 Full run
+### 3.2 Full run, 2026-09-08 (`docs/performance-2026-09-08T04-12-22-114Z.json`)
 
-See the section appended below by the full `npm run perf` run (7 spots × 20 s, 5-minute soak), or the newest
-`docs/performance-*.json`.
+`node scripts/measure-performance.mjs --url=http://127.0.0.1:4173/ --quality=medium --min-fps=0` on the production
+build (`vite preview`), 1920×1080, **20 s per spot, 5-minute soak**. `--min-fps=0` disables the FPS gate *and* keeps
+the ladder idle (rung 0), so these are the **undegraded medium preset** numbers — the plain cost of the scene in
+software. Boot to ready 105.8 s (45 s of it the terrain-host timeout). **OSM was offline in this run** (the preview
+server does not serve the synthetic fixture unless `?terraFixtures=1` is in the URL), so no buildings or traffic were
+present and the actor count is 0 — see the fixture run below for the traffic case.
+
+| Spot | Avg FPS | Current FPS | 1 % low | Frame ms | p99 ms | Heap MB | Globe tiles | Draw calls | Actors | Adaptive step |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Mumbai Marine Drive / CSMT traffic area | 1.1 | 1.1 | 0.3 | 874.2 | 3345.5 | 77 | 26 | 32 | 0 | 0 |
+| Rural Maharashtra near Satara | 1.3 | 1.3 | 0.4 | 753.5 | 2363.5 | 102 | 32 | 22 | 0 | 0 |
+| SGIS-inspired campus (procedural) | 1 | 1 | 0.3 | 959.2 | 3553.3 | 81 | 32 | 60 | 0 | 0 |
+| Train corridor near Lonavala | 1.3 | 1.3 | 0.3 | 751.7 | 2956.5 | 73 | 34 | 25 | 0 | 0 |
+| Air-travel view over Mumbai (3 000 m) | 1.2 | 1.2 | 0.4 | 858.3 | 2695.8 | 91 | 29 | 61 | 0 | 0 |
+| Konkan coast, Ganpatipule | 1.3 | 1.3 | 0.4 | 770.3 | 2325.2 | 93 | 36 | 27 | 0 | 0 |
+| Taj Mahal, Agra | 1.1 | 1.1 | 0.4 | 919.2 | 2745.1 | 132 | 34 | 74 | 0 | 0 |
+
+Traversal soak (300 s walking, campus ↔ Mumbai, GC forced before each heap sample):
+
+| Soak minute | p99 ms | Avg FPS | Frames |
+|---:|---:|---:|---:|
+| 1 | 4516.3 | 0.67 | 41 |
+| 2 | 6831 | 1.06 | 68 |
+| 3 | 7129.9 | 0.96 | 64 |
+| 4 | 6647.8 | 1.07 | 64 |
+
+Heap samples (s → MB): 11→87.7, 22→93.4, 33→89, 44→89.7, 54→89.7, 101→81.6, 112→84.2, 123→84.6, 188→94.8,
+237→82.2, 247→86.5. Minute 1 → last sample: 89.7 → 86.5 MB (**−3.6 %**), p99 4.5 s → 6.6 s (< 2×): **PASS**. Only four
+per-minute rows exist because each teleport between the two spots waits up to 60 s for tiles, which eats into the
+300 s budget at this frame rate. No page errors.
+
+What this run says: in software rendering the scene costs ~0.75–0.95 s per frame at 1080p regardless of spot (the
+globe material, atmosphere and post-processing dominate; draw calls are only 22–74), the 1 % low is 0.3–0.4 fps, and
+five minutes of continuous walking does not grow the heap. It says nothing about a GPU.
+
+### 3.3 Full run with the synthetic OSM fixture (traffic present)
+
+See the newest `docs/performance-*.json` whose `url` contains `terraFixtures=1`; its table is appended below when
+recorded.
 
 ## 4. What is verified and what is not
 
@@ -165,9 +202,8 @@ See the section appended below by the full `npm run perf` run (7 spots × 20 s, 
 
 * **60 fps (performance/low/medium/high) and 30 fps (ultra) on a GPU.** No GPU has run this build. The sandbox
   numbers (0.6–3.8 fps at 1920×1080 in software) cannot be extrapolated.
-* The 5-minute soak's heap/p99 criteria have only been exercised in the 40 s quick form and the full SwiftShader run
-  recorded below; at 1 fps the walker covers very little ground per minute, so the soak on a GPU will stream far more
-  content and is the run that matters.
+* The 5-minute soak passed in software (heap −3.6 %, p99 < 2×), but at ~1 fps the walker covers very little ground
+  per minute; the soak on a GPU will stream far more content and is the run that matters.
 * Behaviour of the ladder on a real GPU (it should sit at rung 0 on hardware that meets the target).
 
 ## 5. Measuring on a real GPU

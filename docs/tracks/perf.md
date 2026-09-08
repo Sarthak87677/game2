@@ -13,7 +13,7 @@ blocked, synthetic OSM fixture). **No GPU has run this build; 60/30 fps is unver
 | 3. Presets + ladder | `src/engine/quality.ts` (`performance` preset, `targetFps`/`minFps`, `degradationLadder`, `resolveQuality`), `src/perf/adaptive.ts`, store `adaptive`, Settings toggle "Protect frame rate (dynamic resolution)" (default on) | done |
 | 4. Ready gating | `src/perf/readiness.ts`, `TerraEngine.loadDataInBackground` → `awaitReadiness` | done |
 | 5. Diagnostics panel | `src/ui/panels/DiagnosticsPanel.tsx` (FPS current/avg/1 % low, frame ms, p99, heap, VRAM n/a, tiles, actors, draw calls, adaptive step, hardware, readiness, Benchmark 20 s → JSON log line) | done |
-| 6. Measurement script | `scripts/measure-performance.mjs` (7 spots, 5-min soak, `--quick`, Markdown + JSON) | done; quick run recorded, full SwiftShader run recorded below when available |
+| 6. Measurement script | `scripts/measure-performance.mjs` (7 spots, 5-min soak, `--quick`, Markdown + JSON) | done; quick run and full SwiftShader run recorded (`docs/performance-2026-09-0{7,8}T*.json`) |
 | 7. PERFORMANCE.md | rewritten (contract, methodology, SwiftShader numbers, hardware block, GPU command, honest gaps) | done |
 | 8. Tests | `tests/unit/perf/*` (36), `tests/e2e/perf.spec.ts` (3) | passing |
 
@@ -66,6 +66,13 @@ URL flags: `?terraQuality=performance|low|medium|high|ultra`, `?terraMinFps=<n>`
 `PERFORMANCE.md`, `PROJECT_STATUS.md` (track section), `docs/PLAN_MAHARASHTRA.md` (contract note),
 `docs/screenshots/perf-*.png`, `docs/performance-*.json`, this file.
 
-## Full-run results
+## Full-run results (SwiftShader, not a GPU)
 
-(Appended after the full `npm run perf` run in this sandbox; see PERFORMANCE.md §3.2.)
+`docs/performance-2026-09-08T04-12-22-114Z.json` — production build, 1920×1080, medium preset, `--min-fps=0`
+(gate off, ladder idle), 7 spots × 20 s, 300 s soak, exit 0:
+
+* Spots: 1.0–1.3 fps average, 1 % low 0.3–0.4 fps, 752–959 ms mean frame, p99 2.3–3.6 s, heap 73–132 MB,
+  26–36 globe tiles, 22–74 draw calls, 0 actors (OSM offline in this run — no `?terraFixtures=1` on the preview URL).
+* Soak: heap 89.7 → 86.5 MB (−3.6 %), p99 4.5 → 6.6 s (< 2×) → **PASS**; no page errors.
+* Full tables in PERFORMANCE.md §3.2. A second full run with `?terraFixtures=1` (traffic present) is recorded in §3.3
+  when available.
