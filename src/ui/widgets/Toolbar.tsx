@@ -54,7 +54,7 @@ export function Toolbar() {
       </div>
       <div className="terra-toolgroup">
         <select value={quality} aria-label="Rendering quality" onChange={(e) => engine?.setQuality(e.target.value as QualityPresetId)}>
-          <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="ultra">Ultra</option>
+          <option value="performance">Performance (60 fps)</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="ultra">Ultra</option>
         </select>
         <button onClick={screenshot} title="Save screenshot (P)">📷</button>
         <button onClick={() => setUi({ hidden: true })} title="Hide interface (H)">Hide UI</button>

@@ -110,13 +110,27 @@ export function applyQuality(viewer: Viewer, q: QualitySettings): void {
   scene.globe.tileCacheSize = q.tileCacheSize;
 }
 
-/** Picks a starting preset from device hints (never worse than 'low'). */
-export function detectQualityPreset(): QualityPresetId {
-  if (typeof navigator === 'undefined') return 'medium';
-  const cores = navigator.hardwareConcurrency ?? 4;
-  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
-  const mobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-  if (mobile || cores <= 2 || mem <= 2) return 'low';
-  if (cores <= 4 || mem <= 4) return 'medium';
+/** Device hints the starting-preset heuristic reads (all optional; falls back to `navigator`). */
+export interface DeviceHints { gpuRenderer?: string; softwareRenderer?: boolean; cpuCores?: number | null; deviceMemoryGb?: number | null }
+
+/** Integrated / low-power GPU families that should start on a light preset (the ladder cannot raise it above the start). */
+const INTEGRATED_GPU = /intel.*(hd|uhd|iris)|(^|[^a-z])hd graphics|(^|[^a-z])mali([^a-z]|$)|adreno|powervr|vivante|videocore|llvmpipe|swiftshader/i;
+
+/**
+ * Picks a starting preset from device hints, biased toward a smooth frame rate rather than maximum fidelity: a
+ * software rasteriser or a phone starts in Performance mode, an integrated GPU or a small machine in Low. The
+ * adaptive ladder and preset demotion drop it further at run time if needed; the user can always raise it. The
+ * start preset is the ceiling, so we err on the light side.
+ */
+export function detectQualityPreset(hints?: DeviceHints): QualityPresetId {
+  const nav = typeof navigator !== 'undefined' ? navigator : undefined;
+  const cores = hints?.cpuCores ?? nav?.hardwareConcurrency ?? 4;
+  const mem = hints?.deviceMemoryGb ?? (nav as (Navigator & { deviceMemory?: number }) | undefined)?.deviceMemory ?? 4;
+  const ua = nav?.userAgent ?? '';
+  const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+  const renderer = hints?.gpuRenderer ?? '';
+  if (hints?.softwareRenderer || mobile) return 'performance';
+  if (INTEGRATED_GPU.test(renderer) || cores <= 2 || mem <= 2) return 'low';
+  if (cores <= 6 || mem <= 4) return 'medium';
   return 'high';
 }

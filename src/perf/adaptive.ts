@@ -24,6 +24,10 @@ export interface AdaptiveControllerOptions {
   maxStep?: number;
   /** FPS must stay below minFps this long before a rung is added (default 2000 ms). */
   degradeAfterMs?: number;
+  /** When FPS is below this fraction of minFps the scene is unplayable, so drop rungs fast (default 0.25). */
+  panicBelowFrac?: number;
+  /** Fast degrade delay used while FPS is below the panic fraction (default 600 ms). */
+  panicAfterMs?: number;
   /** FPS must stay above targetFps + recoverMarginFps this long before a rung is removed (default 6000 ms). */
   recoverAfterMs?: number;
   recoverMarginFps?: number;
@@ -47,6 +51,8 @@ export class AdaptiveController {
   readonly degradeAfterMs: number;
   readonly recoverAfterMs: number;
   readonly recoverMarginFps: number;
+  readonly panicBelowFrac: number;
+  readonly panicAfterMs: number;
 
   constructor(opts: AdaptiveControllerOptions) {
     this.minFps = opts.minFps;
@@ -55,7 +61,15 @@ export class AdaptiveController {
     this.degradeAfterMs = opts.degradeAfterMs ?? 2000;
     this.recoverAfterMs = opts.recoverAfterMs ?? 6000;
     this.recoverMarginFps = opts.recoverMarginFps ?? 8;
+    this.panicBelowFrac = opts.panicBelowFrac ?? 0.25;
+    this.panicAfterMs = opts.panicAfterMs ?? 600;
   }
+
+  /** True while FPS is so far below minFps that the scene is unplayable (drives the fast degrade path). */
+  private isPanic(fps: number): boolean { return this.minFps > 0 && fps < this.minFps * this.panicBelowFrac; }
+
+  /** True once the ladder is at its last rung (nothing left to degrade). */
+  get exhausted(): boolean { return this.step >= this.maxStep; }
 
   get reason(): string { return this.lastReason; }
 
@@ -66,7 +80,8 @@ export class AdaptiveController {
     const high = fps > this.targetFps + this.recoverMarginFps;
     if (low) { if (this.lowSince === null) this.lowSince = nowMs; } else this.lowSince = null;
     if (high) { if (this.highSince === null) this.highSince = nowMs; } else this.highSince = null;
-    if (low && this.lowSince !== null && nowMs - this.lowSince >= this.degradeAfterMs) {
+    const degradeDelay = this.isPanic(fps) ? this.panicAfterMs : this.degradeAfterMs;
+    if (low && this.lowSince !== null && nowMs - this.lowSince >= degradeDelay) {
       this.lowSince = nowMs;
       if (this.step < this.maxStep) {
         this.step++;
@@ -101,6 +116,14 @@ export interface AdaptiveQualityOptions {
   apply: (q: QualitySettings, step: number, reason: string) => void;
   onReadout?: (r: AdaptiveReadout) => void;
   evaluateEveryMs?: number;
+  /**
+   * Drop the whole preset one tier (e.g. high → medium → low → performance) when the in-preset ladder is exhausted
+   * and the frame rate is still below minFps. Returns true if it demoted, false if already at the lowest preset.
+   * The ladder (which only reduces distance/fill costs) cannot turn off MSAA, shadows, ambient occlusion, HDR or
+   * clouds; a lower preset does. Called after `demoteAfterMs` of exhausted-and-starving.
+   */
+  demote?: () => boolean;
+  demoteAfterMs?: number;
 }
 
 /**
@@ -114,8 +137,10 @@ export class AdaptiveQuality {
   private lastEval = 0;
   private lastPublish = 0;
   private current: QualitySettings;
+  private exhaustedLowSince: number | null = null;
   private readonly remove: () => void;
   private readonly evaluateEveryMs: number;
+  private readonly demoteAfterMs: number;
 
   constructor(private readonly opts: AdaptiveQualityOptions) {
     const p = opts.preset();
@@ -123,6 +148,7 @@ export class AdaptiveQuality {
     this.current = p;
     this.wasEnabled = opts.enabled();
     this.evaluateEveryMs = opts.evaluateEveryMs ?? 250;
+    this.demoteAfterMs = opts.demoteAfterMs ?? 2500;
     this.remove = opts.monitor.addFrameListener((_dt, now) => this.onFrame(now));
     this.publish();
   }
@@ -138,6 +164,7 @@ export class AdaptiveQuality {
     const p = this.opts.preset();
     this.controller = new AdaptiveController({ minFps: this.opts.minFps(), targetFps: p.targetFps });
     this.current = p;
+    this.exhaustedLowSince = null;
     this.publish();
   }
 
@@ -154,6 +181,14 @@ export class AdaptiveQuality {
     const fps = this.opts.monitor.currentFps(now);
     const d = this.controller.update(fps, now);
     if (d.changed) this.applyStep(d.step, d.reason);
+    // The in-preset ladder is exhausted but the frame rate is still below the floor: drop the whole preset a tier.
+    if (this.opts.demote && this.controller.exhausted && this.controller.minFps > 0 && fps < this.controller.minFps) {
+      if (this.exhaustedLowSince === null) this.exhaustedLowSince = now;
+      else if (now - this.exhaustedLowSince >= this.demoteAfterMs) {
+        this.exhaustedLowSince = null;
+        if (this.opts.demote()) { this.resetForPreset(); return; }
+      }
+    } else this.exhaustedLowSince = null;
     if (d.changed || now - this.lastPublish >= 1000) this.publish(fps, now);
   }
 

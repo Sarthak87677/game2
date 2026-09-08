@@ -173,6 +173,7 @@ export class TerraEngine {
       minFps: () => this.gateMinFps().minFps,
       enabled: () => useTerraStore.getState().settings.protectFrameRate,
       apply: (q, step, reason) => { this.applySettings(q); useTerraStore.getState().log('info', `Adaptive quality → step ${step}/${this.adaptive.readout().maxStep}: ${reason}`); },
+      demote: () => this.demotePreset(),
       onReadout: (r) => { if (!this.destroyed) useTerraStore.setState({ adaptive: r }); },
     });
     if (!disabled.has('nominatim') && env.nominatimUrl) this.geocoders.push(new NominatimAdapter({ url: env.nominatimUrl }));
@@ -205,7 +206,7 @@ export class TerraEngine {
     const saved = (() => { try { return localStorage.getItem('terra-infinite.quality') as QualityPresetId | null; } catch { return null; } })();
     // ?terraQuality=low|medium|high|ultra overrides the preset (used by tests and software-rendered CI).
     const forced = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('terraQuality') : null;
-    engine.setQuality(isQualityPresetId(forced) ? forced : isQualityPresetId(saved) ? saved : detectQualityPreset());
+    engine.setQuality(isQualityPresetId(forced) ? forced : isQualityPresetId(saved) ? saved : detectQualityPreset(engine.hardware));
     store.patch({ boot: { phase: 'terrain', progress: 0.25, message: 'Connecting terrain and imagery…', error: null, details: [] } });
     await engine.setTerrain(engine.registry.defaultTerrainId());
     await engine.setImagery(engine.registry.defaultImageryId());
@@ -293,9 +294,18 @@ export class TerraEngine {
    */
   private async awaitReadiness(layers: Record<LayerId, LayerStatus>, setBoot: (progress: number, message: string, phase?: 'data' | 'ready') => void): Promise<void> {
     const { minFps, note } = this.gateMinFps();
-    const gate = new ReadinessGate({ minFps, minFpsNote: note, sustainMs: 3000 });
+    let gate = new ReadinessGate({ minFps, minFpsNote: note, sustainMs: 3000 });
     if (note) useTerraStore.getState().log('info', note);
+    // Let the adaptive ladder degrade (and demote the preset) during warm-up. Otherwise a device that cannot reach the
+    // FPS gate at its current preset would never turn "ready", so the ladder that rescues it would never activate — the
+    // globe would sit at a few fps for ever. Only quality is touched; nearby buildings and the player are never cut.
+    this.adaptive.setActive(true);
     const started = performance.now();
+    // Once everything except the FPS gate is ready, give the device a bounded budget to reach the target frame rate;
+    // if it still cannot (even after the ladder and preset demotion bottom out), open the gate at its best effort so
+    // the world is playable rather than stuck on "Warming up". The scene keeps auto-tuning in the background.
+    const GATE_FPS_GRACE_MS = 20_000;
+    let fpsWaitSince: number | null = null;
     let terrainFallbackReason: string | null = null;
     while (!this.destroyed) {
       const now = performance.now();
@@ -326,6 +336,17 @@ export class TerraEngine {
         useTerraStore.getState().log('error', `Not ready: ${decision.message}`);
         return;
       }
+      // Everything except the frame-rate gate is satisfied: start the grace clock, and open the gate once it expires.
+      const onlyFpsLeft = gate.minFps > 0 && !decision.fpsGatePassed && decision.blocking.every((b) => /Warming up/.test(b));
+      if (onlyFpsLeft) {
+        if (fpsWaitSince === null) fpsWaitSince = now;
+        else if (now - fpsWaitSince >= GATE_FPS_GRACE_MS) {
+          const fps = this.streaming.currentFps(now);
+          gate = new ReadinessGate({ minFps: 0, sustainMs: 0, minFpsNote: `Performance limited: this device holds about ${fps.toFixed(0)} fps at the lowest quality. Pick a lower preset, shrink the window, or use a machine with a stronger GPU for a smoother frame rate.` });
+          useTerraStore.getState().log('warn', `Boot gate opened at ~${fps.toFixed(0)} fps after ${Math.round((now - fpsWaitSince) / 1000)} s: device is below the preset's frame-rate target even at the lowest quality`);
+          continue; // re-evaluate immediately with the relaxed gate
+        }
+      } else fpsWaitSince = null;
       if (decision.phase === 'ready') {
         for (const d of decision.degraded) useTerraStore.getState().log('warn', `Ready with degraded layer — ${d}`);
         // Publish the streaming snapshot the decision was based on before the pill flips, so observers (HUD, tests)
@@ -437,6 +458,26 @@ export class TerraEngine {
       useTerraStore.getState().log('error', `Imagery ${id} failed: ${String(e)}`, e);
       if (id !== 'procedural') await this.setImagery('procedural');
     }
+  }
+
+  /**
+   * Drops the preset one tier (ultra → high → medium → low → performance) when the adaptive ladder is exhausted and
+   * the frame rate is still below the floor. A lower preset turns off the fill-heavy effects the ladder never
+   * touches (MSAA, shadows, ambient occlusion, HDR, clouds), so a weak GPU keeps getting lighter until it is
+   * playable. Persisted so the next load starts where this device settled; the user can raise it any time.
+   */
+  private demotePreset(): boolean {
+    const order: QualityPresetId[] = ['performance', 'low', 'medium', 'high', 'ultra'];
+    const i = order.indexOf(this.quality);
+    if (i <= 0) return false; // already at the lightest preset
+    const next = order[i - 1];
+    this.quality = next;
+    this.applySettings(QUALITY_PRESETS[next]);
+    this.lastApplied = QUALITY_PRESETS[next];
+    useTerraStore.setState({ quality: next });
+    try { localStorage.setItem('terra-infinite.quality', next); } catch { /* ignore */ }
+    useTerraStore.getState().log('warn', `Auto quality → ${next}: the previous preset stayed below its frame-rate floor at the lowest settings`);
+    return true;
   }
 
   setQuality(id: QualityPresetId): void {

@@ -126,6 +126,27 @@ describe('AdaptiveController', () => {
     expect(d.reason).toMatch(/ladder exhausted/);
     expect(c.maxStep).toBe(2);
   });
+  it('drops rungs fast when the frame rate is catastrophically low (panic)', () => {
+    const c = ctl(); // minFps 30 → panic below 7.5 fps, 600 ms delay
+    expect(c.update(2, 0).changed).toBe(false);
+    expect(c.update(2, 599).changed).toBe(false);
+    expect(c.update(2, 600).step).toBe(1);   // 600 ms, not 2 s
+    expect(c.update(2, 1200).step).toBe(2);
+    // A merely-low (not panic) frame rate still waits the full 2 s.
+    const d = ctl();
+    d.update(10, 0);
+    expect(d.update(10, 600).changed).toBe(false);
+    expect(d.update(10, 2000).step).toBe(1);
+  });
+
+  it('exposes whether the ladder is exhausted', () => {
+    const c = new AdaptiveController({ minFps: 30, targetFps: 60, maxStep: 1 });
+    expect(c.exhausted).toBe(false);
+    c.update(2, 0); c.update(2, 600);
+    expect(c.step).toBe(1);
+    expect(c.exhausted).toBe(true);
+  });
+
   it('a minFps of 0 never degrades and reset clears state', () => {
     const c = new AdaptiveController({ minFps: 0, targetFps: 60 });
     c.update(0.5, 0);
