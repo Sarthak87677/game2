@@ -237,14 +237,18 @@ function grammarRows(spec) {
       else if (isStr(g[k])) strings[k] = g[k];
     }
     const roomTypes = pick(g, ['roomTypes', 'rooms'], []);
+    // The interiors vocabulary stores floorHeightM as a [min, max] range and room specs keyed by `kind`.
+    const floorH = pick(g, ['floorHeightM'], 3.2);
+    const floorHeightM = Array.isArray(floorH) && floorH.length === 2 && floorH.every(isNum) ? (floorH[0] + floorH[1]) / 2 : floorH;
+    const roomWidths = Array.isArray(roomTypes) ? roomTypes.map((r) => (isObj(r) ? pick(r, ['widthM', 'width'], null) : null)).filter(isNum) : [];
     return {
       Name: category,
       Category: category,
-      FloorHeightM: round(pick(g, ['floorHeightM'], 3.2), 2),
+      FloorHeightM: round(isNum(floorHeightM) ? floorHeightM : 3.2, 2),
       CorridorWidthM: round(pick(g, ['corridorWidthM'], 2.4), 2),
-      RoomMinM: round(pick(g, ['roomMinM'], 3), 2),
-      RoomMaxM: round(pick(g, ['roomMaxM'], 12), 2),
-      RoomTypes: Array.isArray(roomTypes) ? roomTypes.map((r) => (isStr(r) ? r : String(pick(r, ['id', 'name', 'type'], 'room')))) : [],
+      RoomMinM: round(pick(g, ['roomMinM'], roomWidths.length ? Math.min(...roomWidths) : 3), 2),
+      RoomMaxM: round(pick(g, ['roomMaxM'], roomWidths.length ? Math.max(...roomWidths) : 12), 2),
+      RoomTypes: Array.isArray(roomTypes) ? roomTypes.map((r) => (isStr(r) ? r : String(pick(r, ['id', 'kind', 'name', 'type'], 'room')))) : [],
       NumericParams: numeric,
       StringParams: strings,
       DataNote: pick(g, ['dataNote'], 'Procedural interior grammar; generated layouts are fictional.'),

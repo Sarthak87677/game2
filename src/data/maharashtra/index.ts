@@ -13,3 +13,4 @@ export { PORTS, PORTS_DATA_NOTE, portById } from './ports';
 export { WATER_ROUTES, WATER_ROUTES_DATA_NOTE, waterRouteById } from './waterRoutes';
 export { SGIS_CAMPUS, campusBuildingById, campusBuildingDoor, campusBuildingFootprint } from './campus';
 export type { CampusSpec, CampusBuildingSpec } from './campus';
+export { INTERIOR_VOCABULARY as INTERIOR_GRAMMAR, categoryForOsmBuilding } from './interiorGrammar';

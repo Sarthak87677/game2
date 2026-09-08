@@ -1,1 +1,265 @@
-[]
+[
+  {
+    "Name": "residential",
+    "Category": "residential",
+    "FloorHeightM": 3.1,
+    "CorridorWidthM": 2.2,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "flat",
+      "living",
+      "store"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 4
+    },
+    "StringParams": {
+      "enterLabel": "Enter apartments"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"lobby\":{\"kind\":\"lobby\",\"labels\":[\"Entrance lobby\"],\"minW\":4,\"maxW\":6,\"furniture\":[{\"label\":\"sofa\",\"w\":2,\"d\":0.9,\"h\":0.8,\"colour\":\"#6d7f92\",\"place\":\"centre\"}],\"weight\":1},\"palette\":{\"floor\":\"#c9b79a\",\"wall\":\"#efe9dc\",\"ceiling\":\"#f4f1ea\",\"accent\":\"#9a6a48\",\"door\":\"#6b4a32\"}}"
+  },
+  {
+    "Name": "office",
+    "Category": "office",
+    "FloorHeightM": 3.5,
+    "CorridorWidthM": 2.4,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "office",
+      "meeting",
+      "kitchen",
+      "washroom",
+      "store"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 3
+    },
+    "StringParams": {
+      "enterLabel": "Enter office"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"lobby\":{\"kind\":\"reception\",\"labels\":[\"Reception\"],\"minW\":6,\"maxW\":9,\"furniture\":[{\"label\":\"counter\",\"w\":3,\"d\":0.7,\"h\":1.05,\"colour\":\"#5e5148\",\"place\":\"back\"},{\"label\":\"sofa\",\"w\":2,\"d\":0.9,\"h\":0.8,\"colour\":\"#6d7f92\",\"place\":\"centre\"}],\"weight\":1},\"palette\":{\"floor\":\"#8f949b\",\"wall\":\"#eceef0\",\"ceiling\":\"#f7f7f5\",\"accent\":\"#3e6ea7\",\"door\":\"#4a4f56\"}}"
+  },
+  {
+    "Name": "school",
+    "Category": "school",
+    "FloorHeightM": 3.6,
+    "CorridorWidthM": 2.8,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "classroom",
+      "science-lab",
+      "computer-lab",
+      "art-room",
+      "staff-room",
+      "library",
+      "washroom"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 4
+    },
+    "StringParams": {
+      "enterLabel": "Enter school"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"lobby\":{\"kind\":\"lobby\",\"labels\":[\"Entrance hall\"],\"minW\":6,\"maxW\":9,\"furniture\":[{\"label\":\"bench\",\"w\":1.8,\"d\":0.45,\"h\":0.45,\"colour\":\"#8a6d4d\",\"place\":\"perimeter\",\"pitchX\":3.5}],\"weight\":1},\"palette\":{\"floor\":\"#d9cbb0\",\"wall\":\"#f3eedf\",\"ceiling\":\"#f8f6ef\",\"accent\":\"#3f7f5f\",\"door\":\"#5e7d5a\"}}"
+  },
+  {
+    "Name": "hotel",
+    "Category": "hotel",
+    "FloorHeightM": 3.2,
+    "CorridorWidthM": 2,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "bedroom",
+      "lounge",
+      "store"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 3
+    },
+    "StringParams": {
+      "enterLabel": "Enter hotel"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"lobby\":{\"kind\":\"reception\",\"labels\":[\"Hotel lobby\"],\"minW\":8,\"maxW\":12,\"furniture\":[{\"label\":\"counter\",\"w\":3,\"d\":0.7,\"h\":1.05,\"colour\":\"#5e5148\",\"place\":\"back\"},{\"label\":\"sofa\",\"w\":2,\"d\":0.9,\"h\":0.8,\"colour\":\"#6d7f92\",\"place\":\"centre\"}],\"weight\":1},\"palette\":{\"floor\":\"#7d3b3b\",\"wall\":\"#f1e7d8\",\"ceiling\":\"#f7f2ea\",\"accent\":\"#c9a45a\",\"door\":\"#4e3024\"}}"
+  },
+  {
+    "Name": "hospital",
+    "Category": "hospital",
+    "FloorHeightM": 3.6,
+    "CorridorWidthM": 3,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "ward",
+      "clinic",
+      "pharmacy",
+      "waiting",
+      "washroom",
+      "store"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 2
+    },
+    "StringParams": {
+      "enterLabel": "Enter hospital"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"lobby\":{\"kind\":\"reception\",\"labels\":[\"Out-patient reception\"],\"minW\":8,\"maxW\":12,\"furniture\":[{\"label\":\"counter\",\"w\":3,\"d\":0.7,\"h\":1.05,\"colour\":\"#5e5148\",\"place\":\"back\"},{\"label\":\"seats\",\"w\":2.4,\"d\":0.5,\"h\":0.5,\"colour\":\"#3d6b9a\",\"place\":\"grid\",\"pitchX\":3,\"pitchY\":1.4}],\"weight\":1},\"palette\":{\"floor\":\"#c8dfe6\",\"wall\":\"#f2f7f9\",\"ceiling\":\"#fbfdfe\",\"accent\":\"#2f8f8a\",\"door\":\"#5d7f8a\"}}"
+  },
+  {
+    "Name": "mall",
+    "Category": "mall",
+    "FloorHeightM": 4.5,
+    "CorridorWidthM": 5,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "shop",
+      "food-court",
+      "washroom"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 2
+    },
+    "StringParams": {
+      "enterLabel": "Enter mall"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"lobby\":{\"kind\":\"atrium\",\"labels\":[\"Atrium\"],\"minW\":10,\"maxW\":16,\"furniture\":[{\"label\":\"bench\",\"w\":1.8,\"d\":0.45,\"h\":0.45,\"colour\":\"#8a6d4d\",\"place\":\"perimeter\",\"pitchX\":3.5}],\"weight\":1},\"palette\":{\"floor\":\"#e2dcd2\",\"wall\":\"#f5f2ee\",\"ceiling\":\"#fbfaf8\",\"accent\":\"#d2793a\",\"door\":\"#7a7f88\"}}"
+  },
+  {
+    "Name": "restaurant-cafe",
+    "Category": "restaurant-cafe",
+    "FloorHeightM": 3.3,
+    "CorridorWidthM": 2,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "dining",
+      "kitchen-commercial",
+      "washroom",
+      "store"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 99
+    },
+    "StringParams": {
+      "enterLabel": "Enter café"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"groundHall\":{\"label\":\"Dining room\",\"kind\":\"dining\"},\"lobby\":{\"kind\":\"dining\",\"labels\":[\"Dining room\"],\"minW\":8,\"maxW\":14,\"furniture\":[{\"label\":\"table\",\"w\":1.2,\"d\":1.2,\"h\":0.75,\"colour\":\"#b48a5a\",\"place\":\"grid\",\"pitchX\":2.6,\"pitchY\":2.6},{\"label\":\"counter\",\"w\":3,\"d\":0.7,\"h\":1.05,\"colour\":\"#5e5148\",\"place\":\"back\"}],\"weight\":1},\"palette\":{\"floor\":\"#8a5a3c\",\"wall\":\"#f3e6cf\",\"ceiling\":\"#efe4d0\",\"accent\":\"#c65f3a\",\"door\":\"#5a3a28\"}}"
+  },
+  {
+    "Name": "museum",
+    "Category": "museum",
+    "FloorHeightM": 4.5,
+    "CorridorWidthM": 3.5,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "gallery",
+      "store",
+      "washroom"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 2
+    },
+    "StringParams": {
+      "enterLabel": "Enter museum"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"lobby\":{\"kind\":\"lobby\",\"labels\":[\"Museum foyer\"],\"minW\":8,\"maxW\":12,\"furniture\":[{\"label\":\"counter\",\"w\":3,\"d\":0.7,\"h\":1.05,\"colour\":\"#5e5148\",\"place\":\"back\"},{\"label\":\"bench\",\"w\":1.8,\"d\":0.45,\"h\":0.45,\"colour\":\"#8a6d4d\",\"place\":\"perimeter\",\"pitchX\":3.5}],\"weight\":1},\"palette\":{\"floor\":\"#b9b1a3\",\"wall\":\"#f4f1ea\",\"ceiling\":\"#f9f7f2\",\"accent\":\"#7a4a3a\",\"door\":\"#4a4038\"}}"
+  },
+  {
+    "Name": "railway-station",
+    "Category": "railway-station",
+    "FloorHeightM": 5.25,
+    "CorridorWidthM": 6,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "waiting",
+      "platform-access",
+      "shop",
+      "washroom"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 2
+    },
+    "StringParams": {
+      "enterLabel": "Enter station building"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"groundHall\":{\"label\":\"Concourse\",\"kind\":\"ticket-hall\"},\"lobby\":{\"kind\":\"ticket-hall\",\"labels\":[\"Ticket hall\"],\"minW\":12,\"maxW\":20,\"furniture\":[{\"label\":\"counter\",\"w\":3,\"d\":0.7,\"h\":1.05,\"colour\":\"#5e5148\",\"place\":\"back\"},{\"label\":\"seats\",\"w\":2.4,\"d\":0.5,\"h\":0.5,\"colour\":\"#3d6b9a\",\"place\":\"grid\",\"pitchX\":3,\"pitchY\":1.4}],\"weight\":1},\"palette\":{\"floor\":\"#a8a49c\",\"wall\":\"#e9e4d8\",\"ceiling\":\"#d9d4c8\",\"accent\":\"#b7452b\",\"door\":\"#3e434b\"}}"
+  },
+  {
+    "Name": "airport-public",
+    "Category": "airport-public",
+    "FloorHeightM": 6,
+    "CorridorWidthM": 8,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "gate-lounge",
+      "shop",
+      "washroom"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 2
+    },
+    "StringParams": {
+      "enterLabel": "Enter terminal (public area)"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"groundHall\":{\"label\":\"Check-in hall (public area)\",\"kind\":\"check-in\"},\"lobby\":{\"kind\":\"check-in\",\"labels\":[\"Check-in hall\"],\"minW\":16,\"maxW\":30,\"furniture\":[{\"label\":\"counter\",\"w\":3,\"d\":0.7,\"h\":1.05,\"colour\":\"#5e5148\",\"place\":\"back\"},{\"label\":\"seats\",\"w\":2.4,\"d\":0.5,\"h\":0.5,\"colour\":\"#3d6b9a\",\"place\":\"grid\",\"pitchX\":3,\"pitchY\":1.4}],\"weight\":1},\"palette\":{\"floor\":\"#d4d6d8\",\"wall\":\"#f5f6f7\",\"ceiling\":\"#eef0f2\",\"accent\":\"#2c7bb6\",\"door\":\"#5b6068\"}}"
+  },
+  {
+    "Name": "showroom",
+    "Category": "showroom",
+    "FloorHeightM": 4.75,
+    "CorridorWidthM": 3,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "office",
+      "service-bay",
+      "lounge"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 99
+    },
+    "StringParams": {
+      "enterLabel": "Enter showroom"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"groundHall\":{\"label\":\"Showroom floor\",\"kind\":\"showroom-floor\"},\"lobby\":{\"kind\":\"showroom-floor\",\"labels\":[\"Showroom floor\"],\"minW\":12,\"maxW\":24,\"furniture\":[{\"label\":\"vehicle plinth\",\"w\":4.6,\"d\":2.2,\"h\":0.2,\"colour\":\"#d8d8dc\",\"place\":\"grid\",\"pitchX\":6.5,\"pitchY\":4.2},{\"label\":\"counter\",\"w\":3,\"d\":0.7,\"h\":1.05,\"colour\":\"#5e5148\",\"place\":\"back\"}],\"weight\":1},\"palette\":{\"floor\":\"#e9ebee\",\"wall\":\"#fafbfc\",\"ceiling\":\"#f1f3f5\",\"accent\":\"#c8102e\",\"door\":\"#3a3f47\"}}"
+  },
+  {
+    "Name": "cruise-public",
+    "Category": "cruise-public",
+    "FloorHeightM": 2.8,
+    "CorridorWidthM": 1.8,
+    "RoomMinM": 3,
+    "RoomMaxM": 12,
+    "RoomTypes": [
+      "cabin",
+      "lounge",
+      "dining"
+    ],
+    "NumericParams": {
+      "elevatorFromFloors": 2
+    },
+    "StringParams": {
+      "enterLabel": "Enter ship (public decks)"
+    },
+    "DataNote": "Procedural interior grammar; generated layouts are fictional.",
+    "ExtraJson": "{\"lobby\":{\"kind\":\"atrium\",\"labels\":[\"Atrium deck\"],\"minW\":8,\"maxW\":12,\"furniture\":[{\"label\":\"sofa\",\"w\":2,\"d\":0.9,\"h\":0.8,\"colour\":\"#6d7f92\",\"place\":\"centre\"},{\"label\":\"counter\",\"w\":3,\"d\":0.7,\"h\":1.05,\"colour\":\"#5e5148\",\"place\":\"back\"}],\"weight\":1},\"palette\":{\"floor\":\"#3f4d63\",\"wall\":\"#eef1f4\",\"ceiling\":\"#f6f8fa\",\"accent\":\"#c9a45a\",\"door\":\"#3b4757\"}}"
+  }
+]

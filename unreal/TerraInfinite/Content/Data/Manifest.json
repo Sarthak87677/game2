@@ -100,9 +100,11 @@
       "file": "InteriorGrammar.json",
       "rowStruct": "FTerraInteriorGrammarRow",
       "sourceType": "interior grammar (export name /grammar/i)",
-      "sourceExports": [],
-      "rows": 0,
-      "status": "missing-in-source"
+      "sourceExports": [
+        "INTERIOR_GRAMMAR"
+      ],
+      "rows": 12,
+      "status": "exported"
     }
   ]
 }
