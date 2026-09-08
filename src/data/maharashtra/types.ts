@@ -46,6 +46,12 @@ export interface RailCorridor {
   path: GeoPoint[];
   /** Service style used for train models and speed limits. */
   service: 'suburban' | 'metro' | 'intercity' | 'heritage';
+  /** Optional slower sections (ghats, curves) between two station ids, km/h. (journeys track, additive) */
+  slowSections?: { between: [string, string]; maxKmh: number }[];
+  /** Height of the track above the ground in metres (elevated metro viaducts), default 0. (journeys track, additive) */
+  elevatedM?: number;
+  /** Provenance note shown in the UI. (journeys track, additive) */
+  dataNote?: string;
 }
 
 export interface Airport extends GeoPoint {
@@ -58,12 +64,18 @@ export interface Airport extends GeoPoint {
   runwayLengthM: number;
   /** Terminal public-area anchor point. */
   terminal: GeoPoint;
+  /** Provenance note shown in the UI. (journeys track, additive) */
+  dataNote?: string;
+  /** Outside Maharashtra (Delhi/Agra marker for the Taj hop). (journeys track, additive) */
+  external?: boolean;
 }
 
 export interface Port extends GeoPoint {
   id: string;
   name: string;
   kind: 'jetty' | 'harbour' | 'marina' | 'cruise-terminal';
+  /** Provenance note shown in the UI. (journeys track, additive) */
+  dataNote?: string;
 }
 
 export interface WaterRoute {
@@ -73,4 +85,6 @@ export interface WaterRoute {
   to: string;
   path: GeoPoint[];
   vessel: 'ferry' | 'speedboat' | 'cruise';
+  /** Provenance note shown in the UI. (journeys track, additive) */
+  dataNote?: string;
 }

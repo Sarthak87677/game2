@@ -6,3 +6,8 @@ export { MAHARASHTRA_CITIES, URBAN_REGION_IDS, cityById } from './cities';
 export { MAHARASHTRA_DESTINATIONS, ALL_MAHARASHTRA_PLACES, destinationById } from './destinations';
 export { MAHARASHTRA_BBOX, insideMaharashtra, defineDestination, defineDestinations } from './defineDestination';
 export { MaharashtraIndex, MAHARASHTRA_INDEX } from './search';
+export { STATIONS, STATIONS_DATA_NOTE, stationById } from './stations';
+export { CORRIDORS, CORRIDORS_DATA_NOTE, corridorById, corridorsAtStation } from './corridors';
+export { AIRPORTS, AIRPORTS_DATA_NOTE, airportById } from './airports';
+export { PORTS, PORTS_DATA_NOTE, portById } from './ports';
+export { WATER_ROUTES, WATER_ROUTES_DATA_NOTE, waterRouteById } from './waterRoutes';

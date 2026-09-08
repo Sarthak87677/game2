@@ -30,41 +30,51 @@
       "file": "Stations.json",
       "rowStruct": "FTerraStationRow",
       "sourceType": "Station[]",
-      "sourceExports": [],
-      "rows": 0,
-      "status": "missing-in-source"
+      "sourceExports": [
+        "STATIONS"
+      ],
+      "rows": 55,
+      "status": "exported"
     },
     {
       "file": "RailCorridors.json",
       "rowStruct": "FTerraRailCorridorRow",
       "sourceType": "RailCorridor[]",
-      "sourceExports": [],
-      "rows": 0,
-      "status": "missing-in-source"
+      "sourceExports": [
+        "CORRIDORS"
+      ],
+      "rows": 11,
+      "status": "exported"
     },
     {
       "file": "Airports.json",
       "rowStruct": "FTerraAirportRow",
       "sourceType": "Airport[]",
-      "sourceExports": [],
-      "rows": 0,
-      "status": "missing-in-source"
+      "sourceExports": [
+        "AIRPORTS"
+      ],
+      "rows": 8,
+      "status": "exported"
     },
     {
       "file": "Ports.json",
       "rowStruct": "FTerraPortRow",
       "sourceType": "Port[]",
-      "sourceExports": [],
-      "rows": 0,
-      "status": "missing-in-source"
+      "sourceExports": [
+        "PORTS"
+      ],
+      "rows": 7,
+      "status": "exported"
     },
     {
       "file": "WaterRoutes.json",
       "rowStruct": "FTerraWaterRouteRow",
       "sourceType": "WaterRoute[]",
-      "sourceExports": [],
-      "rows": 0,
-      "status": "missing-in-source"
+      "sourceExports": [
+        "WATER_ROUTES"
+      ],
+      "rows": 4,
+      "status": "exported"
     },
     {
       "file": "Campuses.json",

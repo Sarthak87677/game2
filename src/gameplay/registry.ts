@@ -7,6 +7,9 @@ import { ActivitiesSystem } from '@/gameplay/activities/ActivitiesSystem';
 import { VehicleSystem } from './vehicles/VehicleSystem';
 import { ShowroomSystem } from './showroom/ShowroomSystem';
 import { TajMahalSystem } from '@/world/hero/TajMahal';
+import { RailSystem } from './rail/RailSystem';
+import { AirSystem } from './air/AirSystem';
+import { MarineSystem } from './marine/MarineSystem';
 
 /**
  * Every gameplay subsystem is constructed here. Add one line per system; systems must not import each other — they
@@ -21,5 +24,8 @@ export function createGameplaySystems(engine: TerraEngine): GameplaySystem[] {
   systems.push(new VehicleSystem(engine));
   systems.push(new ShowroomSystem(engine));
   systems.push(new TajMahalSystem(engine)); // maharashtra-data: Taj Mahal hero destination
+  systems.push(new RailSystem(engine));
+  systems.push(new AirSystem(engine));
+  systems.push(new MarineSystem(engine));
   return systems;
 }
