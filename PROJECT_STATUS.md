@@ -2,17 +2,77 @@
 
 Resumable task ledger. Update after every completed task. Dates are UTC.
 
-## Current state (2026-09-05)
+## Current state (2026-09-08) — Maharashtra-first vertical slice integrated
 
-| Milestone | Status | Notes |
+**Architecture (decided 2026-09-05, `docs/PLAN_MAHARASHTRA.md`)**: the browser client in this repository is the
+running, verified vertical slice; the Unreal Engine 5 client under `unreal/` is the intended principal AAA client
+and is *scaffold only* (never compiled — the cloud sandbox has no Unreal install and no GPU, `docs/UNREAL.md`).
+
+All seven parallel tracks are merged into `main` (perf, data, interiors, vehicles, journeys, living, unreal) plus the
+integration fixes: 1:10m coastline detail regions (southern Mumbai was "ocean" at 1:50m), terrain-refined land
+classification, the walker never below the sea surface, terrain recovery after the ellipsoid fallback, and the
+campus prompt priority. `npm run typecheck && npm run lint && npm test` → 49 files / 403 unit tests green.
+
+### Quality gates (from the brief) — what is verified, and how
+
+| Gate | Status | Evidence |
 |---|---|---|
-| 1. Working Earth | **done** | Globe, Terrarium terrain (worker-decoded, cached), offline inferred imagery + optional OSM/Esri/GIBS/MapTiler/ion layers, atmosphere/sun/moon/stars, search (offline gazetteer + coordinates, optional Nominatim/Photon), camera modes, loading/error states, diagnostics. |
-| 2. Geographic Structure | **done** | Overpass adapter + OSM buildings (custom night-window shader), towers, roads, rail, water, land use, POI/place labels; bookmarks (246 highlights, 19 showcase areas); DATA_SOURCES/ATTRIBUTIONS; provenance UI; synthetic fixture responder for offline testing. |
-| 3. Ground-Level World | **done** | Walk/drive with gravity, terrain, OSM-building and procedural-building collision; tile-anchored local frames (floating origin) for every ground-level mesh; procedural vegetation/rocks/crops/fields/villages/urban blocks generated in a worker from the climate atlas, height fields and OSM (`src/world/procedural`, `src/world/render`). Verified in headless Chromium: 2 572 trees across 15 tiles in the Black Forest, rocks only on the Antarctic ice sheet. |
-| 4. Hyperrealistic Nature | **done (first pass)** | 100-species library with hemisphere-aware fruit/flower windows and leaf phenology, leaf cards/needles/palm fronds/fruit at close range, wind-sway vertex shader, weather particles, ground material (snow line, wetness, season tint, cloud shadows, water), ocean surface, orbital + cumulus clouds, underwater fog, procedural ambient audio. Not done: snow accumulation on vegetation geometry, puddles, subsurface leaf translucency. |
-| 5. Cities and Landmarks | **done (first pass)** | OSM building meshes with day glass / night window emission, towers, roads, rail, water, land use, POI labels, population night lights, simulated traffic with headlights/tail-lights, street lamps, procedural villages and urban blocks where OSM is absent, 36 landmark stand-ins at measured positions (labelled procedural), 19 showcase areas with tours. Not done: street furniture (benches, signs), road markings, real 3D landmark models (none legally available offline). |
-| 6. Optimisation | **done (first pass)** | Budgets in place (tile caches, OSM/near-field radii and LRU unloading, in-flight limits, impostor LOD, vertex caps, request scheduling, adaptive presets, `?terraQuality` override). Profiling found and fixed a real streaming bug (throttled terrain requests were treated as failures). `npm run perf` records real numbers (see PERFORMANCE.md); the sandbox only has software WebGL, so they are SwiftShader numbers — GPU measurement is the next task. |
-| 7. Verification & Packaging | **done** | 217 unit tests, 8 Playwright end-to-end tests all passing on the current build (smoke ×6, synthetic city, nature, landmarks), production build, CI workflow, all documents. Visually inspected frames in `docs/screenshots/`. No console errors in the verified runs apart from expected blocked-host network failures in the sandbox. |
+| Player walks at street level | **verified** | `tests/e2e/play.spec.ts`, `smoke.spec.ts` (walk keeps eye height on terrain); `docs/screenshots/living-*.png` |
+| Player enters rooms | **verified (procedural interiors)** | `tests/e2e/campus.spec.ts` (door → academic block → stairs → elevator → exit), `interiors.spec.ts` (OSM fixture building) |
+| Player drives a vehicle | **verified** | `tests/e2e/vehicles.spec.ts` (enter the parked bus at the Gateway, drive, cameras and lamps, exit; Worli showroom inspect and test drive) — run 4; legacy drive mode in `smoke.spec.ts` |
+| Train journey, boarding to arrival | **verified (simulated schedule, in-game ticket)** | `tests/e2e/journeys.spec.ts` rail: CSMT → ticket → board → aboard → leave at Pune |
+| Air journey, terminal to destination | **verified (abstracted security, arcade sequence)** | `journeys.spec.ts` air: BOM terminal → check-in → gate → board → PNQ |
+| Coastal vessel journey | **verified** | `journeys.spec.ts` marine: Gateway ↔ Mandwa ferry, speedboat course, cruise decks |
+| Maharashtra locations searchable | **verified** | `tests/e2e/maharashtra.spec.ts`, `tests/unit/maharashtra/search.test.ts` (offline index) |
+| Taj Mahal loads as recognisable geometry | **verified (procedural reconstruction, labelled approximate)** | `maharashtra.spec.ts`; `docs/screenshots/maharashtra-taj-mahal-*.png` |
+| School-inspired campus loads as a playable environment | **verified (fictionalised)** | `campus.spec.ts`; `living.spec.ts` (basketball at the court) |
+| Tiles, terrain and level streaming | **verified** | `smoke.spec.ts` (descends from space, streams terrain), readiness gate (`perf.spec.ts`) |
+| No major console errors | **verified in the e2e runs** | every spec fails on page errors / diagnostics errors; the three `undefined.scene` errors are root-caused and fixed (`docs/RECOVERY.md`) |
+| ≥ 30 fps on the test computer | **NOT verifiable here** | the sandbox renders through SwiftShader at ~1 fps; the readiness gate, adaptive ladder and `npm run perf` are in place and `PERFORMANCE.md` records the software numbers. Run `npm run perf` on a GPU machine. |
+| Memory does not grow during long travel | **verified in software** | 5-minute walking soak: heap −3.6 %, p99 frame time < 2× (`PERFORMANCE.md` §3) |
+| Tests and packaged build succeed | **verified** | unit 403/403 (49 files); production build; Playwright runs 1–4 below |
+| Ground-level screenshots and a captured walkthrough | **partly** | screenshots in `docs/screenshots/` (living, Taj Mahal, perf diagnostics, campus); `scripts/dev/capture-walkthrough.mjs` records a WebM walk at the Gateway |
+
+### Full end-to-end run on the integrated production build
+
+Run 1 — production build of `main` at 19e4744 (all seven tracks merged, before the last fix-ups), `vite preview`,
+headless Chromium + SwiftShader, synthetic OSM fixture, 2026-09-08 04:20–05:07 UTC, **19 passed / 3 failed of 22**
+(46.7 min). The three failures and what fixed them:
+
+| Failing test | Cause | Fix (already on `main`) |
+|---|---|---|
+| `interiors.spec` — OSM fixture building offers an interior | only the player's own OSM tile was scanned for enterable buildings | interiors track `ad2d609` scans every loaded tile near the player |
+| `journeys.spec` — rail CSMT → Pune | the departures board listed only the two local services | journeys track `7bc0f56` offers one ticket per service, so intercity departures are always on the board |
+| `perf.spec` — ready pill / tiles-loaded-once | store race: the pill flipped to *ready* on the same tick the globe finished its first (ellipsoid-fallback) tiles, before the 250 ms streaming readout refreshed | `a8404e6` publishes the streaming snapshot before the pill turns ready |
+
+Run 2 — re-run of those three specs plus the new `vehicles.spec` on the final build:
+
+Run 2 — `main` at d602e2c (final track merges), production build, 2026-09-08 05:12–05:30 UTC: **8 passed / 1 failed
+of 9**. The three run-1 failures now pass. The one new failure, `vehicles.spec` *enter the nearest parked vehicle*,
+was a cross-track clash: the ferry's "Board ferry to Mandwa" prompt (220 m radius, priority 2) outranked "Enter bus"
+even beside the bus. Fixed in `480e93d` (`src/gameplay/selection.ts`: contact interactions outrank area prompts;
+unit-tested), then:
+
+Run 3 — dev server (`TERRA_E2E_DEV=1`, fixtures), `main` at 480e93d, 2026-09-08 05:33–05:52 UTC, prompt-sensitive
+specs only (vehicles ×2, living, journeys ×3, campus, interiors): **7 passed / 1 failed of 8**. Entering and
+driving the bus now works; the same ferry prompt still hid "Exit vehicle" *while driving*, because interactions
+defaulted to walk + drive. `fead21c` makes interactions walk-only unless they opt into `drive` /
+`passenger` (the exit, time-trial and journey prompts already do), then:
+
+Run 4 — dev server, `main` at fead21c, 2026-09-08 05:55–05:59 UTC, `vehicles.spec` ×2: **2 passed / 0 failed**.
+
+Net result on the final code: every one of the 22 specs has passed on the build it was last changed in (run 1: 19,
+run 2: interiors / rail / perf-ready-pill, run 3: living, journeys ×3, campus, interiors, showroom, run 4: vehicles
+×2), plus 49 unit-test files / 403 tests. A single uninterrupted run of all 22 on the final commit is *Next task 0*.
+
+The other 19 specs (campus, city, journeys air + marine, landmarks, living, maharashtra ×3, nature, perf ×2, play,
+smoke ×6) passed in run 1. Code merged after run 1 (crowd thinning, the traffic-walker/crowd hand-off, the rail
+window-seat look, the readiness snapshot) is covered by run 2 and by the 398 unit tests; a complete re-run of all 22
+specs on the final build is the first item under *Next task* and has not been done yet.
+
+### Per-track sections
+
+Each track keeps its own Completed / Tested / Broken / Next section below and a summary in `docs/tracks/<track>.md`.
 
 ## Track: living-world-activities (branch `claude/track-living`, 2026-09-07)
 
@@ -106,7 +166,17 @@ TERRA_FIXTURES=1 npm run dev   # synthetic OSM responder for offline development
 
 ## Next task
 
-Run `npm run build && npm run perf` on a machine with a GPU and network access to the OSM/Overpass hosts, paste the table into PERFORMANCE.md, and use the Diagnostics panel at the showcase ground spots to check real-OSM rendering (this sandbox could only exercise the synthetic fixture).
+0. Re-run the complete Playwright suite (`npm run build && npm run test:e2e`, 22 specs, ≈ 50 min on SwiftShader) on
+   the final `main` and record the result in *Current state* — run 1 there predates the last fix-ups.
+1. On a machine with a GPU and open network access: `npm run build && npm run perf`, paste the table into
+   `PERFORMANCE.md`, and confirm the Low/Medium/High presets hold ≥ 30 fps at 1920×1080 (the adaptive ladder
+   protects the frame rate; the pill reports which preset it settled on). This is the only way to close the 30/60 fps
+   gate — it cannot be measured in the software-rendered sandbox.
+2. On a workstation with Unreal Engine 5.4+ and Cesium for Unreal 2.x: open `unreal/TerraInfinite`, fix the API
+   drift that a first compile will surface, create `L_Benchmark`, run the benchmark and add screenshots
+   (`docs/UNREAL.md` gates 1–10). Until then the browser client is the playable product.
+3. Real OpenStreetMap coverage was exercised only through the synthetic fixture here (Overpass is blocked in the
+   sandbox); use the Diagnostics panel at the Maharashtra spawn points on a networked machine and report holes.
 
 ## Track: unreal (2026-09-07)
 
@@ -324,3 +394,13 @@ Full summary: `docs/tracks/journeys.md`.
 * Drive the Lonavala course on real OSM roads with terrain online and tune checkpoint positions.
 * Hand pedestrians to the living-world crowd system (shared contract in the plan) and add gatherings.
 * Wall collision for the showroom once the interiors track's `moveFilter` contract is on `main`.
+
+1. On a machine with a GPU and open network access: `npm run build && npm run perf`, paste the table into
+   `PERFORMANCE.md`, and confirm the Low/Medium/High presets hold ≥ 30 fps at 1920×1080 (the adaptive ladder
+   protects the frame rate; the pill reports which preset it settled on). This is the only way to close the 30/60 fps
+   gate — it cannot be measured in the software-rendered sandbox.
+2. On a workstation with Unreal Engine 5.4+ and Cesium for Unreal 2.x: open `unreal/TerraInfinite`, fix the API
+   drift that a first compile will surface, create `L_Benchmark`, run the benchmark and add screenshots
+   (`docs/UNREAL.md` gates 1–10). Until then the browser client is the playable product.
+3. Real OpenStreetMap coverage was exercised only through the synthetic fixture here (Overpass is blocked in the
+   sandbox); use the Diagnostics panel at the Maharashtra spawn points on a networked machine and report holes.
