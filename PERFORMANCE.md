@@ -177,10 +177,49 @@ What this run says: in software rendering the scene costs ~0.75–0.95 s per fra
 globe material, atmosphere and post-processing dominate; draw calls are only 22–74), the 1 % low is 0.3–0.4 fps, and
 five minutes of continuous walking does not grow the heap. It says nothing about a GPU.
 
-### 3.3 Full run with the synthetic OSM fixture (traffic present)
+### 3.3 Full run with the synthetic OSM fixture (traffic present), 2026-09-08 (`docs/performance-2026-09-08T04-36-37-315Z.json`)
 
-See the newest `docs/performance-*.json` whose `url` contains `terraFixtures=1`; its table is appended below when
-recorded.
+Same build, viewport and flags as 3.2 but with `?terraFixtures=1`, so every spot has synthetic OSM buildings, roads
+and the simulated traffic (the vehicle cap 500 × 0.8 = 400 is reached everywhere: "Actors 400").
+
+| Spot | Avg FPS | Current FPS | 1 % low | Frame ms | p99 ms | Heap MB | Globe tiles | Draw calls | Actors | Adaptive step |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Mumbai Marine Drive / CSMT traffic area | 18.9 | 18.9 | 12 | 53 | 83.1 | 83 | 26 | 110 | 400 | 0 |
+| Rural Maharashtra near Satara | 0.5 | 0.5 | 0.1 | 2039.8 | 9993.8 | 88 | 32 | 139 | 400 | 0 |
+| SGIS-inspired campus (procedural) | 0.3 | 0.3 | 0.1 | 2907.6 | 8343.8 | 91 | 32 | 143 | 400 | 0 |
+| Train corridor near Lonavala | 0.3 | 0.3 | 0.1 | 3215.3 | 9619.6 | 80 | 34 | 144 | 400 | 0 |
+| Air-travel view over Mumbai (3 000 m) | 0.5 | 0.5 | 0.2 | 1823.7 | 6348.4 | 117 | 29 | 194 | 400 | 0 |
+| Konkan coast, Ganpatipule | 17.4 | 17.4 | 6 | 57.5 | 168 | 98 | 36 | 141 | 400 | 0 |
+| Taj Mahal, Agra | 0.4 | 0.4 | 0.1 | 2377.4 | 9716.3 | 103 | 2 | 49 | 400 | 0 |
+
+| Soak minute | p99 ms | Avg FPS | Frames |
+|---:|---:|---:|---:|
+| 1 | 9216.4 | 0.53 | 13 |
+| 2 | 9930.5 | 0.44 | 32 |
+| 3 | 9475.3 | 0.48 | 29 |
+
+Heap (s → MB): 20→89, 31→89.1, 43→89.3, 57→89.3, 174→85.6, 285→91.2; minute 1 → last: 89.3 → 91.2 MB (**+2.1 %**),
+p99 9.2 s → 9.5 s: **PASS** (three per-minute rows only — at 0.5 fps the teleports' tile waits consume most of the
+300 s).
+
+Two rows need a caveat: the **Mumbai (18.9 fps) and Ganpatipule (17.4 fps)** values are far above every other spot
+and above the same spots without the fixture (1.1 fps in 3.2). With the fixture on, the software rasteriser rendered
+those two coastal frames an order of magnitude faster while still issuing 110–141 draw commands; the most likely
+explanation is that little of the fill-heavy globe/ocean/near-field content was actually visible from the resolved
+camera position (e.g. the view resolved inside or below synthetic geometry), but **this run did not verify that** and
+the two numbers should not be quoted as representative. Everything else is consistent with 3.2 plus the cost of the
+buildings and 400 vehicles: 0.3–0.5 fps, p99 6–10 s.
+
+### 3.4 Summary of the software runs
+
+| Configuration | Typical ground spot | Soak |
+|---|---|---|
+| low preset, ladder active (rung 9–10), fixtures (3.1) | 0.6–0.8 fps, p99 ≈ 2.6 s | 40 s, heap −1 %, PASS |
+| medium preset, ladder idle, no OSM (3.2) | 1.0–1.3 fps, p99 2.3–3.6 s | 300 s, heap −3.6 %, p99 4.5→6.6 s, PASS |
+| medium preset, ladder idle, fixture buildings + 400 vehicles (3.3) | 0.3–0.5 fps, p99 6–10 s | 300 s, heap +2.1 %, p99 9.2→9.5 s, PASS |
+
+The heap stays between 73 and 132 MB in every run and never trends upward over five minutes of walking; frame time in
+software is dominated by fragment work, which is the part a GPU removes. None of this measures a GPU.
 
 ## 4. What is verified and what is not
 

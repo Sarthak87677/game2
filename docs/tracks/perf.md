@@ -74,5 +74,11 @@ URL flags: `?terraQuality=performance|low|medium|high|ultra`, `?terraMinFps=<n>`
 * Spots: 1.0–1.3 fps average, 1 % low 0.3–0.4 fps, 752–959 ms mean frame, p99 2.3–3.6 s, heap 73–132 MB,
   26–36 globe tiles, 22–74 draw calls, 0 actors (OSM offline in this run — no `?terraFixtures=1` on the preview URL).
 * Soak: heap 89.7 → 86.5 MB (−3.6 %), p99 4.5 → 6.6 s (< 2×) → **PASS**; no page errors.
-* Full tables in PERFORMANCE.md §3.2. A second full run with `?terraFixtures=1` (traffic present) is recorded in §3.3
-  when available.
+* Full tables in PERFORMANCE.md §3.2.
+
+`docs/performance-2026-09-08T04-36-37-315Z.json` — same flags with `?terraFixtures=1` (synthetic buildings, roads,
+400 simulated vehicles at every spot), exit 0:
+
+* Spots: 0.3–0.5 fps, p99 6–10 s, 49–194 draw calls, 400 actors; two coastal spots (Mumbai 18.9 fps, Ganpatipule
+  17.4 fps) are unexplained outliers flagged in PERFORMANCE.md §3.3 and must not be quoted as representative.
+* Soak: heap 89.3 → 91.2 MB (+2.1 %), p99 9.2 → 9.5 s → **PASS**; no page errors. Tables in PERFORMANCE.md §3.3, summary in §3.4.
