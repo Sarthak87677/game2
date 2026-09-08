@@ -53,6 +53,14 @@ export function serviceLabel(corridor: RailCorridor, direction: 1 | -1): { name:
  * Next departures from `stationId` on every corridor in `corridors` within `horizonMin` simulated minutes, sorted by
  * departure. `nowMin` is the simulated clock (minutes since midnight or any monotonic minute counter).
  */
+/** One departure per service (corridor + direction) in time order, then the rest — used for the ticket buttons. */
+export function ticketChoices(deps: Departure[], max = 4): Departure[] {
+  const seen = new Set<string>();
+  const first: Departure[] = [], rest: Departure[] = [];
+  for (const d of deps) { const k = `${d.corridorId}:${d.direction}`; if (seen.has(k)) rest.push(d); else { seen.add(k); first.push(d); } }
+  return [...first, ...rest].slice(0, max);
+}
+
 export function nextDepartures(stationId: string, corridors: RailCorridor[], nowMin: number, horizonMin = 60, maxCount = 8): Departure[] {
   const out: Departure[] = [];
   for (const c of corridors) {

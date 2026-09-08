@@ -45,3 +45,8 @@ landmark summaries, journey checklists, boat checkpoint courses, fictional museu
 basketball court are original Terra Infinite content (MIT). No photographs, real people, brands, logos or third-party
 artwork are used; place coordinates are approximate public reference values, not surveyed data.
 
+
+## Journeys: rail, air and marine (track `journeys`)
+
+* **Stations, corridors, airports, ports and water routes** (`src/data/maharashtra/{stations,corridors,airports,ports,waterRoutes}.ts`) — written by this project from memory of public reference values; positions are approximate (±300 m, up to ±1 km on rural rail alignments) and every table carries a data note. MIT. No timetable, track-geometry or airline dataset was copied; timetables, train/flight numbers, service names, fares and gates are simulated and fictional.
+* **Vehicles** (trains, the "Terra Air" airliner, ferries, speedboat, buoys, the cruise ship "MV Terra Konkan", platforms, runways and terminals) — original primitive-built designs by this project. Not scans, not licensed models, no operator liveries or logos; labelled "fictional / simulated" in the overlays.
