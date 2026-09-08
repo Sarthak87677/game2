@@ -63,7 +63,9 @@ export class GameplayHost {
       let list: Interaction[] = [];
       try { list = s.interactions?.(ctx) ?? []; } catch (e) { this.report(s, e); continue; }
       for (const it of list) {
-        const allowed = it.modes ?? ['walk', 'drive'];
+        // Default: on foot only. Boarding a ferry, entering a terminal or reading a landmark card make no sense from a
+        // moving vehicle; systems opt into 'drive' (exit vehicle, time trial) or 'passenger' explicitly.
+        const allowed = it.modes ?? ['walk'];
         if (!allowed.includes(mode)) continue;
         const d = distanceM(p.lat, p.lon, it.lat, it.lon);
         const score = interactionScore(d, it);

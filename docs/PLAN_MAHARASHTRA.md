@@ -19,7 +19,7 @@ session) works against the contracts below so that branches merge cleanly.
 ## Contracts (already on `main`)
 
 * `src/gameplay/types.ts` — `GameplaySystem { id, label, update?(ctx), interactions?(ctx), stats?(), onSpawn?(), destroy?() }`,
-  `Interaction { id, label, lat, lon, radiusM, priority?, modes?, run }`, `GameplayOverlay`, `SpawnPoint`.
+  `Interaction { id, label, lat, lon, radiusM, priority?, modes? (default walk only), run }` — a contact interaction (≤ 6 m away, radius ≤ 12 m) outranks area prompts, `GameplayOverlay`, `SpawnPoint`.
 * `src/gameplay/GameplayHost.ts` — runs systems each frame, picks the nearest interaction (prompt "E — …"),
   `showOverlay(overlay, onAction)` / `closeOverlay()`, `spawn(spawnPoint)`, `teleport(lat, lon, heading)`, `stats()`.
 * `src/gameplay/registry.ts` — **the only shared registration file**: add exactly one line per system.

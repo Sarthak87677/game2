@@ -12,7 +12,7 @@ export interface Interaction {
   radiusM: number;
   /** Higher wins when several interactions overlap (default 0). */
   priority?: number;
-  /** Modes in which this interaction is offered (default: walk and drive). */
+  /** Modes in which this interaction is offered (default: walk only — opt into 'drive' / 'passenger' explicitly). */
   modes?: ModeId[];
   run: () => void | Promise<void>;
 }
