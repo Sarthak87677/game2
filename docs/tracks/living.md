@@ -19,7 +19,7 @@ weight 1 in `VegetationMaterial`), fruit on mango and coconut species (species p
 
 ## How it was verified
 
-* `npm run typecheck && npm run lint && npm test` → clean, 238 unit tests (21 new under `tests/unit/living/`).
+* `npm run typecheck && npm run lint && npm test` → clean; 398 unit tests after merging `origin/main` (21 new under `tests/unit/living/`).
 * `tests/e2e/living.spec.ts` in headless Chromium (SwiftShader, synthetic OSM fixture):
   `TERRA_FIXTURES=1 nohup npx vite --host 127.0.0.1 --port 5180 &` then
   `TERRA_E2E_DEV=1 TERRA_E2E_PORT=5180 npx playwright test tests/e2e/living.spec.ts` → **1 passed (5.5 min)**.

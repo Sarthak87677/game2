@@ -43,7 +43,7 @@ Resumable task ledger. Update after every completed task. Dates are UTC.
   wind weight 1 in the vegetation shader), fruit on mango and coconut species (species library phenology).
 
 **Tested (how)**
-* `npm run typecheck && npm run lint && npm test` — 238 unit tests pass (21 new: monsoon phases/picks, photo scoring,
+* `npm run typecheck && npm run lint && npm test` — all pass after merging `origin/main` (398 unit tests, 21 new: monsoon phases/picks, photo scoring,
   persistence round-trip, basketball model, crowd density/time-of-day, palettes, walk network, ambience mix, flocks,
   sightings, data integrity).
 * `tests/e2e/living.spec.ts` (headless Chromium, SwiftShader, synthetic OSM fixture, `TERRA_E2E_DEV=1 TERRA_E2E_PORT=5180`):
