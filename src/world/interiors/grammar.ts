@@ -196,11 +196,11 @@ function buildStructure(ring: readonly [number, number][], vocab: CategoryVocabu
     const m = Math.min(dS, dN, dE, dW);
     side = m === dS ? 'south' : m === dN ? 'north' : m === dE ? 'east' : 'west';
   }
-  if (side === 'west') side = mode === 'hall' ? 'west' : 'south'; // the stair core occupies the west end
+  if (side === 'west') side = 'south'; // the stair core occupies the west end in every mode
   if (mode === 'single' && side === 'north') side = 'south';
   const roomX0 = xStart + (elevator ? ELEVATOR_SIZE_M : 0);
   const ex = clamp(entrance ? entrance[0] : (roomX0 + xEnd) / 2, roomX0 + 3, Math.max(roomX0 + 3, xEnd - 3));
-  const entranceX = side === 'east' ? usable.x1 : side === 'west' ? usable.x0 : ex;
+  const entranceX = side === 'east' ? usable.x1 : ex;
   const entranceY = side === 'south' ? usable.y0 : side === 'north' ? usable.y1 : mode === 'hall' ? clamp(entrance ? entrance[1] : cy, usable.y0 + 1.5, usable.y1 - 1.5) : cy;
   return { usable, mode, corridorWidth: cw, cy, coreHalf, cores, xStart, xEnd, elevator, entranceSide: side, entranceX, entranceY };
 }

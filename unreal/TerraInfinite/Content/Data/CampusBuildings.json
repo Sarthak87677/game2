@@ -159,7 +159,7 @@
     "Footprint": [],
     "Description": "",
     "DataNote": "",
-    "ExtraJson": "{\"colour\":\"#cfd6d9\",\"dM\":26,\"east\":150,\"entrance\":\"west\",\"heightM\":9,\"layout\":{\"elevator\":false,\"terrace\":false,\"entrance\":\"west\",\"floors\":[{\"name\":\"Indoor sports hall\",\"hall\":{\"label\":\"Indoor sports hall\",\"kind\":\"sports-hall\"},\"rooms\":[{\"label\":\"Equipment store\",\"kind\":\"store\",\"widthM\":5},{\"label\":\"Changing rooms\",\"kind\":\"washroom\",\"widthM\":6}]}]},\"north\":215,\"rotationDeg\":0,\"wM\":44}"
+    "ExtraJson": "{\"colour\":\"#cfd6d9\",\"dM\":26,\"east\":150,\"entrance\":\"south\",\"heightM\":9,\"layout\":{\"elevator\":false,\"terrace\":false,\"entrance\":\"south\",\"floors\":[{\"name\":\"Indoor sports hall\",\"hall\":{\"label\":\"Indoor sports hall\",\"kind\":\"sports-hall\"},\"rooms\":[{\"label\":\"Equipment store\",\"kind\":\"store\",\"widthM\":5},{\"label\":\"Changing rooms\",\"kind\":\"washroom\",\"widthM\":6}]}]},\"north\":215,\"rotationDeg\":0,\"wM\":44}"
   },
   {
     "Name": "sgis-inspired-campus:hostel",

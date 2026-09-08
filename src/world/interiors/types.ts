@@ -172,7 +172,7 @@ export interface HeroLayoutSpec {
   /** Add a walkable railed terrace on the roof (default true). */
   terrace?: boolean;
   corridorWidthM?: number;
-  /** Which usable-rect side the entrance door is on (default: side nearest the request's entrance hint, else south). */
+  /** Which usable-rect side the entrance door is on (default: side nearest the request's entrance hint, else south). 'west' is the stair core and falls back to south. */
   entrance?: 'north' | 'south' | 'east' | 'west';
 }
 
