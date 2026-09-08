@@ -18,7 +18,7 @@ pedestrians, generated showrooms with inspect cameras and test drives, and a clo
 
 Commands run before every commit: `npm run typecheck && npm run lint && npm test` (all green after merging `main`: 398 unit tests, 36 of them from this track).
 E2E: `TERRA_E2E_DEV=1 TERRA_E2E_PORT=5180 npx playwright test tests/e2e/vehicles.spec.ts` against
-`TERRA_FIXTURES=1 npx vite --port 5180` — both tests pass (about 11 minutes on SwiftShader).
+`TERRA_FIXTURES=1 npx vite --port 5180` — both tests pass on the branch merged with `main` (all tracks registered), 4 minutes on SwiftShader.
 
 Prompt priorities: "Enter <vehicle>" and "Exit vehicle" use priority 3 so they outrank wide-radius prompts from other
 systems (ferry boarding at the Gateway is priority 2); the time-trial start gate is 4, abort 2.
