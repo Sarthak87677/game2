@@ -9,6 +9,7 @@ import { VehicleBody } from '@/gameplay/vehicles/VehicleBody';
 import { requestVehicle } from '@/gameplay/vehicles/requests';
 import { offsetFromVehicle } from '@/gameplay/vehicles/logic';
 import { buildShowroomLayout, PLINTH_HEIGHT_M, type ShowroomLayout } from './showroomLayout';
+import { GroundResolver } from '@/gameplay/vehicles/ground';
 
 const DISPLAY: VehicleKind[] = ['hatchback', 'sedan', 'suv', 'sports', 'taxi', 'rickshaw'];
 const BUILD_M = 1200;
@@ -45,10 +46,12 @@ export class ShowroomSystem implements GameplaySystem {
   private osmShowrooms: Showroom[] = [];
   private lastSync = 0;
   private lastOsm = 0;
+  private ground: GroundResolver;
   private inspect: { inst: Instance; index: number; mode: CameraMode; t: number; saved: { lat: number; lon: number; headingDeg: number } } | null = null;
 
   constructor(private readonly engine: TerraEngine) {
     this.collection = engine.viewer.scene.primitives.add(new PrimitiveCollection());
+    this.ground = new GroundResolver(engine);
   }
 
   private allShowrooms(): Showroom[] { return [...MAHARASHTRA_SHOWROOMS, ...this.osmShowrooms]; }
@@ -73,7 +76,7 @@ export class ShowroomSystem implements GameplaySystem {
       const d = distanceM(lat, lon, s.lat, s.lon);
       const inst = this.instances.get(s.id);
       if (d < BUILD_M) {
-        const ground = this.engine.groundHeightAt(s.lat, s.lon);
+        const ground = this.ground.get(s.id, s.lat, s.lon);
         if (ground === null) continue;
         if (inst && Math.abs(inst.groundM - ground) > 0.6) this.dispose(s.id);
         if (!this.instances.has(s.id)) this.build(s, ground);
@@ -202,8 +205,8 @@ export class ShowroomSystem implements GameplaySystem {
       Cartesian3.add(pos, Cartesian3.multiplyByScalar(up, height, new Cartesian3()), pos);
       cam.setView({ destination: pos, orientation: { heading: az + Math.PI, pitch: -Math.atan2(height - lookHeight, dist), roll: 0 } });
     };
-    if (ins.mode === 'orbit') place(v.headingRad + ins.t * 0.35, spec.lengthM * 1.4 + 2, 1.9, spec.heightM * 0.5);
-    else if (ins.mode === 'cinematic') place(v.headingRad + 0.6 + ins.t * 0.18, spec.lengthM * 0.9 + 1.5 + Math.sin(ins.t / 4) * 1.2, 0.7 + (1 + Math.sin(ins.t / 6)) * 0.8, spec.heightM * 0.45);
+    if (ins.mode === 'orbit') place(v.headingRad + ins.t * 0.35, spec.lengthM * 0.85 + 1.2, 1.5, spec.heightM * 0.5);
+    else if (ins.mode === 'cinematic') place(v.headingRad + 0.6 + ins.t * 0.18, spec.lengthM * 0.7 + 1.2 + Math.sin(ins.t / 4) * 0.8, 0.6 + (1 + Math.sin(ins.t / 6)) * 0.7, spec.heightM * 0.45);
     else {
       // Seat camera: forward offset in the vehicle frame, looking ahead (interior) or down at the dashboard.
       const fwd = Cartesian3.add(Cartesian3.multiplyByScalar(east, Math.sin(v.headingRad), new Cartesian3()), Cartesian3.multiplyByScalar(north, Math.cos(v.headingRad), new Cartesian3()), new Cartesian3());

@@ -240,7 +240,7 @@ export const VEHICLE_CATALOG: VehicleSpec[] = [
       { kind: 'indicatorRight', x: 1.3, y: -0.45, z: 0.85, sizeM: 0.1 }, { kind: 'indicatorRight', x: -1.3, y: -0.58, z: 0.6, sizeM: 0.1 },
       { kind: 'roof', x: 0.6, y: 0, z: 1.78, sizeM: 0.16 },
     ],
-    drive: { accelMs2: 2.6, maxSpeedMs: 16, turnRate: 2.0, eyeHeightM: 1.25, followBackM: 7, followUpM: 3 },
+    drive: { accelMs2: 2.6, maxSpeedMs: 16, turnRate: 2.0, eyeHeightM: 1.42, followBackM: 7, followUpM: 3 },
     audio: { idleHz: 70, maxHz: 260, kind: 'two-stroke', hornHz: [620], level: 0.6 },
     door: { x: 0.3, y: -0.9 }, zeroToHundredS: 99, drivetrain: 'CNG single-cylinder, rear wheels, automatic',
     note: VEHICLE_NOTE,

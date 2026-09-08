@@ -1,7 +1,7 @@
 import { BoxGeometry, Cartesian3, Color, ColorGeometryInstanceAttribute, EllipsoidGeometry, GeometryInstance, HeadingPitchRoll, Matrix3, Matrix4, PerInstanceColorAppearance, Primitive, PrimitiveCollection, Transforms, type Viewer } from 'cesium';
 import { enuOffsetM } from '@/util/geo';
 import { Rng } from '@/util/hash';
-import { roadPosition, type GraphRoad, type RoadPoint } from './roadGraph';
+import { roadNearPoint, roadPosition, type GraphRoad, type RoadPoint } from './roadGraph';
 
 /**
  * Pooled pedestrians walking along the pavements of nearby roads: regional clothing palettes (colour sets only, no
@@ -65,6 +65,21 @@ interface Walker {
   paused: number;
 }
 
+/** Distance along the road of the point nearest to lat/lon (flat-earth metres). */
+function nearestT(road: GraphRoad, lat: number, lon: number): number {
+  let best = 0, bestD = Infinity;
+  for (let i = 1; i < road.pts.length; i++) {
+    const a = enuOffsetM(lat, lon, road.pts[i - 1].lat, road.pts[i - 1].lon);
+    const b = enuOffsetM(lat, lon, road.pts[i].lat, road.pts[i].lon);
+    const dx = b.east - a.east, dy = b.north - a.north;
+    const len2 = dx * dx + dy * dy;
+    const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, (-a.east * dx - a.north * dy) / len2));
+    const d = Math.hypot(a.east + dx * t, a.north + dy * t);
+    if (d < bestD) { bestD = d; best = road.cum[i - 1] + t * (road.cum[i] - road.cum[i - 1]); }
+  }
+  return best;
+}
+
 export class Pedestrians {
   private collection: PrimitiveCollection;
   private walkers: Walker[] = [];
@@ -106,11 +121,13 @@ export class Pedestrians {
   }
 
   private spawn(w: Walker, roads: GraphRoad[], focus: { lat: number; lon: number }): boolean {
-    const near = roads.filter((r) => WALKABLE.has(r.kind) && r.length > 20 && r.pts.some((p) => Math.abs(p.lat - focus.lat) < 0.0025 && Math.abs(p.lon - focus.lon) < 0.0025));
+    const near = roads.filter((r) => WALKABLE.has(r.kind) && r.length > 20 && roadNearPoint(r, focus.lat, focus.lon, 150));
     if (near.length === 0) return false;
     const road = this.rng.pick(near);
     w.road = road;
-    w.t = this.rng.range(0, road.length);
+    // Start within ~120 m of the focus along the road rather than anywhere on a kilometre-long way.
+    const along = nearestT(road, focus.lat, focus.lon);
+    w.t = Math.max(0, Math.min(road.length, along + this.rng.range(-120, 120)));
     w.dir = this.rng.next() < 0.5 ? 1 : -1;
     const side = this.rng.next() < 0.5 ? 1 : -1;
     w.baseSideM = side * (road.widthM / 2 + 1.3);

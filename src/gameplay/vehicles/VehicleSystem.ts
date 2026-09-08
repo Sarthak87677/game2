@@ -13,6 +13,7 @@ import { onVehicleRequest, type SpawnVehicleRequest } from './requests';
 import { advanceTimeTrial, bearingDeg, formatLapTime, headlightsOn, impactDamage, indicatorLit, loadBestTime, nearestRoadPoint, nextCheckpoint, offsetFromVehicle, pointBehind, saveBestTime, selectGear, startTimeTrial, StuckDetector, wetGrip, type Gear, type TimeTrialState } from './logic';
 import { TIME_TRIAL_COURSES } from './courses';
 import { CourseMarkers } from './CourseMarkers';
+import { GroundResolver } from './ground';
 
 interface ParkedVehicle {
   id: string;
@@ -71,6 +72,7 @@ export class VehicleSystem implements GameplaySystem {
   private lastPoolSync = 0;
   private trial: { state: TimeTrialState; courseIdx: number } | null = null;
   private markers: CourseMarkers;
+  private ground: GroundResolver;
   private offRequests: () => void;
   private keyDown = (e: KeyboardEvent) => this.onKey(e, true);
   private keyUp = (e: KeyboardEvent) => this.onKey(e, false);
@@ -84,7 +86,8 @@ export class VehicleSystem implements GameplaySystem {
 
   constructor(private readonly engine: TerraEngine) {
     this.collection = engine.viewer.scene.primitives.add(new PrimitiveCollection());
-    this.markers = new CourseMarkers(this.collection, engine);
+    this.ground = new GroundResolver(engine);
+    this.markers = new CourseMarkers(this.collection, this.ground);
     this.seedParkedVehicles();
     this.offRequests = onVehicleRequest((r) => this.handleRequest(r));
     window.addEventListener('keydown', this.keyDown, true);
@@ -145,7 +148,7 @@ export class VehicleSystem implements GameplaySystem {
 
   private placeParked(v: ParkedVehicle): void {
     if (!v.body) return;
-    const g = this.engine.groundHeightAt(v.lat, v.lon);
+    const g = this.ground.get(v.id, v.lat, v.lon);
     if (g !== null) v.groundM = g;
     const h = v.groundM ?? 0;
     v.body.show = v.groundM !== null;
@@ -186,6 +189,7 @@ export class VehicleSystem implements GameplaySystem {
     modes.driveParams = { ...spec.drive };
     modes.setVehicleBody(body.primitive);
     modes.setMode('drive');
+    this.pushHud(true);
     const ground = v.groundM ?? (await this.engine.terrainHeight(v.lat, v.lon));
     if (this.active !== v) return;
     modes.setBody(v.lat, v.lon, v.headingDeg, ground);
@@ -202,6 +206,7 @@ export class VehicleSystem implements GameplaySystem {
     const { lat, lon } = modes.bodyLatLon();
     const headingDeg = CMath.toDegrees(modes.getHeading());
     v.lat = lat; v.lon = lon; v.headingDeg = ((headingDeg % 360) + 360) % 360;
+    this.ground.forget(v.id);
     v.groundM = this.engine.groundHeightAt(lat, lon) ?? v.groundM;
     v.damage = v.body?.damageLevel ?? v.damage;
     const door = offsetFromVehicle(lat, lon, v.headingDeg, this.spec.door.x, this.spec.door.y - (this.spec.door.y < 0 ? 0.9 : -0.9));
@@ -299,7 +304,11 @@ export class VehicleSystem implements GameplaySystem {
     const pos = modes.bodyPosition();
     const heading = modes.getHeading();
     let speed = 0;
-    if (this.lastPos && ctx.dt > 0) {
+    if (this.lastPos && ctx.dt > 0 && Cartesian3.distance(pos, this.lastPos) > this.spec.drive.maxSpeedMs * ctx.dt * 3 + 5) {
+      // A teleport (fast travel, reset, test hook) is not motion: restart the speed estimate.
+      this.lastSpeed = 0;
+      this.stuck.reset();
+    } else if (this.lastPos && ctx.dt > 0) {
       Cartesian3.subtract(pos, this.lastPos, scratchDelta);
       Transforms.eastNorthUpToFixedFrame(pos, undefined, scratchEnu);
       const east = Matrix4.multiplyByPointAsVector(scratchEnu, Cartesian3.UNIT_X, scratchFwd);
@@ -569,8 +578,12 @@ export class VehicleSystem implements GameplaySystem {
   }
 
   /** Test/diagnostic snapshot. */
-  snapshot(): { active: string | null; camera: CameraMode; gear: Gear; speedMs: number; parkedNear: number; trial: TimeTrialState | null; indicator: Indicator; damage: number } {
-    return { active: this.active?.kind ?? null, camera: this.camera, gear: this.gear, speedMs: this.lastSpeed, parkedNear: this.stats_.bodies, trial: this.trial?.state ?? null, indicator: this.indicator, damage: this.active?.body?.damageLevel ?? 0 };
+  snapshot(): { active: string | null; camera: CameraMode; gear: Gear; speedMs: number; parkedNear: number; parked: { kind: VehicleKind; lat: number; lon: number; headingDeg: number }[]; trial: TimeTrialState | null; indicator: Indicator; damage: number; headlights: boolean; resets: number } {
+    return {
+      active: this.active?.kind ?? null, camera: this.camera, gear: this.gear, speedMs: this.lastSpeed, parkedNear: this.stats_.bodies,
+      parked: this.parked.filter((v) => v.body && v !== this.active).map((v) => ({ kind: v.kind, lat: v.lat, lon: v.lon, headingDeg: v.headingDeg })),
+      trial: this.trial?.state ?? null, indicator: this.indicator, damage: this.active?.body?.damageLevel ?? 0, headlights: headlightsOn(this.sunEl, this.headlightOverride), resets: this.stats_.resets,
+    };
   }
 
   destroy(): void {

@@ -41,6 +41,46 @@ export function nodeKey(lat: number, lon: number): string {
   return `${Math.round(lat * 1e5)}:${Math.round(lon * 1e5)}`;
 }
 
+/**
+ * Inserts vertices where road polylines cross each other without sharing a node, so at-grade crossings become
+ * junctions (bridges/tunnels are filtered out before calling). Bounded work: skipped for very large inputs.
+ */
+export function insertCrossings(roads: { coords: [number, number][] }[], maxRoads = 160): void {
+  if (roads.length > maxRoads) return;
+  const eps = 1e-9;
+  for (let a = 0; a < roads.length; a++) for (let b = a + 1; b < roads.length; b++) {
+    const A = roads[a].coords, B = roads[b].coords;
+    for (let i = 0; i < A.length - 1; i++) for (let j = 0; j < B.length - 1; j++) {
+      const [x1, y1] = A[i], [x2, y2] = A[i + 1], [x3, y3] = B[j], [x4, y4] = B[j + 1];
+      const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+      if (Math.abs(den) < 1e-18) continue;
+      const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
+      const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
+      if (t <= eps || t >= 1 - eps || u <= eps || u >= 1 - eps) continue;
+      const px = x1 + t * (x2 - x1), py = y1 + t * (y2 - y1);
+      const pt: [number, number] = [Math.round(px * 1e7) / 1e7, Math.round(py * 1e7) / 1e7];
+      A.splice(i + 1, 0, pt);
+      B.splice(j + 1, 0, [pt[0], pt[1]]);
+      i++; // skip the segment we just created
+      break;
+    }
+  }
+}
+
+/** True when any segment of the road passes within radiusM of the point (flat-earth metres). */
+export function roadNearPoint(road: GraphRoad, lat: number, lon: number, radiusM: number): boolean {
+  const mLat = METRES_PER_DEGREE_LAT, mLon = metresPerDegreeLon(lat);
+  for (let i = 1; i < road.pts.length; i++) {
+    const ax = (road.pts[i - 1].lon - lon) * mLon, ay = (road.pts[i - 1].lat - lat) * mLat;
+    const bx = (road.pts[i].lon - lon) * mLon, by = (road.pts[i].lat - lat) * mLat;
+    const dx = bx - ax, dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, (-ax * dx - ay * dy) / len2));
+    if (Math.hypot(ax + dx * t, ay + dy * t) <= radiusM) return true;
+  }
+  return false;
+}
+
 /** Builds a GraphRoad from lon/lat coordinates (no node information yet — see `connectRoads`). */
 export function makeGraphRoad(id: string, kind: RoadKind, coords: [number, number][], tile: string, widthM: number, lanes: number | null, oneway: boolean): GraphRoad {
   const pts: RoadPoint[] = coords.map(([lon, lat]) => ({ lon, lat, h: null }));

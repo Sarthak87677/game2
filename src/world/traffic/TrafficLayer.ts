@@ -4,7 +4,7 @@ import { enuOffsetM } from '@/util/geo';
 import { fnv1a, Rng } from '@/util/hash';
 import type { OsmLayer } from '@/world/osm/OsmLayer';
 import type { EnvironmentController } from '@/engine/environment';
-import { connectRoads, disconnectRoads, laneOffsetM, makeGraphRoad, nextNodeAhead, pickTurn, roadPosition, signalGreen, trafficDensity, type GraphNode, type GraphRoad, type RoadPoint } from './roadGraph';
+import { connectRoads, disconnectRoads, insertCrossings, laneOffsetM, makeGraphRoad, nextNodeAhead, pickTurn, roadNearPoint, roadPosition, signalGreen, trafficDensity, type GraphNode, type GraphRoad, type RoadPoint } from './roadGraph';
 import { Pedestrians } from './Pedestrians';
 
 const SPEED_MS: Partial<Record<RoadKind, number>> = { motorway: 30, trunk: 25, primary: 16, secondary: 14, tertiary: 12, residential: 9 };
@@ -118,8 +118,7 @@ export class TrafficLayer {
   /** Roads currently loaded near a point (for pedestrians and other consumers). */
   roadsNear(lat: number, lon: number, radiusM: number): GraphRoad[] {
     const out: GraphRoad[] = [];
-    const dLat = radiusM / 111_132, dLon = radiusM / (111_320 * Math.cos((lat * Math.PI) / 180));
-    for (const list of this.roads.values()) for (const r of list) if (r.pts.some((p) => Math.abs(p.lat - lat) < dLat && Math.abs(p.lon - lon) < dLon)) out.push(r);
+    for (const list of this.roads.values()) for (const r of list) if (roadNearPoint(r, lat, lon, radiusM)) out.push(r);
     return out;
   }
 
@@ -184,10 +183,11 @@ export class TrafficLayer {
     for (const t of tiles) {
       if (this.roads.has(t.key)) continue;
       const roads: GraphRoad[] = [];
-      for (const r of t.roads) {
-        if (!SPEED_MS[r.kind] || r.coords.length < 2 || r.tunnel) continue;
-        roads.push(makeGraphRoad(r.id, r.kind, r.coords, t.key, r.widthM, r.lanes, r.oneway));
-      }
+      const drivable = t.roads.filter((r) => SPEED_MS[r.kind] && r.coords.length >= 2 && !r.tunnel);
+      // Copy coordinates so crossing insertion never mutates the OSM tile itself.
+      const copies = drivable.map((r) => ({ coords: r.coords.map(([lon, lat]) => [lon, lat] as [number, number]) }));
+      insertCrossings(copies.filter((_, i) => !drivable[i].bridge));
+      drivable.forEach((r, i) => roads.push(makeGraphRoad(r.id, r.kind, copies[i].coords, t.key, r.widthM, r.lanes, r.oneway)));
       this.roads.set(t.key, roads);
       connectRoads(roads, this.nodes);
       this.spawn(roads, t.key);

@@ -61,3 +61,27 @@ that drives the feature through `window.__terra`, a probe screenshot in `docs/sc
   *next*, not *done*.
 * `npm run typecheck && npm run lint && npm test` must pass before every commit; e2e specs run with
   `TERRA_E2E_DEV=1` against the dev server (`?terraQuality=low`, `--use-angle=swiftshader`).
+
+## Additive hooks added by the vehicles track (branch `claude/track-vehicles`)
+
+All optional; nothing existing changes behaviour when they are unused.
+
+* `AmbientAudio.bus(name)` (`src/engine/audio.ts`) → `{ ctx, gain } | null`: a named mix bus into the master gain for
+  gameplay sound (engine, horn, activities). Null until audio is enabled from a user gesture, so re-ask each frame.
+* `TrafficLayer.setPlayer(fn)`, `setBodyPool(pool)`, `setExclusion(zone)`, `roadsNear(lat, lon, r)`, `pedestrians`
+  (`src/world/traffic/TrafficLayer.ts`): the embodied player for emergency braking and simulation focus; a pool of
+  primitive vehicle bodies (`TrafficBody` interface) lent to the nearest ambient vehicles; a circle in which traffic is
+  suppressed (closed-course time trial); road-graph access; the pooled pedestrian layer.
+* `Pedestrians` (`src/world/traffic/Pedestrians.ts`) is constructed by `TrafficLayer` and exposes `positions()`,
+  `stats()`, `maxWalkers` and the regional palettes (`paletteFor`). **Living-world track:** build crowds on this
+  contract (read `engine.traffic.pedestrians.positions()` for avoidance, extend the palettes) rather than a second
+  walker pool; gatherings/groups are yours.
+* Store `gameplay.vehicle` gained optional fields `headingDeg`, `destination {name, bearingDeg, distanceM}`, `camera`,
+  `damage` (`src/state/store.ts`); `InteractionPrompt` renders heading and destination when present (one line).
+* OSM adapter: `node["shop"="car"]["name"]` is requested and parsed into `pois` with `kind: 'car_showroom'`
+  (`overpass.ts`, `osmParse.ts`) so real dealership positions can host generated showrooms.
+* `src/gameplay/vehicles/requests.ts`: `requestVehicle({...})` / `onVehicleRequest(fn)` — the showroom asks the
+  vehicle system to spawn (and optionally enter) a catalog vehicle. Systems still never import each other's classes.
+* Spawn points `lonavala-time-trial` and `showroom-worli` were added to `src/data/maharashtra/spawns.ts`.
+* Keyboard: while driving, **H** is the horn (the hide-UI shortcut is suspended in drive mode), **C** cycles
+  third/first/dashboard cameras, **L** headlights, **Q/R** indicators, **Z** hazards, **E** exits when stopped.
