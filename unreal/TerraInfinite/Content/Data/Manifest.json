@@ -70,17 +70,21 @@
       "file": "Campuses.json",
       "rowStruct": "FTerraCampusRow",
       "sourceType": "campus spec (export name /campus/i)",
-      "sourceExports": [],
-      "rows": 0,
-      "status": "missing-in-source"
+      "sourceExports": [
+        "SGIS_CAMPUS"
+      ],
+      "rows": 1,
+      "status": "exported"
     },
     {
       "file": "CampusBuildings.json",
       "rowStruct": "FTerraCampusBuildingRow",
       "sourceType": "campus spec buildings[]",
-      "sourceExports": [],
-      "rows": 0,
-      "status": "missing-in-source"
+      "sourceExports": [
+        "SGIS_CAMPUS"
+      ],
+      "rows": 10,
+      "status": "exported"
     },
     {
       "file": "InteriorGrammar.json",
