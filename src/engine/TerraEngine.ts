@@ -328,6 +328,9 @@ export class TerraEngine {
       }
       if (decision.phase === 'ready') {
         for (const d of decision.degraded) useTerraStore.getState().log('warn', `Ready with degraded layer — ${d}`);
+        // Publish the streaming snapshot the decision was based on before the pill flips, so observers (HUD, tests)
+        // never see "ready" alongside a stale `tilesLoadedOnce: false` from the 250 ms readout timer.
+        useTerraStore.setState({ streaming: this.streaming.snapshot() });
         setBoot(1, 'Ready', 'ready');
         if (window.__terra?.engine === this) window.__terra.ready = true;
         this.adaptive.setActive(true);
