@@ -12,14 +12,19 @@ describe('quality presets', () => {
     expect(t('high')).toEqual([60, 30]);
     expect(t('ultra')).toEqual([30, 24]);
     const p = QUALITY_PRESETS.performance;
-    expect(p.resolutionScale).toBe(0.7);
+    expect(p.resolutionScale).toBe(0.6);
     expect(p.shadows).toBe(false);
     expect(p.ambientOcclusion).toBe(false);
     expect(p.bloom).toBe(false);
-    expect(p.vegetationDensity).toBe(0.25);
-    expect(p.nearFieldRadiusM).toBe(250);
-    expect(p.trafficDensity).toBe(0.4);
+    expect(p.vegetationDensity).toBe(0.15);
+    expect(p.nearFieldRadiusM).toBe(180);
+    expect(p.trafficDensity).toBe(0.25);
     expect(p.clouds).toBe(false);
+    // The fill-rate items a 2-compute-unit iGPU cannot afford.
+    expect(p.fxaa).toBe(false);
+    expect(p.groundAtmosphere).toBe(false);
+    expect(p.preloadTiles).toBe(false);
+    expect(p.maximumScreenSpaceError).toBe(6);
     expect(isQualityPresetId('performance')).toBe(true);
     expect(isQualityPresetId('turbo')).toBe(false);
   });
@@ -54,7 +59,7 @@ describe('degradation ladder', () => {
     expect(resolveQuality(preset, -4)).toEqual(preset);
   });
   it('scales resolution relative to the preset (performance mode 0.7 → 0.35 at the bottom)', () => {
-    expect(resolveQuality(QUALITY_PRESETS.performance, 10).resolutionScale).toBe(0.35);
+    expect(resolveQuality(QUALITY_PRESETS.performance, 10).resolutionScale).toBe(0.3);
     expect(resolveQuality(QUALITY_PRESETS.low, 6).resolutionScale).toBe(0.675);
   });
   it('never touches settings that describe nearby building or player quality', () => {
@@ -67,6 +72,7 @@ describe('degradation ladder', () => {
     expect(bottom.bloom).toBe(preset.bloom);
     expect(bottom.ambientOcclusion).toBe(preset.ambientOcclusion);
     expect(bottom.groundDetail).toBe(preset.groundDetail);
+    expect(bottom.groundAtmosphere).toBe(preset.groundAtmosphere);
     expect(bottom.tileCacheSize).toBe(preset.tileCacheSize);
     expect(bottom.nearFieldRadiusM).toBeGreaterThanOrEqual(150);
     expect(bottom.targetFps).toBe(preset.targetFps);

@@ -55,6 +55,13 @@ declare global {
 /** Seconds without a single terrain tile before the boot gate falls back to the flat ellipsoid (see awaitReadiness). */
 const TERRAIN_FALLBACK_MS = 45_000;
 
+/**
+ * Where the chosen preset is remembered. Versioned: v1 values were picked by a preset detector that could not see the
+ * GPU and started most laptops on High, and by a quality menu that did not even offer Performance mode. Bumping the
+ * key retires those stale choices once so every device re-detects; anything chosen from now on persists normally.
+ */
+const QUALITY_STORAGE_KEY = 'terra-infinite.quality.v2';
+
 const fetchJson = async (url: string): Promise<unknown> => {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
@@ -203,7 +210,7 @@ export class TerraEngine {
     const store = useTerraStore.getState();
     store.patch({ boot: { phase: 'viewer', progress: 0.1, message: 'Creating WebGL2 globe…', error: null, details: [] } });
     const engine = new TerraEngine(container);
-    const saved = (() => { try { return localStorage.getItem('terra-infinite.quality') as QualityPresetId | null; } catch { return null; } })();
+    const saved = (() => { try { return localStorage.getItem(QUALITY_STORAGE_KEY) as QualityPresetId | null; } catch { return null; } })();
     // ?terraQuality=low|medium|high|ultra overrides the preset (used by tests and software-rendered CI).
     const forced = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('terraQuality') : null;
     engine.setQuality(isQualityPresetId(forced) ? forced : isQualityPresetId(saved) ? saved : detectQualityPreset(engine.hardware));
@@ -475,7 +482,7 @@ export class TerraEngine {
     this.applySettings(QUALITY_PRESETS[next]);
     this.lastApplied = QUALITY_PRESETS[next];
     useTerraStore.setState({ quality: next });
-    try { localStorage.setItem('terra-infinite.quality', next); } catch { /* ignore */ }
+    try { localStorage.setItem(QUALITY_STORAGE_KEY, next); } catch { /* ignore */ }
     useTerraStore.getState().log('warn', `Auto quality → ${next}: the previous preset stayed below its frame-rate floor at the lowest settings`);
     return true;
   }
@@ -486,7 +493,7 @@ export class TerraEngine {
     (this.adaptive as AdaptiveQuality | undefined)?.resetForPreset();
     this.applySettings(QUALITY_PRESETS[id]);
     useTerraStore.setState({ quality: id });
-    try { localStorage.setItem('terra-infinite.quality', id); } catch { /* ignore */ }
+    try { localStorage.setItem(QUALITY_STORAGE_KEY, id); } catch { /* ignore */ }
   }
 
   /** Applies a resolved settings object (preset, or preset + ladder rungs) to the viewer and every scene system. */
