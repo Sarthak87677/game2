@@ -18,7 +18,7 @@ page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resourc
 await page.goto(url, { waitUntil: 'load', timeout: 60000 });
 await page.waitForFunction(() => window.__terra?.ready === true, null, { timeout: 200000 });
 console.log('ready');
-await page.evaluate(() => window.__terra.engine.setDate(new Date('2026-02-10T09:30:00Z')));
+await page.evaluate(() => { window.__terra.engine.setDate(new Date('2026-02-10T09:30:00Z')); window.__terra.engine.setWeatherPreset('clear'); });
 await page.evaluate(() => window.__terra.engine.setUi?.({ hidden: true }));
 await page.evaluate(() => window.__terra.spawn({ id: 'sgis-campus', name: 'SGIS-inspired campus, Atigre (Kolhapur)', region: 'Kolhapur', lat: 16.7335, lon: 74.4015, headingDeg: 20, description: '', dataNote: 'probe', approximate: true }));
 await page.waitForFunction(() => window.__terra.engine.gameplay.systems.find((s) => s.id === 'interiors')?.campus.placed === true, null, { timeout: 120000 });
@@ -47,8 +47,9 @@ const doorA = await campusPoint(-55, 81);
 await stand(doorA.lat, doorA.lon, 0);
 await enter('academic-a');
 // 2. Corridor: stand at the east end of the ground-floor corridor looking west toward the stairs.
-const corridor = await page.evaluate(() => { const l = window.__terra.engine.gameplay.systems.find((x) => x.id === 'interiors').activeLevel(); const c = l.plan.floors[0].corridors[0].rect; const p = l.toLonLat(c.x1 - 2, (c.y0 + c.y1) / 2); const f = l.frame; const east = -Math.cos(f.rotationRad), north = -Math.sin(f.rotationRad); return { ...p, heading: (Math.atan2(east, north) * 180) / Math.PI }; });
+const corridor = await page.evaluate(() => { const l = window.__terra.engine.gameplay.systems.find((x) => x.id === 'interiors').activeLevel(); const c = l.plan.floors[0].corridors[0].rect; const p = l.toLonLat((c.x0 + c.x1) / 2 + 4, (c.y0 + c.y1) / 2); const f = l.frame; const east = -Math.cos(f.rotationRad), north = -Math.sin(f.rotationRad); return { ...p, heading: (Math.atan2(east, north) * 180) / Math.PI }; });
 await stand(corridor.lat, corridor.lon, corridor.heading, 'first', -4);
+await page.evaluate(() => window.__terra.engine.setWeatherPreset('clear'));
 await shot('campus-corridor');
 // 3. Classroom on the first floor: ride the lift, stand in a classroom's door corner looking across the desks.
 await page.evaluate(() => window.__terra.engine.gameplay.systems.find((x) => x.id === 'interiors').rideTo(1));
@@ -59,11 +60,11 @@ await shot('campus-classroom');
 // Leave block A.
 await page.evaluate(() => window.__terra.engine.gameplay.systems.find((x) => x.id === 'interiors').exit(false));
 await page.waitForTimeout(1500);
-// 4. Library: enter and look down the reading hall from the door end.
+// 4. Library: enter and look north along a shelf aisle.
 const doorLib = await campusPoint(-40 + 15, 36);
 await stand(doorLib.lat, doorLib.lon, 270);
 await enter('library');
-const library = await page.evaluate(() => { const l = window.__terra.engine.gameplay.systems.find((x) => x.id === 'interiors').activeLevel(); const r = l.plan.floors[0].rooms[0]; const p = l.toLonLat(r.rect.x1 - 1.2, r.rect.y0 + 1.2); const f = l.frame; const dx = -1, dy = 0.5; const east = dx * Math.cos(f.rotationRad) - dy * Math.sin(f.rotationRad), nn = dx * Math.sin(f.rotationRad) + dy * Math.cos(f.rotationRad); return { ...p, heading: (Math.atan2(east, nn) * 180) / Math.PI }; });
+const library = await page.evaluate(() => { const l = window.__terra.engine.gameplay.systems.find((x) => x.id === 'interiors').activeLevel(); const r = l.plan.floors[0].rooms[0]; const p = l.toLonLat(r.rect.x1 - 3.5, r.rect.y0 + 1.6); const f = l.frame; const dx = 0.05, dy = 1; const east = dx * Math.cos(f.rotationRad) - dy * Math.sin(f.rotationRad), nn = dx * Math.sin(f.rotationRad) + dy * Math.cos(f.rotationRad); return { ...p, heading: (Math.atan2(east, nn) * 180) / Math.PI }; });
 await stand(library.lat, library.lon, library.heading, 'first', -6);
 await shot('campus-library');
 // 5. Terrace of the library: third person from the roof, looking toward the academic blocks.

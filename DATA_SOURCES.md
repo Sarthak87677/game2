@@ -52,6 +52,10 @@ The Unreal client (`unreal/TerraInfinite`) consumes the same shared data (`src/d
 * **Esri World Imagery**: allowed for light/non-commercial use; add an ArcGIS key for production deployments.
 * **AWS Terrain Tiles**: no key, S3 egress paid by AWS Open Data; tiles are cached locally (configurable budget).
 
+## Procedural interiors and the hero campus
+
+Interiors (`Enter … (procedural interior)`) and the SGIS-inspired campus use **no external dataset**. Room layouts are generated deterministically from the building footprint (OpenStreetMap outline when online or in the fixture, otherwise the procedural near-field footprint) with a seed derived from the footprint centroid, so the same building always yields the same interior. The campus origin (16.7335, 74.4015) is an approximate public map position (±300 m); its layout is invented. Both are labelled fictional/procedural in the world and the HUD.
+
 ## Not used
 
 * Google Maps/Earth tiles, Apple Maps, Mapbox raster (restricted terms or keys required).
