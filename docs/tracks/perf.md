@@ -40,8 +40,11 @@ URL flags: `?terraQuality=performance|low|medium|high|ultra`, `?terraMinFps=<n>`
   3. **Diagnostics** — perf grid, hardware grid, readiness block visible; `benchmark(4)` returns a `terra-benchmark`
      record and the log line appears in the panel. Screenshot `docs/screenshots/perf-diagnostics.png`
      (and `perf-warming-up.png`).
-* Full suite `TERRA_FIXTURES=1 npx playwright test` against the production build — result recorded in the
-  "Full-run results" section below.
+* Full suite `TERRA_FIXTURES=1 npx playwright test` against the production build (`npm run build`, `vite preview`,
+  SwiftShader): **12 passed, 0 failed (26.9 min)** — city, landmarks, nature, 3 × perf, 6 × smoke. The existing specs
+  boot through the new gate without changes (software renderers auto-relax the FPS gate to 1 fps; the terrain host is
+  blocked here so each boot ends on the 45 s ellipsoid fallback and still reaches ready within the 180 s helper
+  timeout).
 * `node scripts/measure-performance.mjs --quick --url=… --quality=low --min-fps=1` → `docs/performance-2026-09-07T13-45-36-612Z.json`.
 
 ## What is not done / caveats
