@@ -1,9 +1,9 @@
 import { BoxGeometry, Cartesian3, Color, ColorGeometryInstanceAttribute, GeometryInstance, HeadingPitchRoll, LabelCollection, LabelStyle, Math as CMath, Matrix4, PerInstanceColorAppearance, Primitive, Transforms, VerticalOrigin, type PrimitiveCollection } from 'cesium';
-import type { TerraEngine } from '@/engine/TerraEngine';
 import { distanceM } from '@/gameplay/GameplayHost';
 import type { TimeTrialCourse } from './logic';
 import { TIME_TRIAL_COURSES } from './courses';
 import { bearingDeg } from './logic';
+import type { GroundResolver } from './ground';
 
 interface Gate { course: TimeTrialCourse; index: number; prim: Primitive | null; groundM: number | null; label: number }
 
@@ -23,7 +23,7 @@ export class CourseMarkers {
   private activeCourse: TimeTrialCourse | null = null;
   private activeIndex = 0;
 
-  constructor(private readonly collection: PrimitiveCollection, private readonly engine: TerraEngine) {
+  constructor(private readonly collection: PrimitiveCollection, private readonly ground: GroundResolver) {
     this.labels = collection.add(new LabelCollection());
     for (const course of TIME_TRIAL_COURSES) course.checkpoints.forEach((_, index) => {
       const cp = course.checkpoints[index];
@@ -54,7 +54,7 @@ export class CourseMarkers {
       const d = distanceM(lat, lon, cp.lat, cp.lon);
       const label = this.labels.get(g.label);
       if (d < 4000) {
-        const ground = this.engine.groundHeightAt(cp.lat, cp.lon);
+        const ground = this.ground.get(`${g.course.id}:${g.index}`, cp.lat, cp.lon);
         if (ground !== null && ground !== g.groundM) {
           g.groundM = ground;
           if (g.prim) { this.collection.remove(g.prim); g.prim = null; }

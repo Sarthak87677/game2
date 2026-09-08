@@ -261,3 +261,54 @@ Full summary: `docs/tracks/journeys.md`.
 
 **Next**
 * Arcade flight mode reusing fly mode with speed limits and bank visuals; ambient air traffic and ferries; cabin/train interiors from the interiors grammar; verify the ghat profile and elevated metro on a machine with terrain access; wire journeys into the activities checklists.
+
+## Track: vehicles (branch `claude/track-vehicles`, 2026-09-08)
+
+**Completed**
+* `src/gameplay/vehicles/catalog.ts`: eight original generic vehicles (hatchback, sedan, SUV, coupé, bus, taxi,
+  truck, auto-rickshaw) with dimensions, paints, drive parameters, wheel/lamp positions, engine audio profile, horn.
+* `VehicleBody.ts`: primitive bodies built once (chassis/cabin boxes, translucent glass, wheels that spin and steer,
+  head/tail/brake/indicator/roof lamps, headlight beams, dashboard + steering wheel + wipers) moved by model matrices.
+* `VehicleSystem.ts` (`vehicles`): 3 parked vehicles at every spawn point, showroom forecourts and the time-trial
+  start (pooled: bodies built within 900 m, dropped beyond 1.6 km); "Enter <vehicle>" → drive mode via
+  `setVehicleBody`/`driveParams`; "Exit vehicle" when stopped → walk mode by the door; C cycles third/first/
+  dashboard cameras; automatic gear display P/R/N/D; speed, heading and destination bearing on the HUD; headlights
+  (L, auto at dusk), indicators (Q/R), hazards (Z), horn (H, WebAudio), wipers in rain, tyre spray when wet,
+  wet-road grip reduction, paint darkening after hard impacts, stuck-for-4-s reset (post-process fade, nearest road
+  point or 5 m back), engine/road/horn audio through the `AmbientAudio.bus` hook.
+* Ambient traffic (`src/world/traffic/`): road graph with shared-node and crossing junctions, two-phase signals with
+  clearance, left-hand lane keeping, flow through junctions, car following, emergency braking for the player and
+  pedestrians, density by local hour and place population, 400 m full / 1.5 km coarse / frozen beyond, 3D bodies
+  lent by the vehicle system to the nearest traffic, exclusion circle for the time trial.
+* Pedestrians (`Pedestrians.ts`): pooled walkers on pavements near the player, Maharashtra/India/generic clothing
+  palettes, bobbing walk cycle with swinging legs, player and vehicle avoidance, time-of-day activity.
+* Showroom (`src/gameplay/showroom/`, `showroom`): five curated approximate Maharashtra positions plus OSM
+  `shop=car` nodes when online; generated interior (floor, glass front, six plinths with catalog vehicles,
+  information stands with spec overlays, reception, lounge, workshop bay with a lifted vehicle, forecourt parking,
+  test-drive exit); Inspect overlay with exterior-orbit / interior / dashboard / cinematic cameras; Test drive
+  spawns the vehicle at the exit and seats the player with a return bearing on the HUD.
+* Closed-course time trial near Lonavala (`courses.ts`, `CourseMarkers.ts`): gates with banners, start/abort
+  interactions while driving, splits, best time in localStorage, traffic suppressed on the course during a lap.
+
+**Tested (how)**
+* `npm run typecheck && npm run lint && npm test` (unit: catalog integrity, gear logic, stuck detection, grip, impacts,
+  bearings, nearest road, time-trial state machine, best-time storage, traffic density/signals/lanes, road graph
+  junctions/turns/crossings, showroom layout, pedestrian palettes).
+* `tests/e2e/vehicles.spec.ts` in headless Chromium (SwiftShader, synthetic OSM fixtures): spawn at the Gateway →
+  enter the nearest parked vehicle → drive 5 s → speed > 0 and gear D → dashboard camera, indicator and headlights
+  → stop → exit → walk mode; traffic stats show junctions, signals, pedestrians and lent bodies; Worli showroom
+  builds, inspect overlay opens, orbit camera runs, test drive seats the player. Screenshots in `docs/screenshots/`
+  (`vehicle-driving-third.png`, `vehicle-dashboard.png`, `showroom-floor.png`, `showroom-inspect.png`).
+
+**Broken / limitations**
+* No terrain or real OSM in the sandbox: everything above was verified on the ellipsoid with fixture roads; on real
+  roads lane offsets, signals and the Lonavala course follow OSM geometry but were not driven here.
+* Showroom walls have no collision (the interiors track owns `moveFilter`); the player can walk through them.
+* Traffic bodies do not brake for parked vehicles; ambient vehicles ignore road elevation between vertices on
+  bridges.
+* Damage is paint darkening only (by design, non-graphic); wipers/spray are visible only in wet weather presets.
+
+**Next**
+* Drive the Lonavala course on real OSM roads with terrain online and tune checkpoint positions.
+* Hand pedestrians to the living-world crowd system (shared contract in the plan) and add gatherings.
+* Wall collision for the showroom once the interiors track's `moveFilter` contract is on `main`.

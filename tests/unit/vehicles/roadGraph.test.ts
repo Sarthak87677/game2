@@ -68,3 +68,31 @@ describe('pedestrians', () => {
     expect(pedestrianActivity(9)).toBe(1);
   });
 });
+
+describe('crossings and nearness', () => {
+  it('inserts a shared vertex where two ways cross without a node', async () => {
+    const { insertCrossings, roadNearPoint } = await import('@/world/traffic/roadGraph');
+    const a = { coords: [[72.80, 18.90], [72.82, 18.90]] as [number, number][] };
+    const b = { coords: [[72.81, 18.89], [72.81, 18.91]] as [number, number][] };
+    insertCrossings([a, b]);
+    expect(a.coords.length).toBe(3);
+    expect(b.coords.length).toBe(3);
+    expect(a.coords[1]).toEqual(b.coords[1]);
+    const nodes = new Map<string, GraphNode>();
+    const ra = makeGraphRoad('a', 'primary', a.coords, 't', 8, 2, false);
+    const rb = makeGraphRoad('b', 'residential', b.coords, 't', 6, null, false);
+    connectRoads([ra, rb], nodes);
+    expect(nodes.size).toBe(1);
+    // Long road far from its vertices is still "near" a point beside its middle.
+    expect(roadNearPoint(ra, 18.9002, 72.805, 50)).toBe(true);
+    expect(roadNearPoint(ra, 18.905, 72.805, 50)).toBe(false);
+  });
+  it('leaves parallel and touching-at-end ways alone', async () => {
+    const { insertCrossings } = await import('@/world/traffic/roadGraph');
+    const a = { coords: [[72.80, 18.90], [72.82, 18.90]] as [number, number][] };
+    const b = { coords: [[72.80, 18.901], [72.82, 18.901]] as [number, number][] };
+    const c = { coords: [[72.82, 18.90], [72.82, 18.92]] as [number, number][] };
+    insertCrossings([a, b, c]);
+    expect(a.coords.length).toBe(2); expect(b.coords.length).toBe(2); expect(c.coords.length).toBe(2);
+  });
+});

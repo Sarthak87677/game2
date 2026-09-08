@@ -15,6 +15,7 @@ export interface LampState {
 const OFF: LampState = { headlights: false, brake: false, indicatorLeft: false, indicatorRight: false, roof: false, night: false };
 
 const TONES: Record<Exclude<PartTone, 'paint' | 'accent'>, string> = { glass: '#4c6f8f', dark: '#1e2226', chrome: '#c7ccd2', canvas: '#c9b48a', wood: '#8a6a44' };
+const GLASS = Color.fromCssColorString('#6f98bf').withAlpha(0.45);
 const TYRE = Color.fromCssColorString('#1b1c1e');
 const RIM = Color.fromCssColorString('#b7bcc2');
 const LAMP_COLOURS: Record<LampKind, { off: string; on: string; dim?: string }> = {
@@ -52,6 +53,7 @@ function box(x: number, y: number, z: number, l: number, w: number, h: number, c
 export class VehicleBody {
   readonly primitive: Primitive;
   private wheels: { spin: number; prim: Primitive; x: number; y: number; r: number; steers: boolean }[] = [];
+  private glass: Primitive | null;
   private lamps: Primitive;
   private beams: Primitive;
   private interior: Primitive | null = null;
@@ -74,13 +76,18 @@ export class VehicleBody {
     const shadows = opts.shadows === false ? ShadowMode.DISABLED : ShadowMode.ENABLED;
     this.paint = Color.fromCssColorString(paintCss);
     const accent = Color.fromCssColorString(spec.accent);
-    const instances: GeometryInstance[] = spec.parts.map((p, i) => {
+    const instances: GeometryInstance[] = [];
+    const glassInstances: GeometryInstance[] = [];
+    spec.parts.forEach((p, i) => {
+      if (p.tone === 'glass') { glassInstances.push(box(p.x, p.y, p.z, p.l, p.w, p.h, GLASS)); return; }
       const colour = p.tone === 'paint' ? this.paint : p.tone === 'accent' ? accent : Color.fromCssColorString(TONES[p.tone]);
       const id = p.tone === 'paint' ? `paint:${i}` : undefined;
       if (id) this.paintIds.push(id);
-      return box(p.x, p.y, p.z, p.l, p.w, p.h, colour, id);
+      instances.push(box(p.x, p.y, p.z, p.l, p.w, p.h, colour, id));
     });
     this.primitive = collection.add(new Primitive({ geometryInstances: instances, appearance: new PerInstanceColorAppearance({ translucent: false, closed: true }), asynchronous: false, shadows, allowPicking: false }));
+    // Glass is translucent and double-sided so the driver sees out and the exterior reads as windows.
+    this.glass = glassInstances.length ? collection.add(new Primitive({ geometryInstances: glassInstances, appearance: new PerInstanceColorAppearance({ translucent: true, closed: false }), asynchronous: false, allowPicking: false })) : null;
     for (const w of spec.wheels) {
       const tyre = new GeometryInstance({ geometry: new CylinderGeometry({ length: w.widthM, topRadius: w.radiusM, bottomRadius: w.radiusM, slices: 16, vertexFormat: VF }), attributes: { color: ColorGeometryInstanceAttribute.fromColor(TYRE) } });
       const spoke = box(0, 0, 0, w.radiusM * 1.5, 0.06, w.widthM + 0.01, RIM);
@@ -127,6 +134,7 @@ export class VehicleBody {
   set show(v: boolean) {
     this.visible = v;
     this.primitive.show = v;
+    if (this.glass) this.glass.show = v;
     this.lamps.show = v;
     for (const w of this.wheels) w.prim.show = v;
     this.beams.show = v && this.lampState.headlights && this.lampState.night;
@@ -155,6 +163,7 @@ export class VehicleBody {
     scratchHpr.heading = headingRad - Math.PI / 2; scratchHpr.pitch = 0; scratchHpr.roll = 0;
     Transforms.headingPitchRollToFixedFrame(position, scratchHpr, undefined, undefined, this.frame);
     this.primitive.modelMatrix = this.frame;
+    if (this.glass) this.glass.modelMatrix = this.frame;
     this.lamps.modelMatrix = this.frame;
     this.beams.modelMatrix = this.frame;
     if (this.interior) this.interior.modelMatrix = this.frame;
@@ -224,6 +233,7 @@ export class VehicleBody {
     this.destroyed = true;
     const c = this.collection;
     c.remove(this.primitive);
+    if (this.glass) c.remove(this.glass);
     c.remove(this.lamps);
     c.remove(this.beams);
     for (const w of this.wheels) c.remove(w.prim);
