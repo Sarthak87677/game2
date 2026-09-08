@@ -90,7 +90,9 @@ Run `npm run build && npm run perf` on a machine with a GPU and network access t
   26.9 min — the readiness gate does not break the smoke, city, nature or landmark specs.
 * `npm run perf -- --quick` run recorded in `docs/performance-2026-09-07T13-45-36-612Z.json` (0.6–3.8 fps, SwiftShader,
   ladder at rung 9–10, soak heap −1 %); full run `docs/performance-2026-09-08T04-12-22-114Z.json` (7 spots × 20 s,
-  1.0–1.3 fps at medium/1080p in software, 300 s soak PASS: heap −3.6 %, p99 < 2×).
+  1.0–1.3 fps at medium/1080p in software, 300 s soak PASS: heap −3.6 %, p99 < 2×) and the fixture run
+  `docs/performance-2026-09-08T04-36-37-315Z.json` (buildings + 400 vehicles: 0.3–0.5 fps, soak PASS: heap +2.1 %;
+  two coastal outliers flagged as unexplained).
 
 **Broken / limitations**
 
