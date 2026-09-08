@@ -156,6 +156,17 @@ export class CrowdSystem implements GameplaySystem {
       const o = enuOffsetM(centre.lat, centre.lon, ped.lat, ped.lon);
       if (o.east * o.east + o.north * o.north > DESPAWN_M * DESPAWN_M) this.deactivate(ped);
     }
+    // Thin the crowd gradually when the target drops (nightfall, rain): retire the farthest pedestrians first.
+    if (this.active > this.target + 4) {
+      let farthest: Ped | null = null, farD = -1;
+      for (const ped of this.pool) {
+        if (!ped.active) continue;
+        const o = enuOffsetM(centre.lat, centre.lon, ped.lat, ped.lon);
+        const d = o.east * o.east + o.north * o.north;
+        if (d > farD) { farD = d; farthest = ped; }
+      }
+      if (farthest) this.deactivate(farthest);
+    }
     // Spawn up to the target (a few per tick so arrival is gradual, or all at once right after a spawn).
     let budget = this.justSpawned ? MAX_PEDESTRIANS : 6;
     for (const ped of this.pool) {
