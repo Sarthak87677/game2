@@ -5,7 +5,7 @@
  *   npm run build && npm run perf              # full run: 7 Maharashtra/Taj spots × 20 s + 5-minute traversal soak
  *   npm run perf -- --quick                    # CI: 3 spots × 5 s + 40 s soak
  *   npm run perf -- --url=http://127.0.0.1:5173/?terraFixtures=1   # measure a running server instead of `vite preview`
- *   npm run perf -- --min-fps=1                # relax the boot gate (software renderers); default: the app decides
+ *   npm run perf -- --min-fps=0                # no FPS gate and ladder idle (software renderers); default: the app decides
  *
  * Per spot it runs the in-app benchmark (`window.__terra.benchmark`) and records current / average / 1 % low FPS,
  * frame ms, p99 frame ms, JS heap, globe tiles, draw commands, primitives and actors. The soak walks continuously
@@ -70,14 +70,21 @@ const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message.slice(0, 300)));
 const bootStart = Date.now();
 await page.goto(url.toString(), { waitUntil: 'load', timeout: 120_000 });
-await page.waitForFunction(() => window.__terra?.ready === true, null, { timeout: 300_000 });
+// Poll once a second: rAF-driven polling adds load on software renderers and can hold a 1 fps gate below threshold.
+try {
+  await page.waitForFunction(() => window.__terra?.ready === true, null, { timeout: 600_000, polling: 1000 });
+} catch {
+  const r = await page.evaluate(() => { const s = window.__terra?.state(); return { phase: s?.boot?.phase, message: s?.boot?.message, blocking: s?.readiness?.blocking, fps: s?.streaming?.fps }; }).catch(() => null);
+  console.error(`Boot gate not passed within 600 s: ${JSON.stringify(r)}\nOn a software renderer try --min-fps=0 (no FPS gate, ladder idle) or --quality=low.`);
+  await browser.close(); server?.kill(); process.exit(2);
+}
 const bootS = (Date.now() - bootStart) / 1000;
 const env = await page.evaluate(() => { const s = window.__terra.state(); return { hardware: s.hardware, quality: s.quality, readiness: s.readiness, adaptive: s.adaptive, ua: navigator.userAgent }; });
 const renderer = env.hardware?.gpuRenderer ?? 'unknown';
 console.log(`Ready after ${bootS.toFixed(1)} s · preset ${env.quality} · ${renderer}${env.hardware?.softwareRenderer ? ' (SOFTWARE RENDERER — not a GPU)' : ''}`);
 if (env.readiness?.degraded?.length) console.log(`Degraded: ${env.readiness.degraded.join(' | ')}`);
 
-const waitTiles = async (ms) => { await page.waitForFunction(() => { const s = window.__terra.state(); return s.streaming && s.streaming.queuedTiles === 0 && s.streaming.tilesLoaded; }, null, { timeout: ms }).catch(() => console.log('  (tiles still streaming — measuring anyway)')); await page.waitForTimeout(2000); };
+const waitTiles = async (ms) => { await page.waitForFunction(() => { const s = window.__terra.state(); return s.streaming && s.streaming.queuedTiles === 0 && s.streaming.tilesLoaded; }, null, { timeout: ms, polling: 1000 }).catch(() => console.log('  (tiles still streaming — measuring anyway)')); await page.waitForTimeout(2000); };
 const gc = () => page.evaluate(() => { if (typeof window.gc === 'function') { window.gc(); return true; } return false; });
 const heapMb = () => page.evaluate(() => window.__terra.state().streaming?.jsHeapMb ?? null);
 
