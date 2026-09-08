@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CORRIDORS, stationById } from '@/data/maharashtra';
-import { headwayMinutes, nextDepartures } from '@/gameplay/journeys/schedule';
+import { headwayMinutes, nextDepartures, ticketChoices } from '@/gameplay/journeys/schedule';
 import { buildTrackProfile, maxGrade } from '@/gameplay/journeys/trackProfile';
 import { BlockSystem } from '@/gameplay/rail/blocks';
 import { advanceTrain, limitAt, SERVICE_MOTION } from '@/gameplay/rail/motion';
@@ -18,6 +18,8 @@ describe('simulated schedule', () => {
   it('offers an intercity service to Pune from CSMT and only outbound directions at a terminus', () => {
     const deps = nextDepartures('csmt', at('csmt'), 600, 120, 8);
     expect(deps.some((d) => d.destinationId === 'pune')).toBe(true);
+    // Ticket buttons offer one departure per service first, so the Pune intercity is always among the first four.
+    for (const now of [0, 17, 600, 29_814_570]) expect(ticketChoices(nextDepartures('csmt', at('csmt'), now, 90, 6), 4).some((d) => d.destinationId === 'pune'), `now=${now}`).toBe(true);
     for (const d of deps) expect(d.direction).toBe(1);
   });
   it('lists both directions from a through station and respects headways', () => {

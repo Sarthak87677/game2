@@ -36,3 +36,7 @@ Vegetation, ground materials, rocks, crops, generic settlement buildings, night 
 * **Taj Mahal hero** (`src/world/hero/`) — an original procedural reconstruction: massing follows public reference dimensions, everything else is an approximate interpretation, labelled as such in the world and in the entry overlay. No photographs, textures or models of the monument are bundled.
 * **SGIS-inspired campus position** — the public map position of the school near Atigre is used only as an anchor; the game's campus is an original, fictionalised reconstruction with no affiliation.
 
+## Journeys: rail, air and marine (track `journeys`)
+
+* **Stations, corridors, airports, ports and water routes** (`src/data/maharashtra/{stations,corridors,airports,ports,waterRoutes}.ts`) — written by this project from memory of public reference values; positions are approximate (±300 m, up to ±1 km on rural rail alignments) and every table carries a data note. MIT. No timetable, track-geometry or airline dataset was copied; timetables, train/flight numbers, service names, fares and gates are simulated and fictional.
+* **Vehicles** (trains, the "Terra Air" airliner, ferries, speedboat, buoys, the cruise ship "MV Terra Konkan", platforms, runways and terminals) — original primitive-built designs by this project. Not scans, not licensed models, no operator liveries or logos; labelled "fictional / simulated" in the overlays.

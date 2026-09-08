@@ -14,7 +14,7 @@ import type { GameplayContext, GameplayOverlay, GameplaySystem, Interaction } fr
 import { BodyModel, localToWorld } from '@/gameplay/journeys/bodies';
 import { distanceM, enuOffset, formatDuration } from '@/gameplay/journeys/geo';
 import { PassengerRig, scaleLabel, setStatus, timeScale, type SeatSpec } from '@/gameplay/journeys/passenger';
-import { nextDepartures, type Departure } from '@/gameplay/journeys/schedule';
+import { nextDepartures, ticketChoices, type Departure } from '@/gameplay/journeys/schedule';
 import { advanceTrain, limitAt, SERVICE_MOTION } from './motion';
 import { railHeadingRad, TrackRenderer, TrackRuntime } from './track';
 import { TrainModel, trainSpecFor } from './trainModel';
@@ -251,11 +251,12 @@ export class RailSystem implements GameplaySystem {
     const deps = nextDepartures(station.id, corridors, this.simMinutes(), 90, 6);
     const lines = deps.length ? deps.map((d) => `${d.trainNo} ${d.name} → ${stationById(d.destinationId)?.name ?? d.destinationId} · platform ${d.platform} · in ${d.departsInMin} min`) : ['No departures in the next 90 minutes.'];
     lines.push(STATIONS_DATA_NOTE);
-    const actions = deps.slice(0, 4).map((d, i) => ({ id: `dep-${i}`, label: `Ticket → ${stationById(d.destinationId)?.name ?? d.destinationId} (${d.name})` }));
+    const choices = ticketChoices(deps, 4);
+    const actions = choices.map((d, i) => ({ id: `dep-${i}`, label: `Ticket → ${stationById(d.destinationId)?.name ?? d.destinationId} (${d.name})` }));
     actions.push({ id: 'close', label: 'Leave the counter' });
     const overlay: GameplayOverlay = { title: `${station.name} (${station.code}) — next departures`, lines, actions, note: TICKET_NOTE };
     this.engine.gameplay.showOverlay(overlay, (id) => {
-      if (id.startsWith('dep-')) this.showTicket(deps[Number(id.slice(4))]);
+      if (id.startsWith('dep-')) this.showTicket(choices[Number(id.slice(4))]);
       else this.engine.gameplay.closeOverlay();
     });
   }

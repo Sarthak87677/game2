@@ -50,7 +50,7 @@ session) works against the contracts below so that branches merge cleanly.
 | maharashtra-data | `src/data/maharashtra/{destinations,cities,index}.ts`, `src/data/bookmarks/*` (additive), `src/data/bookmarks/landmarkModels.ts` (additive), `src/world/landmarks/**` (new archetypes), Taj Mahal hero layer under `src/world/hero/**`, gazetteer search integration | ModeController |
 | interiors-campus | `src/world/interiors/**`, `src/gameplay/interiors/**`, `src/data/maharashtra/campus.ts`, `src/data/maharashtra/interiorGrammar.ts` | vehicles, journeys |
 | vehicles | `src/gameplay/vehicles/**`, `src/gameplay/showroom/**`, `src/data/maharashtra/showrooms.ts`, `src/world/traffic/**` (pedestrians additive) | interiors |
-| journeys | `src/gameplay/rail/**`, `src/gameplay/air/**`, `src/gameplay/marine/**`, `src/data/maharashtra/{stations,corridors,airports,ports,waterRoutes}.ts` | vehicles |
+| journeys | `src/gameplay/rail/**`, `src/gameplay/air/**`, `src/gameplay/marine/**`, `src/gameplay/journeys/**` (shared journey helpers: geometry, simulated schedules, primitive bodies, passenger rig), `src/data/maharashtra/{stations,corridors,airports,ports,waterRoutes}.ts` | vehicles |
 | living-world-activities | `src/gameplay/activities/**`, `src/world/crowds/**`, `src/world/wildlife/**`, monsoon presets in `src/world/climate/*` (additive) | journeys |
 | unreal | `unreal/**`, `scripts/export-unreal-data.mjs`, `docs/UNREAL.md` | `src/**` |
 
@@ -101,3 +101,12 @@ Unknown fields are kept in `ExtraJson`; missing tables are exported empty and fl
   footprints (currently the Taj Mahal). `TerraEngine.search` merges `MAHARASHTRA_INDEX.search()` (`src/data/maharashtra/search.ts`)
   into the offline results by score (`mergeSearchResults`), de-duplicated by id and position. Maharashtra places are appended to
   `WORLD_HIGHLIGHTS` as `mh-*` bookmarks and five `showcase-maharashtra-*` areas to `SHOWCASE_AREAS`.
+* **journeys** — optional fields on the shared data types (`src/data/maharashtra/types.ts`): `RailCorridor.slowSections`
+  (`{ between: [stationId, stationId], maxKmh }[]`), `RailCorridor.elevatedM` (metro viaducts), and `dataNote` on
+  `RailCorridor`, `Airport`, `Port`, `WaterRoute`; `Airport.external` marks the Delhi/Agra markers. Shared helpers live in
+  `src/gameplay/journeys/` (`geo.ts` great-circle/polyline maths, `schedule.ts` simulated timetables, `trackProfile.ts`
+  terrain-lifted rail profiles, `bodies.ts` posable primitive bodies, `passenger.ts` seat placement/status/time
+  compression). The cruise ship takes `modes.groundOverride` while the player is aboard (decks are an interior-like level
+  moving with the ship) and releases it on disembarking; when another system already owns the override it falls back
+  to `addHeightSampler`. The speedboat course registers a water-surface height sampler and a custom `setVehicleBody`
+  while active and restores `driveParams` afterwards. Journey systems expose `debug()`/`debugJump()` test hooks.
