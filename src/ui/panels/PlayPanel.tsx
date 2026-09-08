@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useEngine } from '../EngineContext';
+import { ActivitiesTab } from './ActivitiesTab';
 import { useTerraStore } from '@/state/store';
 import { MAHARASHTRA_SPAWNS } from '@/data/maharashtra';
 
@@ -8,6 +10,7 @@ export function PlayPanel() {
   const setUi = useTerraStore((s) => s.setUi);
   const player = useTerraStore((s) => s.gameplay.player);
   const boot = useTerraStore((s) => s.boot);
+  const [tab, setTab] = useState<'spawn' | 'activities'>('spawn');
   const spawn = (id: string) => {
     const s = MAHARASHTRA_SPAWNS.find((x) => x.id === id);
     if (!engine || !s) return;
@@ -16,6 +19,12 @@ export function PlayPanel() {
   };
   return (
     <div className="terra-panel-body">
+      <div className="terra-tabs">
+        <button className={tab === 'spawn' ? 'active' : ''} onClick={() => setTab('spawn')}>Spawn</button>
+        <button className={tab === 'activities' ? 'active' : ''} onClick={() => setTab('activities')}>Activities</button>
+      </div>
+      {tab === 'activities' && <ActivitiesTab />}
+      {tab === 'spawn' && <>
       <p className="terra-muted">Spawn as a walking character. Walk with <kbd>W A S D</kbd>, run with <kbd>Shift</kbd>, interact with <kbd>E</kbd>, third person <kbd>V</kbd>. Coordinates are approximate public reference values; campuses, interiors and landmark bodies are original procedural reconstructions.</p>
       {boot.phase !== 'ready' && <p className="terra-warn">World still loading ({boot.message}) — you can spawn now; terrain streams in around you.</p>}
       {player.spawned && <p className="terra-muted">Currently spawned at <b>{player.spawnName}</b>.</p>}
@@ -30,6 +39,7 @@ export function PlayPanel() {
           </li>
         ))}
       </ul>
+      </>}
     </div>
   );
 }

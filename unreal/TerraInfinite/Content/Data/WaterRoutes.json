@@ -1,0 +1,234 @@
+[
+  {
+    "Name": "gateway-mandwa",
+    "DisplayName": "Gateway of India ↔ Mandwa ferry",
+    "FromPortId": "gateway-jetty",
+    "ToPortId": "mandwa",
+    "Vessel": "ferry",
+    "Path": [
+      {
+        "Lat": 18.9225,
+        "Lon": 72.8352
+      },
+      {
+        "Lat": 18.917,
+        "Lon": 72.842
+      },
+      {
+        "Lat": 18.905,
+        "Lon": 72.851
+      },
+      {
+        "Lat": 18.88,
+        "Lon": 72.862
+      },
+      {
+        "Lat": 18.85,
+        "Lon": 72.872
+      },
+      {
+        "Lat": 18.825,
+        "Lon": 72.879
+      },
+      {
+        "Lat": 18.803,
+        "Lon": 72.883
+      }
+    ],
+    "DataNote": "Water routes are approximate simplified lines over open water; the cruise loop and the speedboat course are fictional in-game routes."
+  },
+  {
+    "Name": "ferry-wharf-rewas",
+    "DisplayName": "Ferry Wharf ↔ Rewas",
+    "FromPortId": "ferry-wharf",
+    "ToPortId": "rewas",
+    "Vessel": "ferry",
+    "Path": [
+      {
+        "Lat": 18.953,
+        "Lon": 72.848
+      },
+      {
+        "Lat": 18.945,
+        "Lon": 72.86
+      },
+      {
+        "Lat": 18.93,
+        "Lon": 72.88
+      },
+      {
+        "Lat": 18.91,
+        "Lon": 72.9
+      },
+      {
+        "Lat": 18.89,
+        "Lon": 72.916
+      },
+      {
+        "Lat": 18.876,
+        "Lon": 72.926
+      }
+    ],
+    "DataNote": "Water routes are approximate simplified lines over open water; the cruise loop and the speedboat course are fictional in-game routes."
+  },
+  {
+    "Name": "konkan-cruise",
+    "DisplayName": "Mumbai Konkan-coast cruise loop",
+    "FromPortId": "ballard-pier",
+    "ToPortId": "ballard-pier",
+    "Vessel": "cruise",
+    "Path": [
+      {
+        "Lat": 18.944,
+        "Lon": 72.842
+      },
+      {
+        "Lat": 18.93,
+        "Lon": 72.855
+      },
+      {
+        "Lat": 18.9,
+        "Lon": 72.86
+      },
+      {
+        "Lat": 18.86,
+        "Lon": 72.84
+      },
+      {
+        "Lat": 18.8,
+        "Lon": 72.8
+      },
+      {
+        "Lat": 18.65,
+        "Lon": 72.76
+      },
+      {
+        "Lat": 18.45,
+        "Lon": 72.78
+      },
+      {
+        "Lat": 18.3,
+        "Lon": 72.82
+      },
+      {
+        "Lat": 18.05,
+        "Lon": 72.9
+      },
+      {
+        "Lat": 17.8,
+        "Lon": 72.98
+      },
+      {
+        "Lat": 17.5,
+        "Lon": 73.05
+      },
+      {
+        "Lat": 17.2,
+        "Lon": 73.12
+      },
+      {
+        "Lat": 17,
+        "Lon": 73.18
+      },
+      {
+        "Lat": 16.7,
+        "Lon": 73.22
+      },
+      {
+        "Lat": 16.4,
+        "Lon": 73.3
+      },
+      {
+        "Lat": 16.06,
+        "Lon": 73.38
+      },
+      {
+        "Lat": 16.2,
+        "Lon": 73.2
+      },
+      {
+        "Lat": 16.6,
+        "Lon": 73.1
+      },
+      {
+        "Lat": 17.1,
+        "Lon": 73
+      },
+      {
+        "Lat": 17.6,
+        "Lon": 72.85
+      },
+      {
+        "Lat": 18.1,
+        "Lon": 72.75
+      },
+      {
+        "Lat": 18.6,
+        "Lon": 72.7
+      },
+      {
+        "Lat": 18.85,
+        "Lon": 72.78
+      },
+      {
+        "Lat": 18.9,
+        "Lon": 72.855
+      },
+      {
+        "Lat": 18.93,
+        "Lon": 72.855
+      },
+      {
+        "Lat": 18.944,
+        "Lon": 72.842
+      }
+    ],
+    "DataNote": "Water routes are approximate simplified lines over open water; the cruise loop and the speedboat course are fictional in-game routes."
+  },
+  {
+    "Name": "alibaug-speedboat",
+    "DisplayName": "Alibaug speedboat checkpoint course",
+    "FromPortId": "mandwa",
+    "ToPortId": "mandwa",
+    "Vessel": "speedboat",
+    "Path": [
+      {
+        "Lat": 18.803,
+        "Lon": 72.883
+      },
+      {
+        "Lat": 18.812,
+        "Lon": 72.874
+      },
+      {
+        "Lat": 18.822,
+        "Lon": 72.862
+      },
+      {
+        "Lat": 18.815,
+        "Lon": 72.85
+      },
+      {
+        "Lat": 18.802,
+        "Lon": 72.846
+      },
+      {
+        "Lat": 18.79,
+        "Lon": 72.855
+      },
+      {
+        "Lat": 18.788,
+        "Lon": 72.868
+      },
+      {
+        "Lat": 18.795,
+        "Lon": 72.878
+      },
+      {
+        "Lat": 18.803,
+        "Lon": 72.883
+      }
+    ],
+    "DataNote": "Water routes are approximate simplified lines over open water; the cruise loop and the speedboat course are fictional in-game routes."
+  }
+]

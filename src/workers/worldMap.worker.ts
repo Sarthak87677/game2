@@ -15,6 +15,8 @@ import { pointInPolygon } from '@/data/naturalEarth/geometry';
 type Rings = [number, number][][];
 export interface WorldMapBuildRequest {
   land: Rings[]; lakes: Rings[]; glaciers: Rings[];
+  /** Fine coastline polygons for detail regions; drawn as a separate even-odd path so they union with `land`. */
+  landFine?: Rings[];
   terrariumUrl: string | null;
   width?: number; height?: number;
 }
@@ -48,6 +50,7 @@ function rasteriseSurface(req: WorldMapBuildRequest, width: number, height: numb
       ctx.fillRect(0, 0, width, height);
       ctx.setTransform(width / 360, 0, 0, -height / 180, width / 2, height / 2);
       fill(req.land, '#010101');
+      if (req.landFine?.length) fill(req.landFine, '#010101');
       fill(req.lakes, '#020202');
       fill(req.glaciers, '#030303');
       const px = ctx.getImageData(0, 0, width, height).data;
@@ -64,7 +67,7 @@ function rasteriseSurface(req: WorldMapBuildRequest, width: number, height: numb
       const i = y * width + x;
       if (test(req.glaciers, lon, lat)) surface[i] = SURFACE_GLACIER;
       else if (test(req.lakes, lon, lat)) surface[i] = SURFACE_LAKE;
-      else if (test(req.land, lon, lat)) surface[i] = SURFACE_LAND;
+      else if (test(req.land, lon, lat) || (req.landFine !== undefined && test(req.landFine, lon, lat))) surface[i] = SURFACE_LAND;
       else surface[i] = SURFACE_OCEAN;
     }
   }

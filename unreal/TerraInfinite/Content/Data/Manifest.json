@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/export-unreal-data.mjs",
+  "sourceEntry": "src/data/maharashtra/index.ts",
+  "dataNote": "Exported from src/data/maharashtra by scripts/export-unreal-data.mjs. Coordinates are approximate public reference values (not surveyed); campuses, interiors, landmark bodies, timetables and tickets are procedural / fictional and must be labelled as such in the UI.",
+  "tables": [
+    {
+      "file": "Spawns.json",
+      "rowStruct": "FTerraSpawnRow",
+      "sourceType": "SpawnPoint[]",
+      "sourceExports": [
+        "MAHARASHTRA_SPAWNS"
+      ],
+      "rows": 12,
+      "status": "exported"
+    },
+    {
+      "file": "Destinations.json",
+      "rowStruct": "FTerraDestinationRow",
+      "sourceType": "Destination[]",
+      "sourceExports": [
+        "MAHARASHTRA_CITIES",
+        "MAHARASHTRA_DESTINATIONS",
+        "ALL_MAHARASHTRA_PLACES"
+      ],
+      "rows": 260,
+      "status": "exported"
+    },
+    {
+      "file": "Stations.json",
+      "rowStruct": "FTerraStationRow",
+      "sourceType": "Station[]",
+      "sourceExports": [
+        "STATIONS"
+      ],
+      "rows": 55,
+      "status": "exported"
+    },
+    {
+      "file": "RailCorridors.json",
+      "rowStruct": "FTerraRailCorridorRow",
+      "sourceType": "RailCorridor[]",
+      "sourceExports": [
+        "CORRIDORS"
+      ],
+      "rows": 11,
+      "status": "exported"
+    },
+    {
+      "file": "Airports.json",
+      "rowStruct": "FTerraAirportRow",
+      "sourceType": "Airport[]",
+      "sourceExports": [
+        "AIRPORTS"
+      ],
+      "rows": 8,
+      "status": "exported"
+    },
+    {
+      "file": "Ports.json",
+      "rowStruct": "FTerraPortRow",
+      "sourceType": "Port[]",
+      "sourceExports": [
+        "PORTS"
+      ],
+      "rows": 7,
+      "status": "exported"
+    },
+    {
+      "file": "WaterRoutes.json",
+      "rowStruct": "FTerraWaterRouteRow",
+      "sourceType": "WaterRoute[]",
+      "sourceExports": [
+        "WATER_ROUTES"
+      ],
+      "rows": 4,
+      "status": "exported"
+    },
+    {
+      "file": "Campuses.json",
+      "rowStruct": "FTerraCampusRow",
+      "sourceType": "campus spec (export name /campus/i)",
+      "sourceExports": [
+        "SGIS_CAMPUS"
+      ],
+      "rows": 1,
+      "status": "exported"
+    },
+    {
+      "file": "CampusBuildings.json",
+      "rowStruct": "FTerraCampusBuildingRow",
+      "sourceType": "campus spec buildings[]",
+      "sourceExports": [
+        "SGIS_CAMPUS"
+      ],
+      "rows": 10,
+      "status": "exported"
+    },
+    {
+      "file": "InteriorGrammar.json",
+      "rowStruct": "FTerraInteriorGrammarRow",
+      "sourceType": "interior grammar (export name /grammar/i)",
+      "sourceExports": [],
+      "rows": 0,
+      "status": "missing-in-source"
+    }
+  ]
+}

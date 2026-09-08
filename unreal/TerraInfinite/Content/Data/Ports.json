@@ -1,0 +1,58 @@
+[
+  {
+    "Name": "gateway-jetty",
+    "DisplayName": "Gateway of India jetty",
+    "Kind": "jetty",
+    "Lat": 18.9225,
+    "Lon": 72.8352,
+    "DataNote": "Jetty and terminal positions are approximate public reference values (±300 m); vessels, timetables and the cruise ship are original in-game designs."
+  },
+  {
+    "Name": "mandwa",
+    "DisplayName": "Mandwa jetty",
+    "Kind": "jetty",
+    "Lat": 18.803,
+    "Lon": 72.883,
+    "DataNote": "Jetty and terminal positions are approximate public reference values (±300 m); vessels, timetables and the cruise ship are original in-game designs."
+  },
+  {
+    "Name": "ferry-wharf",
+    "DisplayName": "Ferry Wharf (Bhaucha Dhakka)",
+    "Kind": "jetty",
+    "Lat": 18.953,
+    "Lon": 72.848,
+    "DataNote": "Jetty and terminal positions are approximate public reference values (±300 m); vessels, timetables and the cruise ship are original in-game designs."
+  },
+  {
+    "Name": "rewas",
+    "DisplayName": "Rewas jetty",
+    "Kind": "jetty",
+    "Lat": 18.876,
+    "Lon": 72.926,
+    "DataNote": "Jetty and terminal positions are approximate public reference values (±300 m); vessels, timetables and the cruise ship are original in-game designs."
+  },
+  {
+    "Name": "ballard-pier",
+    "DisplayName": "Mumbai cruise terminal (Ballard Pier)",
+    "Kind": "cruise-terminal",
+    "Lat": 18.944,
+    "Lon": 72.842,
+    "DataNote": "Jetty and terminal positions are approximate public reference values (±300 m); vessels, timetables and the cruise ship are original in-game designs."
+  },
+  {
+    "Name": "ratnagiri-harbour",
+    "DisplayName": "Ratnagiri harbour",
+    "Kind": "harbour",
+    "Lat": 17.01,
+    "Lon": 73.27,
+    "DataNote": "Jetty and terminal positions are approximate public reference values (±300 m); vessels, timetables and the cruise ship are original in-game designs."
+  },
+  {
+    "Name": "malvan-jetty",
+    "DisplayName": "Malvan jetty",
+    "Kind": "jetty",
+    "Lat": 16.06,
+    "Lon": 73.46,
+    "DataNote": "Jetty and terminal positions are approximate public reference values (±300 m); vessels, timetables and the cruise ship are original in-game designs."
+  }
+]

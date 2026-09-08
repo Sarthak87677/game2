@@ -1,0 +1,1136 @@
+[
+  {
+    "Name": "western-suburban",
+    "DisplayName": "Western line (Churchgate–Borivali)",
+    "Service": "suburban",
+    "StationIds": [
+      "churchgate",
+      "mumbai-central",
+      "dadar",
+      "bandra",
+      "andheri",
+      "borivali"
+    ],
+    "Path": [
+      {
+        "Lat": 18.9352,
+        "Lon": 72.827
+      },
+      {
+        "Lat": 18.946,
+        "Lon": 72.824
+      },
+      {
+        "Lat": 18.963,
+        "Lon": 72.816
+      },
+      {
+        "Lat": 18.969,
+        "Lon": 72.8194
+      },
+      {
+        "Lat": 18.982,
+        "Lon": 72.823
+      },
+      {
+        "Lat": 18.996,
+        "Lon": 72.83
+      },
+      {
+        "Lat": 19.0186,
+        "Lon": 72.8438
+      },
+      {
+        "Lat": 19.041,
+        "Lon": 72.842
+      },
+      {
+        "Lat": 19.0544,
+        "Lon": 72.8406
+      },
+      {
+        "Lat": 19.069,
+        "Lon": 72.84
+      },
+      {
+        "Lat": 19.081,
+        "Lon": 72.841
+      },
+      {
+        "Lat": 19.099,
+        "Lon": 72.844
+      },
+      {
+        "Lat": 19.1197,
+        "Lon": 72.8464
+      },
+      {
+        "Lat": 19.136,
+        "Lon": 72.848
+      },
+      {
+        "Lat": 19.164,
+        "Lon": 72.849
+      },
+      {
+        "Lat": 19.187,
+        "Lon": 72.849
+      },
+      {
+        "Lat": 19.204,
+        "Lon": 72.852
+      },
+      {
+        "Lat": 19.229,
+        "Lon": 72.857
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "central-suburban",
+    "DisplayName": "Central line (CSMT–Kalyan–Karjat)",
+    "Service": "suburban",
+    "StationIds": [
+      "csmt",
+      "byculla",
+      "dadar",
+      "kurla",
+      "ghatkopar",
+      "thane",
+      "dombivli",
+      "kalyan",
+      "neral",
+      "karjat"
+    ],
+    "Path": [
+      {
+        "Lat": 18.9398,
+        "Lon": 72.8355
+      },
+      {
+        "Lat": 18.948,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 18.958,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 18.977,
+        "Lon": 72.833
+      },
+      {
+        "Lat": 18.986,
+        "Lon": 72.833
+      },
+      {
+        "Lat": 18.995,
+        "Lon": 72.834
+      },
+      {
+        "Lat": 19.008,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 19.0186,
+        "Lon": 72.8438
+      },
+      {
+        "Lat": 19.027,
+        "Lon": 72.85
+      },
+      {
+        "Lat": 19.04,
+        "Lon": 72.862
+      },
+      {
+        "Lat": 19.0656,
+        "Lon": 72.879
+      },
+      {
+        "Lat": 19.077,
+        "Lon": 72.897
+      },
+      {
+        "Lat": 19.086,
+        "Lon": 72.9085
+      },
+      {
+        "Lat": 19.108,
+        "Lon": 72.927
+      },
+      {
+        "Lat": 19.142,
+        "Lon": 72.937
+      },
+      {
+        "Lat": 19.172,
+        "Lon": 72.956
+      },
+      {
+        "Lat": 19.186,
+        "Lon": 72.9755
+      },
+      {
+        "Lat": 19.196,
+        "Lon": 72.999
+      },
+      {
+        "Lat": 19.187,
+        "Lon": 73.021
+      },
+      {
+        "Lat": 19.19,
+        "Lon": 73.045
+      },
+      {
+        "Lat": 19.218,
+        "Lon": 73.087
+      },
+      {
+        "Lat": 19.235,
+        "Lon": 73.13
+      },
+      {
+        "Lat": 19.22,
+        "Lon": 73.152
+      },
+      {
+        "Lat": 19.209,
+        "Lon": 73.188
+      },
+      {
+        "Lat": 19.164,
+        "Lon": 73.238
+      },
+      {
+        "Lat": 19.112,
+        "Lon": 73.264
+      },
+      {
+        "Lat": 19.025,
+        "Lon": 73.317
+      },
+      {
+        "Lat": 18.954,
+        "Lon": 73.328
+      },
+      {
+        "Lat": 18.9107,
+        "Lon": 73.3236
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "harbour-suburban",
+    "DisplayName": "Harbour line (CSMT–Vashi–Panvel)",
+    "Service": "suburban",
+    "StationIds": [
+      "csmt",
+      "kurla",
+      "mankhurd",
+      "vashi",
+      "belapur",
+      "panvel"
+    ],
+    "Path": [
+      {
+        "Lat": 18.9398,
+        "Lon": 72.8355
+      },
+      {
+        "Lat": 18.948,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 18.958,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 18.964,
+        "Lon": 72.842
+      },
+      {
+        "Lat": 18.972,
+        "Lon": 72.845
+      },
+      {
+        "Lat": 18.986,
+        "Lon": 72.844
+      },
+      {
+        "Lat": 18.994,
+        "Lon": 72.856
+      },
+      {
+        "Lat": 19.017,
+        "Lon": 72.858
+      },
+      {
+        "Lat": 19.029,
+        "Lon": 72.864
+      },
+      {
+        "Lat": 19.047,
+        "Lon": 72.869
+      },
+      {
+        "Lat": 19.0656,
+        "Lon": 72.879
+      },
+      {
+        "Lat": 19.068,
+        "Lon": 72.892
+      },
+      {
+        "Lat": 19.062,
+        "Lon": 72.901
+      },
+      {
+        "Lat": 19.054,
+        "Lon": 72.917
+      },
+      {
+        "Lat": 19.048,
+        "Lon": 72.931
+      },
+      {
+        "Lat": 19.056,
+        "Lon": 72.965
+      },
+      {
+        "Lat": 19.065,
+        "Lon": 72.999
+      },
+      {
+        "Lat": 19.064,
+        "Lon": 73.011
+      },
+      {
+        "Lat": 19.057,
+        "Lon": 73.024
+      },
+      {
+        "Lat": 19.033,
+        "Lon": 73.018
+      },
+      {
+        "Lat": 19.021,
+        "Lon": 73.021
+      },
+      {
+        "Lat": 19.019,
+        "Lon": 73.038
+      },
+      {
+        "Lat": 19.033,
+        "Lon": 73.062
+      },
+      {
+        "Lat": 19.012,
+        "Lon": 73.089
+      },
+      {
+        "Lat": 18.995,
+        "Lon": 73.105
+      },
+      {
+        "Lat": 18.99,
+        "Lon": 73.118
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "metro-1",
+    "DisplayName": "Mumbai Metro line 1 (Versova–Andheri–Ghatkopar)",
+    "Service": "metro",
+    "StationIds": [
+      "m1-versova",
+      "m1-dn-nagar",
+      "m1-azad-nagar",
+      "m1-andheri",
+      "m1-weh",
+      "m1-chakala",
+      "m1-airport-road",
+      "m1-marol-naka",
+      "m1-saki-naka",
+      "m1-asalpha",
+      "m1-jagruti-nagar",
+      "m1-ghatkopar"
+    ],
+    "Path": [
+      {
+        "Lat": 19.129,
+        "Lon": 72.821
+      },
+      {
+        "Lat": 19.125,
+        "Lon": 72.832
+      },
+      {
+        "Lat": 19.125,
+        "Lon": 72.839
+      },
+      {
+        "Lat": 19.1195,
+        "Lon": 72.848
+      },
+      {
+        "Lat": 19.116,
+        "Lon": 72.859
+      },
+      {
+        "Lat": 19.111,
+        "Lon": 72.867
+      },
+      {
+        "Lat": 19.109,
+        "Lon": 72.873
+      },
+      {
+        "Lat": 19.107,
+        "Lon": 72.88
+      },
+      {
+        "Lat": 19.103,
+        "Lon": 72.888
+      },
+      {
+        "Lat": 19.097,
+        "Lon": 72.895
+      },
+      {
+        "Lat": 19.091,
+        "Lon": 72.9
+      },
+      {
+        "Lat": 19.0863,
+        "Lon": 72.908
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "mumbai-pune",
+    "DisplayName": "Mumbai–Pune intercity (via Karjat–Lonavala ghat)",
+    "Service": "intercity",
+    "StationIds": [
+      "csmt",
+      "dadar",
+      "thane",
+      "kalyan",
+      "karjat",
+      "lonavala",
+      "shivajinagar",
+      "pune"
+    ],
+    "Path": [
+      {
+        "Lat": 18.9398,
+        "Lon": 72.8355
+      },
+      {
+        "Lat": 18.948,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 18.958,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 18.977,
+        "Lon": 72.833
+      },
+      {
+        "Lat": 18.986,
+        "Lon": 72.833
+      },
+      {
+        "Lat": 18.995,
+        "Lon": 72.834
+      },
+      {
+        "Lat": 19.008,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 19.0186,
+        "Lon": 72.8438
+      },
+      {
+        "Lat": 19.027,
+        "Lon": 72.85
+      },
+      {
+        "Lat": 19.04,
+        "Lon": 72.862
+      },
+      {
+        "Lat": 19.0656,
+        "Lon": 72.879
+      },
+      {
+        "Lat": 19.077,
+        "Lon": 72.897
+      },
+      {
+        "Lat": 19.086,
+        "Lon": 72.9085
+      },
+      {
+        "Lat": 19.108,
+        "Lon": 72.927
+      },
+      {
+        "Lat": 19.142,
+        "Lon": 72.937
+      },
+      {
+        "Lat": 19.172,
+        "Lon": 72.956
+      },
+      {
+        "Lat": 19.186,
+        "Lon": 72.9755
+      },
+      {
+        "Lat": 19.196,
+        "Lon": 72.999
+      },
+      {
+        "Lat": 19.187,
+        "Lon": 73.021
+      },
+      {
+        "Lat": 19.19,
+        "Lon": 73.045
+      },
+      {
+        "Lat": 19.218,
+        "Lon": 73.087
+      },
+      {
+        "Lat": 19.235,
+        "Lon": 73.13
+      },
+      {
+        "Lat": 19.22,
+        "Lon": 73.152
+      },
+      {
+        "Lat": 19.209,
+        "Lon": 73.188
+      },
+      {
+        "Lat": 19.164,
+        "Lon": 73.238
+      },
+      {
+        "Lat": 19.112,
+        "Lon": 73.264
+      },
+      {
+        "Lat": 19.025,
+        "Lon": 73.317
+      },
+      {
+        "Lat": 18.954,
+        "Lon": 73.328
+      },
+      {
+        "Lat": 18.9107,
+        "Lon": 73.3236
+      },
+      {
+        "Lat": 18.886,
+        "Lon": 73.345
+      },
+      {
+        "Lat": 18.86,
+        "Lon": 73.356
+      },
+      {
+        "Lat": 18.842,
+        "Lon": 73.361
+      },
+      {
+        "Lat": 18.819,
+        "Lon": 73.376
+      },
+      {
+        "Lat": 18.79,
+        "Lon": 73.381
+      },
+      {
+        "Lat": 18.762,
+        "Lon": 73.385
+      },
+      {
+        "Lat": 18.753,
+        "Lon": 73.407
+      },
+      {
+        "Lat": 18.748,
+        "Lon": 73.455
+      },
+      {
+        "Lat": 18.75,
+        "Lon": 73.533
+      },
+      {
+        "Lat": 18.736,
+        "Lon": 73.674
+      },
+      {
+        "Lat": 18.69,
+        "Lon": 73.755
+      },
+      {
+        "Lat": 18.628,
+        "Lon": 73.803
+      },
+      {
+        "Lat": 18.61,
+        "Lon": 73.82
+      },
+      {
+        "Lat": 18.564,
+        "Lon": 73.836
+      },
+      {
+        "Lat": 18.532,
+        "Lon": 73.85
+      },
+      {
+        "Lat": 18.5285,
+        "Lon": 73.8745
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "mumbai-nagpur",
+    "DisplayName": "Mumbai–Nashik–Bhusawal–Nagpur",
+    "Service": "intercity",
+    "StationIds": [
+      "csmt",
+      "dadar",
+      "thane",
+      "kalyan",
+      "igatpuri",
+      "nashik-road",
+      "manmad",
+      "jalgaon",
+      "bhusawal",
+      "akola",
+      "badnera",
+      "nagpur"
+    ],
+    "Path": [
+      {
+        "Lat": 18.9398,
+        "Lon": 72.8355
+      },
+      {
+        "Lat": 18.948,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 18.958,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 18.977,
+        "Lon": 72.833
+      },
+      {
+        "Lat": 18.986,
+        "Lon": 72.833
+      },
+      {
+        "Lat": 18.995,
+        "Lon": 72.834
+      },
+      {
+        "Lat": 19.008,
+        "Lon": 72.838
+      },
+      {
+        "Lat": 19.0186,
+        "Lon": 72.8438
+      },
+      {
+        "Lat": 19.027,
+        "Lon": 72.85
+      },
+      {
+        "Lat": 19.04,
+        "Lon": 72.862
+      },
+      {
+        "Lat": 19.0656,
+        "Lon": 72.879
+      },
+      {
+        "Lat": 19.077,
+        "Lon": 72.897
+      },
+      {
+        "Lat": 19.086,
+        "Lon": 72.9085
+      },
+      {
+        "Lat": 19.108,
+        "Lon": 72.927
+      },
+      {
+        "Lat": 19.142,
+        "Lon": 72.937
+      },
+      {
+        "Lat": 19.172,
+        "Lon": 72.956
+      },
+      {
+        "Lat": 19.186,
+        "Lon": 72.9755
+      },
+      {
+        "Lat": 19.196,
+        "Lon": 72.999
+      },
+      {
+        "Lat": 19.187,
+        "Lon": 73.021
+      },
+      {
+        "Lat": 19.19,
+        "Lon": 73.045
+      },
+      {
+        "Lat": 19.218,
+        "Lon": 73.087
+      },
+      {
+        "Lat": 19.235,
+        "Lon": 73.13
+      },
+      {
+        "Lat": 19.293,
+        "Lon": 73.207
+      },
+      {
+        "Lat": 19.42,
+        "Lon": 73.306
+      },
+      {
+        "Lat": 19.652,
+        "Lon": 73.478
+      },
+      {
+        "Lat": 19.678,
+        "Lon": 73.523
+      },
+      {
+        "Lat": 19.696,
+        "Lon": 73.562
+      },
+      {
+        "Lat": 19.715,
+        "Lon": 73.63
+      },
+      {
+        "Lat": 19.943,
+        "Lon": 73.815
+      },
+      {
+        "Lat": 19.947,
+        "Lon": 73.838
+      },
+      {
+        "Lat": 20.08,
+        "Lon": 74.11
+      },
+      {
+        "Lat": 20.145,
+        "Lon": 74.24
+      },
+      {
+        "Lat": 20.251,
+        "Lon": 74.439
+      },
+      {
+        "Lat": 20.314,
+        "Lon": 74.65
+      },
+      {
+        "Lat": 20.457,
+        "Lon": 75.01
+      },
+      {
+        "Lat": 20.667,
+        "Lon": 75.354
+      },
+      {
+        "Lat": 21.007,
+        "Lon": 75.566
+      },
+      {
+        "Lat": 21.045,
+        "Lon": 75.785
+      },
+      {
+        "Lat": 20.885,
+        "Lon": 76.205
+      },
+      {
+        "Lat": 20.79,
+        "Lon": 76.69
+      },
+      {
+        "Lat": 20.706,
+        "Lon": 77.002
+      },
+      {
+        "Lat": 20.73,
+        "Lon": 77.37
+      },
+      {
+        "Lat": 20.859,
+        "Lon": 77.736
+      },
+      {
+        "Lat": 20.81,
+        "Lon": 78.09
+      },
+      {
+        "Lat": 20.735,
+        "Lon": 78.599
+      },
+      {
+        "Lat": 20.8,
+        "Lon": 78.88
+      },
+      {
+        "Lat": 21.152,
+        "Lon": 79.088
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "pune-kolhapur",
+    "DisplayName": "Pune–Satara–Miraj–Kolhapur",
+    "Service": "intercity",
+    "StationIds": [
+      "pune",
+      "satara",
+      "sangli",
+      "miraj",
+      "kolhapur"
+    ],
+    "Path": [
+      {
+        "Lat": 18.5285,
+        "Lon": 73.8745
+      },
+      {
+        "Lat": 18.498,
+        "Lon": 73.94
+      },
+      {
+        "Lat": 18.43,
+        "Lon": 74
+      },
+      {
+        "Lat": 18.277,
+        "Lon": 74.16
+      },
+      {
+        "Lat": 18.1,
+        "Lon": 74.25
+      },
+      {
+        "Lat": 18.04,
+        "Lon": 74.19
+      },
+      {
+        "Lat": 17.84,
+        "Lon": 74.12
+      },
+      {
+        "Lat": 17.665,
+        "Lon": 74.025
+      },
+      {
+        "Lat": 17.59,
+        "Lon": 74.2
+      },
+      {
+        "Lat": 17.29,
+        "Lon": 74.18
+      },
+      {
+        "Lat": 17.06,
+        "Lon": 74.46
+      },
+      {
+        "Lat": 16.857,
+        "Lon": 74.568
+      },
+      {
+        "Lat": 16.826,
+        "Lon": 74.643
+      },
+      {
+        "Lat": 16.77,
+        "Lon": 74.45
+      },
+      {
+        "Lat": 16.703,
+        "Lon": 74.243
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "konkan",
+    "DisplayName": "Konkan Railway (Panvel–Roha–Ratnagiri–Kudal–Sawantwadi)",
+    "Service": "intercity",
+    "StationIds": [
+      "panvel",
+      "roha",
+      "chiplun",
+      "ratnagiri",
+      "kudal",
+      "sawantwadi"
+    ],
+    "Path": [
+      {
+        "Lat": 18.99,
+        "Lon": 73.118
+      },
+      {
+        "Lat": 18.74,
+        "Lon": 73.09
+      },
+      {
+        "Lat": 18.54,
+        "Lon": 73.14
+      },
+      {
+        "Lat": 18.442,
+        "Lon": 73.12
+      },
+      {
+        "Lat": 18.4,
+        "Lon": 73.22
+      },
+      {
+        "Lat": 18.24,
+        "Lon": 73.28
+      },
+      {
+        "Lat": 18.07,
+        "Lon": 73.33
+      },
+      {
+        "Lat": 17.72,
+        "Lon": 73.4
+      },
+      {
+        "Lat": 17.533,
+        "Lon": 73.522
+      },
+      {
+        "Lat": 17.19,
+        "Lon": 73.56
+      },
+      {
+        "Lat": 16.998,
+        "Lon": 73.311
+      },
+      {
+        "Lat": 16.82,
+        "Lon": 73.46
+      },
+      {
+        "Lat": 16.66,
+        "Lon": 73.59
+      },
+      {
+        "Lat": 16.5,
+        "Lon": 73.73
+      },
+      {
+        "Lat": 16.26,
+        "Lon": 73.72
+      },
+      {
+        "Lat": 16.1,
+        "Lon": 73.7
+      },
+      {
+        "Lat": 16.012,
+        "Lon": 73.687
+      },
+      {
+        "Lat": 15.934,
+        "Lon": 73.786
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "neral-matheran",
+    "DisplayName": "Neral–Matheran hill railway (heritage)",
+    "Service": "heritage",
+    "StationIds": [
+      "neral",
+      "matheran"
+    ],
+    "Path": [
+      {
+        "Lat": 19.025,
+        "Lon": 73.317
+      },
+      {
+        "Lat": 19.018,
+        "Lon": 73.305
+      },
+      {
+        "Lat": 19.01,
+        "Lon": 73.295
+      },
+      {
+        "Lat": 19.004,
+        "Lon": 73.29
+      },
+      {
+        "Lat": 19,
+        "Lon": 73.285
+      },
+      {
+        "Lat": 18.996,
+        "Lon": 73.281
+      },
+      {
+        "Lat": 18.992,
+        "Lon": 73.276
+      },
+      {
+        "Lat": 18.987,
+        "Lon": 73.27
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "pune-solapur",
+    "DisplayName": "Pune–Daund–Solapur",
+    "Service": "intercity",
+    "StationIds": [
+      "pune",
+      "solapur"
+    ],
+    "Path": [
+      {
+        "Lat": 18.5285,
+        "Lon": 73.8745
+      },
+      {
+        "Lat": 18.498,
+        "Lon": 73.94
+      },
+      {
+        "Lat": 18.47,
+        "Lon": 74.07
+      },
+      {
+        "Lat": 18.49,
+        "Lon": 74.13
+      },
+      {
+        "Lat": 18.465,
+        "Lon": 74.59
+      },
+      {
+        "Lat": 18.3,
+        "Lon": 74.77
+      },
+      {
+        "Lat": 18.2,
+        "Lon": 75.05
+      },
+      {
+        "Lat": 18.09,
+        "Lon": 75.42
+      },
+      {
+        "Lat": 17.85,
+        "Lon": 75.7
+      },
+      {
+        "Lat": 17.666,
+        "Lon": 75.907
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  },
+  {
+    "Name": "manmad-nanded",
+    "DisplayName": "Manmad–Chhatrapati Sambhajinagar–Nanded",
+    "Service": "intercity",
+    "StationIds": [
+      "manmad",
+      "sambhajinagar",
+      "nanded"
+    ],
+    "Path": [
+      {
+        "Lat": 20.251,
+        "Lon": 74.439
+      },
+      {
+        "Lat": 20.06,
+        "Lon": 74.97
+      },
+      {
+        "Lat": 19.83,
+        "Lon": 75.1
+      },
+      {
+        "Lat": 19.867,
+        "Lon": 75.323
+      },
+      {
+        "Lat": 19.84,
+        "Lon": 75.88
+      },
+      {
+        "Lat": 19.6,
+        "Lon": 76.21
+      },
+      {
+        "Lat": 19.45,
+        "Lon": 76.44
+      },
+      {
+        "Lat": 19.26,
+        "Lon": 76.77
+      },
+      {
+        "Lat": 19.19,
+        "Lon": 77.02
+      },
+      {
+        "Lat": 19.148,
+        "Lon": 77.32
+      }
+    ],
+    "DataNote": "Track alignments are approximate, simplified interpretations of the real corridors (±300 m–1 km) and are lifted to the game terrain; speed limits and signals are simulated."
+  }
+]

@@ -30,7 +30,23 @@ session) works against the contracts below so that branches merge cleanly.
   `setVehicleBody(primitive)`, `driveParams`, `onFall(fallM)`.
 * Store: `gameplay: { prompt, overlay, player, status, vehicle }` via `useTerraStore.getState().setGameplay(...)`.
 * HUD: `InteractionPrompt`, `GameplayOverlayCard`, `PlayPanel` (spawn list from `src/data/maharashtra/spawns.ts`).
-* `window.__terra` (tests): `goTo`, `setMode`, `spawn(spawnPoint)`, `interact()`, `gameplay()`, `state()`.
+* **Additive hooks added by track `interiors-campus`** — `NearFieldWorld.buildingsNear(lat, lon, radiusM)` returns the
+  procedural buildings of fully built near-field tiles as `[lon, lat]` footprints (used to offer enterable procedural
+  buildings; optional, no behaviour change elsewhere). The `interiors` system exposes `activeLevel()`, `activePlan()`,
+  `enter(candidate)`, `exit()`, `rideTo(floor)` and `campus` (hero campus layer with `heightAt`, `toLonLat`,
+  `setBuildingHidden`) for tests and other systems; while an interior is active it owns `modes.groundOverride`,
+  `modes.moveFilter` and the `gameplay.status` line, and it chains (never replaces) any existing `modes.onFall` handler.
+* `window.__terra` (tests): `goTo`, `setMode`, `spawn(spawnPoint)`, `interact()`, `gameplay()`, `state()`,
+  `benchmark(seconds?)` (perf track, optional).
+* Performance contract (perf track, additive): store slices `hardware` (CPU/GPU/API/screen, VRAM "not exposed"),
+  `adaptive` (`{ enabled, step, maxStep, stepLabel, resolutionScale, reason, fps, minFps, targetFps }` — the
+  degradation-ladder readout; kept beside `quality`, which stays the preset id string other panels read) and
+  `readiness` (boot gate decision: blocking items, degraded layers, FPS gate). `settings.protectFrameRate` toggles the
+  ladder. `engine.effectiveQuality()` returns the preset after the ladder — systems that read a `QualitySettings`
+  should use it rather than `QUALITY_PRESETS[...]`. Presets carry `targetFps`/`minFps`/`trafficDensity`/
+  `oceanReflections`; `performance` is the fifth preset. URL: `?terraMinFps=<n>` overrides the boot gate's minimum
+  frame rate (0 = no gate; SwiftShader auto-relaxes to 1 fps with a visible note). Gameplay `stats()` values whose keys
+  mention actors/vehicles/passengers/crowds etc. are summed into the Diagnostics "Actors" count.
 
 ## Tracks and file ownership
 
@@ -40,7 +56,7 @@ session) works against the contracts below so that branches merge cleanly.
 | maharashtra-data | `src/data/maharashtra/{destinations,cities,index}.ts`, `src/data/bookmarks/*` (additive), `src/data/bookmarks/landmarkModels.ts` (additive), `src/world/landmarks/**` (new archetypes), Taj Mahal hero layer under `src/world/hero/**`, gazetteer search integration | ModeController |
 | interiors-campus | `src/world/interiors/**`, `src/gameplay/interiors/**`, `src/data/maharashtra/campus.ts`, `src/data/maharashtra/interiorGrammar.ts` | vehicles, journeys |
 | vehicles | `src/gameplay/vehicles/**`, `src/gameplay/showroom/**`, `src/data/maharashtra/showrooms.ts`, `src/world/traffic/**` (pedestrians additive) | interiors |
-| journeys | `src/gameplay/rail/**`, `src/gameplay/air/**`, `src/gameplay/marine/**`, `src/data/maharashtra/{stations,corridors,airports,ports,waterRoutes}.ts` | vehicles |
+| journeys | `src/gameplay/rail/**`, `src/gameplay/air/**`, `src/gameplay/marine/**`, `src/gameplay/journeys/**` (shared journey helpers: geometry, simulated schedules, primitive bodies, passenger rig), `src/data/maharashtra/{stations,corridors,airports,ports,waterRoutes}.ts` | vehicles |
 | living-world-activities | `src/gameplay/activities/**`, `src/world/crowds/**`, `src/world/wildlife/**`, monsoon presets in `src/world/climate/*` (additive) | journeys |
 | unreal | `unreal/**`, `scripts/export-unreal-data.mjs`, `docs/UNREAL.md` | `src/**` |
 
@@ -62,6 +78,58 @@ that drives the feature through `window.__terra`, a probe screenshot in `docs/sc
 * `npm run typecheck && npm run lint && npm test` must pass before every commit; e2e specs run with
   `TERRA_E2E_DEV=1` against the dev server (`?terraQuality=low`, `--use-angle=swiftshader`).
 
+## Unreal export contract (additive, owned by the unreal track)
+
+`scripts/export-unreal-data.mjs` reads the module namespace of `src/data/maharashtra/index.ts` and recognises
+tables **by shape**, so tracks may name their exports freely:
+
+| Table | Recognised when every array item has… |
+|---|---|
+| Spawns | `id, lat, lon, headingDeg, region, approximate` (`SpawnPoint`) |
+| Destinations | `id, kind, district, lat, lon, overviewHeightM` |
+| Stations | `id, code, platforms, lat, lon` |
+| RailCorridors | `id, stations[], path[], service` |
+| Airports | `id, iata, runwayHeadingDeg, runwayLengthM` |
+| Ports | `id, kind ∈ {jetty,harbour,marina,cruise-terminal}, lat, lon` and no `district` |
+| WaterRoutes | `id, vessel, path[], from, to` |
+| Campuses / CampusBuildings | export **name** matches `/campus/i`; an object (or array of objects) with `id, name, origin|position|center, headingDeg, buildings[]`; each building `id, name, category|kind|type, position|lat/lon, headingDeg, widthM, depthM, floors|levels, footprint?` |
+| InteriorGrammar | export **name** matches `/grammar/i`; an object keyed by category (or array with `category`) with `floorHeightM, corridorWidthM, roomMinM, roomMaxM, roomTypes[]` plus any numeric/string parameters |
+
+Unknown fields are kept in `ExtraJson`; missing tables are exported empty and flagged `missing-in-source` in
+`Content/Data/Manifest.json`. Run `node scripts/export-unreal-data.mjs` after changing data and commit the JSON;
+`tests/unit/exportUnrealData.test.ts` fails otherwise. Optional `dataNote` fields on any row are carried through.
+
+## Additive hooks added by tracks
+
+* **maharashtra-data** — `LandmarkModel.hero?: string` (`src/data/bookmarks/landmarkModels.ts`): a stand-in whose body is rendered by
+  a hero gameplay system; `LandmarkLayer` skips it. `applyHeroExclusions(tile)` (`src/world/hero/heroExclusions.ts`) is called once
+  per generated near-field tile in `TerraEngine.generateNearFieldTile` and drops procedural placements/buildings/fields inside hero
+  footprints (currently the Taj Mahal). `TerraEngine.search` merges `MAHARASHTRA_INDEX.search()` (`src/data/maharashtra/search.ts`)
+  into the offline results by score (`mergeSearchResults`), de-duplicated by id and position. Maharashtra places are appended to
+  `WORLD_HIGHLIGHTS` as `mh-*` bookmarks and five `showcase-maharashtra-*` areas to `SHOWCASE_AREAS`.
+
+## Living-world hooks (track living-world-activities, additive)
+
+* Registered systems: `crowds`, `wildlife`, `monsoon`, `activities` (`src/gameplay/registry.ts`).
+* `src/world/wildlife/sightings.ts` — module-level registry (`reportSighting` / `nearbySightings`) so the wildlife and
+  activities systems can share "what is near the player" without importing each other. Any track may report a sighting.
+* `src/world/crowds/placeContext.ts` — `classifyPlace(engine, lat, lon)` (hotspot / urban / rural / coast / farmland /
+  park) and `groundFallback(engine, player)` (surface height when no terrain tile is loaded). Other tracks may reuse them.
+* Activities status line: the activities system writes `gameplay.status` with a short TTL and never overwrites a foreign
+  status while the mode is `passenger` (journeys own it there).
+* `ActivitiesTab` is rendered by `PlayPanel` behind a "Spawn | Activities" tab bar; other tracks can add tabs the same way.
+* The `P` key (photograph) is handled by a window listener inside the activities system; it does not touch `input.ts`.
+
+
+* **journeys** — optional fields on the shared data types (`src/data/maharashtra/types.ts`): `RailCorridor.slowSections`
+  (`{ between: [stationId, stationId], maxKmh }[]`), `RailCorridor.elevatedM` (metro viaducts), and `dataNote` on
+  `RailCorridor`, `Airport`, `Port`, `WaterRoute`; `Airport.external` marks the Delhi/Agra markers. Shared helpers live in
+  `src/gameplay/journeys/` (`geo.ts` great-circle/polyline maths, `schedule.ts` simulated timetables, `trackProfile.ts`
+  terrain-lifted rail profiles, `bodies.ts` posable primitive bodies, `passenger.ts` seat placement/status/time
+  compression). The cruise ship takes `modes.groundOverride` while the player is aboard (decks are an interior-like level
+  moving with the ship) and releases it on disembarking; when another system already owns the override it falls back
+  to `addHeightSampler`. The speedboat course registers a water-surface height sampler and a custom `setVehicleBody`
+  while active and restores `driveParams` afterwards. Journey systems expose `debug()`/`debugJump()` test hooks.
 ## Additive hooks added by the vehicles track (branch `claude/track-vehicles`)
 
 All optional; nothing existing changes behaviour when they are unused.
