@@ -546,6 +546,9 @@ export class VehicleSystem implements GameplaySystem {
     const max = this.engine.getQuality() === 'low' ? 8 : 16;
     const kinds: VehicleKind[] = ['hatchback', 'hatchback', 'sedan', 'suv', 'taxi', 'taxi', 'rickshaw', 'rickshaw', 'rickshaw', 'bus', 'truck'];
     traffic.setPlayer(() => this.playerForTraffic());
+    // The living-world crowd system (billboard pedestrians) owns crowds when it is registered; keep the traffic
+    // layer's own primitive walkers only as a fallback so the street is not populated twice.
+    window.setTimeout(() => { if (this.engine.gameplay.systems.some((s) => s.id === 'crowds')) traffic.pedestrians.maxWalkers = 0; }, 0);
     traffic.setBodyPool({
       acquire: (hint) => {
         let b = this.trafficPool.free.pop() ?? null;

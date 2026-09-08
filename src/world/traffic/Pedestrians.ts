@@ -151,6 +151,7 @@ export class Pedestrians {
       for (const w of this.walkers) { this.collection.remove(w.body); this.collection.remove(w.legL); this.collection.remove(w.legR); }
       this.walkers = [];
     }
+    if (this.maxWalkers <= 0) { for (const w of this.walkers) if (w.active) this.setActive(w, false); return; }
     while (this.walkers.length < this.maxWalkers) this.walkers.push(this.build(palette, 0x9e37 + this.walkers.length * 7919));
     const activity = pedestrianActivity(localHour);
     const roadsById = new Set(roads);
