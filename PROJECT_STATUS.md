@@ -43,13 +43,17 @@ Resumable task ledger. Update after every completed task. Dates are UTC.
   wind weight 1 in the vegetation shader), fruit on mango and coconut species (species library phenology).
 
 **Tested (how)**
-* `npm run typecheck && npm run lint && npm test` — 238 unit tests pass (21 new: monsoon phases/picks, photo scoring,
+* `npm run typecheck && npm run lint && npm test` — all pass after merging `origin/main` (398 unit tests, 21 new: monsoon phases/picks, photo scoring,
   persistence round-trip, basketball model, crowd density/time-of-day, palettes, walk network, ambience mix, flocks,
   sightings, data integrity).
 * `tests/e2e/living.spec.ts` (headless Chromium, SwiftShader, synthetic OSM fixture, `TERRA_E2E_DEV=1 TERRA_E2E_PORT=5180`):
   spawn at Marine Drive → pedestrians > 0 (107–120 simulated), gulls/crows/pigeons present, monsoon preset active,
   landmark collected; spawn at the campus → basketball prompt offered, walk-over teleport, court built, a throw scored;
   spawn at the Gateway → facing the arch scores the photo and persists it, facing away does not. Passes in 5.5 min.
+* Regression check of the pre-existing specs on this branch (`smoke.spec.ts`, `city.spec.ts`, same dev server): 5 of 7
+  pass; `city.spec.ts` (building collision lookup returns null) and the smoke "search navigates by place name" test
+  fail — **both fail identically on a clean `main` worktree in this sandbox** (verified side by side on port 5181), so
+  they are environment/timing issues of the sandbox, not regressions from this track.
 * Probe screenshots in `docs/screenshots/`: `living-crowd-csmt-forecourt.png`, `living-village-cattle.png`,
   `living-monsoon-mahabaleshwar.png`, `living-basketball-court.png`.
 
