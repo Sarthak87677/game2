@@ -11,3 +11,5 @@ export { CORRIDORS, CORRIDORS_DATA_NOTE, corridorById, corridorsAtStation } from
 export { AIRPORTS, AIRPORTS_DATA_NOTE, airportById } from './airports';
 export { PORTS, PORTS_DATA_NOTE, portById } from './ports';
 export { WATER_ROUTES, WATER_ROUTES_DATA_NOTE, waterRouteById } from './waterRoutes';
+export { SGIS_CAMPUS, campusBuildingById, campusBuildingDoor, campusBuildingFootprint } from './campus';
+export type { CampusSpec, CampusBuildingSpec } from './campus';

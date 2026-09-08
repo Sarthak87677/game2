@@ -10,6 +10,7 @@ import { TajMahalSystem } from '@/world/hero/TajMahal';
 import { RailSystem } from './rail/RailSystem';
 import { AirSystem } from './air/AirSystem';
 import { MarineSystem } from './marine/MarineSystem';
+import { InteriorSystem } from './interiors/InteriorSystem';
 
 /**
  * Every gameplay subsystem is constructed here. Add one line per system; systems must not import each other — they
@@ -27,5 +28,6 @@ export function createGameplaySystems(engine: TerraEngine): GameplaySystem[] {
   systems.push(new RailSystem(engine));
   systems.push(new AirSystem(engine));
   systems.push(new MarineSystem(engine));
+  systems.push(new InteriorSystem(engine));
   return systems;
 }
